@@ -4,6 +4,7 @@ import time
 import pygame
 
 from src.controllers.appbar_controller import AppbarController
+from src.controllers.calendar_controller import CalendarController
 from src.controllers.resizing_controller import ResizingController
 from src.controllers.taskbar_controller import TaskbarController
 from src.controllers.todo_list_controller import TodoListController
@@ -12,6 +13,7 @@ from src.events.event import CloseWindowEvent, WindowResizeEvent, MouseFocusChan
 from src.events.event_loop import EventLoop
 from src.main.config import Config
 from src.models.appbar_model import AppbarModel
+from src.models.calendar_model import CalendarModel
 from src.models.taskbar_model import TaskbarModel
 from src.models.todo_list_model import TodoListModel
 from src.ui.colors import Colors
@@ -21,6 +23,7 @@ from src.utils.logging import Log
 from src.utils.pygame_utils import set_window_pos
 from src.utils.ui_debugger import UIDebugger
 from src.views.appbar_view import AppbarView
+from src.views.calendar_view import CalendarView
 from src.views.resizing_view import ResizingView
 from src.views.taskbar_view import TaskbarView
 from src.views.todo_list_view import TodoListView
@@ -62,11 +65,17 @@ class Main:
         self.taskbar_view = TaskbarView(self.win, self.taskbar_model, 60, self.win.get_height() - 30, y=30)
         self.taskbar_controller = TaskbarController(self.taskbar_model, self.taskbar_view, self.event_loop)
 
+        self.calendar_model = CalendarModel()
+        self.calendar_view = CalendarView(self.win, self.calendar_model, self.win.get_width() - self.taskbar_view.width,
+                                          self.win.get_height() - self.appbar_view.height, self.taskbar_view.width,
+                                          self.appbar_view.height)
+        self.calendar_controller = CalendarController(self.calendar_model, self.calendar_view)
+
         self.screen_fog = pygame.Surface((self.window_width, self.window_height - self.appbar_view.height), pygame.SRCALPHA)
         self.screen_fog_animation = ChangeValuesAnimation("IncreaseScreenFog", self.event_loop, 0.4)
 
         self.top_view = None
-        self.views: list[View] = [self.appbar_view, self.taskbar_view]
+        self.views: list[View] = [self.appbar_view, self.taskbar_view, self.calendar_view]
 
     def start(self) -> None:
         self.running = True
@@ -113,9 +122,15 @@ class Main:
                     self.screen_fog_animation.start([0], [150])
                 else:
                     self.views.append(event.view)
+                    if isinstance(event.view, TodoListView):
+                        self.calendar_view.resize(width=self.win.get_width() - self.taskbar_view.width - event.view.width)
+                        self.calendar_view.x += event.view.width
             if isinstance(event, CloseViewEvent):
                 if event.view in self.views:
                     self.views.remove(event.view)
+                    if isinstance(event.view, TodoListView):
+                        self.calendar_view.resize(width=self.win.get_width() - self.taskbar_view.width)
+                        self.calendar_view.x -= event.view.width
                 elif event.view == self.top_view:
                     self.top_view = None
                     self.screen_fog_animation.start([150], [0])
@@ -176,6 +191,12 @@ class Main:
         for view in self.views:
             if isinstance(view, (TaskbarView, TodoListView, )):
                 view.resize(height=window_size[1] - self.appbar_view.height)
+            elif isinstance(view, (CalendarView, )):
+                todo_list_width = self.taskbar_view.width
+                for v in self.views:
+                    if isinstance(v, TodoListView):
+                        todo_list_width += v.width
+                view.resize(width=window_size[0] - todo_list_width, height=window_size[1] - self.appbar_view.height)
         self.screen_fog = pygame.Surface((window_size[0], window_size[1] - self.appbar_view.height), pygame.SRCALPHA)
 
 

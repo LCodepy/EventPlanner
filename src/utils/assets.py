@@ -68,3 +68,5 @@ class Assets(metaclass=Singleton):
         self.font14 = pygame.font.SysFont("arial", 14)
         self.font18 = pygame.font.SysFont("arial", 18)
         self.font24 = pygame.font.SysFont("arial", 24)
+        self.font32 = pygame.font.SysFont("arial", 32)
+        self.font36 = pygame.font.SysFont("arial", 36)
