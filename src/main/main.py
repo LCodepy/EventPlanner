@@ -60,18 +60,13 @@ class Main:
 
         self.taskbar_model = TaskbarModel()
         self.taskbar_view = TaskbarView(self.win, self.taskbar_model, 60, self.win.get_height() - 30, y=30)
-        self.taskbar_controller = TaskbarController(self.taskbar_model, self.taskbar_view)
-
-        self.todo_list_model = TodoListModel()
-        self.todo_list_view = TodoListView(self.win, self.todo_list_model, self.event_loop,
-                                           300, self.win.get_height() - 30, x=self.taskbar_view.width, y=30)
-        self.todo_list_controller = TodoListController(self.todo_list_model, self.todo_list_view, self.event_loop)
+        self.taskbar_controller = TaskbarController(self.taskbar_model, self.taskbar_view, self.event_loop)
 
         self.screen_fog = pygame.Surface((self.window_width, self.window_height - self.appbar_view.height), pygame.SRCALPHA)
         self.screen_fog_animation = ChangeValuesAnimation("IncreaseScreenFog", self.event_loop, 0.4)
 
         self.top_view = None
-        self.views: list[View] = [self.appbar_view, self.taskbar_view, self.todo_list_view]
+        self.views: list[View] = [self.appbar_view, self.taskbar_view]
 
     def start(self) -> None:
         self.running = True
@@ -178,8 +173,9 @@ class Main:
     def resize_window(self, window_size: (int, int)) -> None:
         self.win = pygame.display.set_mode(window_size, pygame.NOFRAME)
         self.appbar_view.resize(width=window_size[0])
-        self.taskbar_view.resize(height=window_size[1] - self.appbar_view.height)
-        self.todo_list_view.resize(height=window_size[1] - self.appbar_view.height)
+        for view in self.views:
+            if isinstance(view, (TaskbarView, TodoListView, )):
+                view.resize(height=window_size[1] - self.appbar_view.height)
         self.screen_fog = pygame.Surface((window_size[0], window_size[1] - self.appbar_view.height), pygame.SRCALPHA)
 
 

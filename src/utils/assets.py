@@ -40,6 +40,13 @@ class Assets(metaclass=Singleton):
             os.path.join(self.IMAGES_PATH, "profile_picture_icon_large_hover.png")
         ).convert_alpha()
 
+        self.todo_list_icon_large = pygame.image.load(
+            os.path.join(self.IMAGES_PATH, "todo_list_icon_large.png")
+        ).convert_alpha()
+        self.todo_list_icon_large_hover = pygame.image.load(
+            os.path.join(self.IMAGES_PATH, "todo_list_icon_large_hover.png")
+        ).convert_alpha()
+
         self.settings_icon_large = pygame.image.load(
             os.path.join(self.IMAGES_PATH, "settings_icon_large.png")
         ).convert_alpha()

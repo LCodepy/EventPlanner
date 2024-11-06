@@ -12,6 +12,12 @@ class CalendarView(View):
     def __init__(self, display: pygame.Surface, model: CalendarModel,
                  width: int, height: int, x: int = 0, y: int = 0) -> None:
         super().__init__(x, y)
+        self.display = display
+        self.model = model
+        self.width = width
+        self.height = height
+        self.x = x
+        self.y = y
 
     def register_event(self, event: Event) -> bool:
         pass
