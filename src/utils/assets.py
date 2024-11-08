@@ -64,6 +64,21 @@ class Assets(metaclass=Singleton):
 
         self.todo_list_database_path = os.path.join(self.DATA_PATH, "todo_list.db")
 
+        # Calendar icons
+        self.right_arrow_icon_large = pygame.image.load(
+            os.path.join(self.IMAGES_PATH, "right_arrow_icon_large.png")
+        ).convert_alpha()
+        self.right_arrow_icon_large_hover = pygame.image.load(
+            os.path.join(self.IMAGES_PATH, "right_arrow_icon_large_hover.png")
+        ).convert_alpha()
+
+        self.left_arrow_icon_large = pygame.image.load(
+            os.path.join(self.IMAGES_PATH, "left_arrow_icon_large.png")
+        ).convert_alpha()
+        self.left_arrow_icon_large_hover = pygame.image.load(
+            os.path.join(self.IMAGES_PATH, "left_arrow_icon_large_hover.png")
+        ).convert_alpha()
+
         # Fonts
         self.font14 = pygame.font.SysFont("arial", 14)
         self.font18 = pygame.font.SysFont("arial", 18)

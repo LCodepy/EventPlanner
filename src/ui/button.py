@@ -123,8 +123,9 @@ class Button(UIObject):
             self.label.update_canvas(self.canvas)
 
     def update_position(self, x: int = None, y: int = None) -> None:
-        self.label.x -= (self.x - (x or self.x))
-        self.label.y -= (self.y - (y or self.y))
+        if self.label:
+            self.label.x -= (self.x - (x or self.x))
+            self.label.y -= (self.y - (y or self.y))
         self.x = x or self.x
         self.y = y or self.y
 

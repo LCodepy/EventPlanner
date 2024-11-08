@@ -34,11 +34,14 @@ class TodoTask(UIObject):
 
         self.start_pos = (self.x, self.y)
         self.pressed = False
+        self.moving_task = False
         self.click_pos = None
+        self.opened = False
 
         self.on_delete_bind = None
         self.on_move = None
         self.on_release = None
+        self.on_open = None
 
         self.description_label = Label(
             self.canvas,
@@ -69,19 +72,25 @@ class TodoTask(UIObject):
             return True
 
         if (
-            isinstance(event, MouseClickEvent) and
-            self.get_rect().collidepoint((event.x, event.y)) and
-            event.button is MouseButtons.LEFT_BUTTON
+                isinstance(event, MouseClickEvent) and
+                self.get_rect().collidepoint((event.x, event.y)) and
+                event.button is MouseButtons.LEFT_BUTTON
         ):
             self.pressed = True
             self.click_pos = (event.x, event.y)
             return True
         if isinstance(event, MouseReleaseEvent) and self.pressed and event.button is MouseButtons.LEFT_BUTTON:
+            if not self.moving_task:
+                self.opened = not self.opened
+                self.on_open(self.id, self.opened)
+            else:
+                self.on_release(self.id)
             self.pressed = False
-            self.on_release(self.id)
+            self.moving_task = False
             return True
         if isinstance(event, MouseMotionEvent) and self.pressed:
             self.on_move(self.id, event.x, event.y)
+            self.moving_task = True
             return True
 
     def render(self) -> None:
@@ -124,6 +133,13 @@ class TodoTask(UIObject):
             if set_start_pos:
                 self.start_pos = (self.start_pos[0], y)
 
+    def resize(self, width: int = None, height: int = None) -> None:
+        self.width = width or self.width
+        self.height = height or self.height
+
+        self.description_label.resize(width=max(self.width - 50, 50), height=self.height)
+        self.delete_task_button.x = self.x + self.width // 2 - Assets().delete_task_icon_large.get_width() // 2 - 5
+
     def on_delete(self) -> None:
         if self.on_delete_bind:
             self.on_delete_bind(self.id)
@@ -136,6 +152,9 @@ class TodoTask(UIObject):
 
     def bind_on_release(self, on_release: Callable[[int], None]) -> None:
         self.on_release = on_release
+
+    def bind_on_open(self, on_open: Callable[[int, bool], None]) -> None:
+        self.on_open = on_open
 
     def get_rect(self) -> pygame.Rect:
         return pygame.Rect(self.x - self.width // 2, self.y - self.height // 2, self.width, self.height)
@@ -158,25 +177,31 @@ class TodoListView(View):
 
         self.canvas = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
 
-        self.task_list_pos = (self.width // 2, 80)
+        self.task_list_pos = (self.width // 2, 90)
         self.task_size = (self.width - 10, 40)
         self.tasks: dict[int, TodoTask] = {
             task.id: TodoTask(self.canvas, self.get_task_position(i), self.task_size, task)
             for i, task in enumerate(self.model.get_tasks())
         }
 
-        self.move_task_animation = ChangeValuesAnimation("MoveTaskAnimation", self.event_loop, animation_time=0.2)
-        self.current_animating_task_id = None
+        # self.move_task_animation = ChangeValuesAnimation("MoveTaskAnimation", self.event_loop, animation_time=0.2)
+        self.move_task_animations = {}
+        # self.current_animating_task_id = None
 
         self.move_task = None
         self.delete_task = None
         self.place_task = None
+        self.open_task = None
+
+        self.on_click = None
+        self.on_release = None
+        self.on_mouse_motion = None
 
         self.deleted_events = []
 
         self.title_label = Label(
             self.canvas,
-            (self.width // 2, 25),
+            (self.width // 2, 35),
             (100, 50),
             text="Todo List",
             text_color=(160, 160, 160),
@@ -207,7 +232,7 @@ class TodoListView(View):
             new_id = self.model.get_next_id()
             task = Task(new_id, event.description, event.importance)
             self.model.add_task(task)
-            self.tasks[new_id] = TodoTask(self.canvas, self.get_task_position(len(self.tasks)), self.task_size, task)
+            self.tasks[new_id] = TodoTask(self.canvas, self.get_new_task_position(), self.task_size, task)
             self.bind_task_methods(task=self.tasks[new_id])
             self.event_loop.enqueue_event(CloseViewEvent(time.time(), event.view))
 
@@ -217,22 +242,32 @@ class TodoListView(View):
             registered_events = True
         if self.add_task_button.register_event(event):
             registered_events = True
-        if self.move_task_animation.register_event(event):
-            registered_events = True
-            if self.move_task_animation.values:
-                self.tasks[self.current_animating_task_id].update_position(*self.move_task_animation.values,
-                                                                           set_start_pos=True)
 
-        if not self.move_task_animation.active:
+        for id_, anim in self.move_task_animations.items():
+            if anim.register_event(event):
+                registered_events = True
+                if anim.values:
+                    self.tasks[id_].update_position(*anim.values, set_start_pos=True)
+
+        if not any(map(lambda a: a.active, self.move_task_animations.values())):
             for task in self.get_sorted_tasks():
                 if task.register_event(event):
                     registered_events = True
 
+        if isinstance(event, MouseClickEvent) and self.on_click and event.button is MouseButtons.LEFT_BUTTON:
+            self.on_click(event)
+        elif isinstance(event, MouseReleaseEvent) and self.on_release and event.button is MouseButtons.LEFT_BUTTON:
+            self.on_release(event)
+        elif isinstance(event, MouseMotionEvent):
+            if self.on_mouse_motion(event):
+                return True
+
+        deleted_tasks = []
         for task_id in self.deleted_events:
-            self.tasks.pop(task_id)
+            deleted_tasks.append(self.tasks.pop(task_id))
 
         if self.deleted_events:
-            self.update_task_list()
+            self.update_task_list(deleted_tasks)
 
         return registered_events
 
@@ -248,6 +283,8 @@ class TodoListView(View):
 
         self.add_task_button.render()
 
+        pygame.draw.line(self.canvas, Colors.GREY70, (self.width - 1, 0), (self.width - 1, self.height))
+
         self.display.blit(self.canvas, (self.x, self.y))
 
     def resize(self, width: int = None, height: int = None) -> None:
@@ -259,14 +296,32 @@ class TodoListView(View):
         self.title_label.update_canvas(self.canvas)
         self.add_task_button.update_canvas(self.canvas)
 
+        self.task_size = (self.width - 10, self.task_size[1])
+        self.task_list_pos = (self.width // 2, self.task_list_pos[1])
         for task in self.get_sorted_tasks():
             task.update_canvas(self.canvas)
+            if width:
+                task.update_position(x=self.width // 2, set_start_pos=True)
+                task.resize(width=self.task_size[0])
+
+        if width:
+            self.title_label.x = self.width // 2
+            self.add_task_button.update_position(x=self.width // 2)
 
         self.add_task_button.update_position(y=self.height - 40)
 
-    def update_task_list(self) -> None:
-        for i, task in enumerate(self.get_sorted_tasks(key=lambda k: self.tasks[k].y)):
-            task.update_position(y=self.get_task_position(i)[1], set_start_pos=True)
+    def add_move_task_animation(self, id_: int, start: list[int], end: list[int]) -> None:
+        self.move_task_animations[id_] = ChangeValuesAnimation(f"MoveTaskAnim{id_}", self.event_loop,
+                                                               animation_time=0.2)
+        self.move_task_animations[id_].start(start, end)
+
+    def update_task_list(self, deleted_tasks: list[TodoTask]) -> None:
+        deleted = deleted_tasks[0]
+
+        for i, task in enumerate(self.get_sorted_tasks()):
+            if task.y < deleted.y:
+                continue
+            task.update_position(y=task.y - deleted.height - 5, set_start_pos=True)
 
     def bind_task_methods(self, task: TodoTask = None) -> None:
         tasks = self.tasks.values()
@@ -276,6 +331,7 @@ class TodoListView(View):
             task.bind_on_delete(self.delete_task)
             task.bind_on_move(self.move_task)
             task.bind_on_release(self.place_task)
+            task.bind_on_open(self.open_task)
 
     def bind_delete_task(self, delete_task: Callable[[int], None]) -> None:
         self.delete_task = delete_task
@@ -286,8 +342,20 @@ class TodoListView(View):
     def bind_place_task(self, place_task: Callable[[int], None]) -> None:
         self.place_task = place_task
 
+    def bind_open_task(self, open_task: Callable[[int, bool], None]) -> None:
+        self.open_task = open_task
+
     def bind_open_add_task_view(self, add_task: Callable[[], None]) -> None:
         self.add_task_button.bind_on_click(add_task)
+
+    def bind_on_click(self, on_click: Callable[[MouseClickEvent], None]) -> None:
+        self.on_click = on_click
+
+    def bind_on_release(self, on_release: Callable[[MouseReleaseEvent], None]) -> None:
+        self.on_release = on_release
+
+    def bind_on_mouse_motion(self, on_mouse_motion: Callable[[MouseMotionEvent], bool]) -> None:
+        self.on_mouse_motion = on_mouse_motion
 
     def set_rendering(self, b: bool) -> None:
         self.rendering = b
@@ -298,8 +366,14 @@ class TodoListView(View):
     def get_task_position(self, idx: int) -> (int, int):
         return self.task_list_pos[0], self.task_list_pos[1] + idx * (self.task_size[1] + 5)
 
+    def get_new_task_position(self) -> (int, int):
+        if self.tasks:
+            last_task = self.get_sorted_tasks()[-1]
+            return self.task_list_pos[0], last_task.y + last_task.height // 2 + self.task_size[1] // 2 + 5
+        return self.task_list_pos
+
     def get_sorted_tasks(self, key: Callable = None) -> list[TodoTask]:
-        return [self.tasks[k] for k in sorted(self.tasks.keys(), key=key or (lambda i: i))]
+        return [self.tasks[k] for k in sorted(self.tasks.keys(), key=key or (lambda i: self.tasks[i].y))]
 
     def get_sorted_tasks_for_rendering(self) -> list[TodoTask]:
         if not self.tasks:

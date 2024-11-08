@@ -9,7 +9,8 @@ from src.controllers.resizing_controller import ResizingController
 from src.controllers.taskbar_controller import TaskbarController
 from src.controllers.todo_list_controller import TodoListController
 from src.events.event import CloseWindowEvent, WindowResizeEvent, MouseFocusChangedEvent, WindowMoveEvent, \
-    OpenViewEvent, CloseViewEvent, MouseClickEvent, MouseReleaseEvent, DeleteCharacterEvent, RenderCursorEvent
+    OpenViewEvent, CloseViewEvent, MouseClickEvent, MouseReleaseEvent, DeleteCharacterEvent, RenderCursorEvent, \
+    ResizeViewEvent
 from src.events.event_loop import EventLoop
 from src.main.config import Config
 from src.models.appbar_model import AppbarModel
@@ -95,6 +96,8 @@ class Main:
     def register_events(self) -> None:
         for view in self.views:
             view.set_rendering(False)
+        if self.top_view:
+            self.top_view.set_rendering(False)
 
         self.update_display = False
         self.render_all = False
@@ -134,11 +137,23 @@ class Main:
                 elif event.view == self.top_view:
                     self.top_view = None
                     self.screen_fog_animation.start([150], [0])
+            if isinstance(event, ResizeViewEvent):
+                if isinstance(event.view, TodoListView):
+                    event.view.resize(width=event.width)
+                    self.calendar_view.resize(width=self.win.get_width() - self.taskbar_view.width - event.width)
+                    self.calendar_view.x = self.taskbar_view.width + event.width
 
             if self.resizing_view.register_event(event):
                 event = MouseFocusChangedEvent(time.time(), False)
             if self.screen_fog_animation.register_event(event):
                 self.update_display = True
+
+            if self.top_view and self.top_view.register_event(event):
+                self.update_display = True
+                self.top_view.set_rendering(True)
+
+            if isinstance(event, (MouseClickEvent, MouseReleaseEvent, )) and self.top_view and self.top_view.is_focused(event):
+                continue
 
             for view in self.views:
                 if view.register_event(event):
@@ -148,10 +163,6 @@ class Main:
                 if isinstance(event, (MouseClickEvent, MouseReleaseEvent)) and view.is_focused(event) and self.top_view:
                     self.top_view = None
                     self.screen_fog_animation.start([150], [0])
-
-            if self.top_view and self.top_view.register_event(event):
-                self.update_display = True
-                self.top_view.set_rendering(True)
 
         if new_window_size:
             self.resize_window(new_window_size)

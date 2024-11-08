@@ -144,6 +144,15 @@ class CloseViewEvent(Event):
 
 
 @dataclass
+class ResizeViewEvent(Event):
+
+    exec_time: float
+    view: Any
+    width: int = None
+    height: int = None
+
+
+@dataclass
 class AddTaskEvent(Event):
 
     exec_time: float

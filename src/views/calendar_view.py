@@ -47,8 +47,32 @@ class CalendarView(View):
             (self.width // 2, 100),
             (200, 50),
             text=str(self.get_month_name(self.month).upper()),
-            text_color=(170, 170, 170),
+            text_color=(200, 200, 200),
             font=Assets().font36
+        )
+
+        self.previous_month_button = Button(
+            self.canvas,
+            (self.width // 2 - 150, 100),
+            (Assets().left_arrow_icon_large.get_width(), Assets().left_arrow_icon_large.get_height()),
+            color=(10, 10, 10),
+            hover_color=(10, 10, 10),
+            click_color=(10, 10, 10),
+            border_width=0,
+            image=Assets().left_arrow_icon_large,
+            hover_image=Assets().left_arrow_icon_large_hover
+        )
+
+        self.next_month_button = Button(
+            self.canvas,
+            (self.width // 2 + 150, 100),
+            (Assets().right_arrow_icon_large.get_width(), Assets().right_arrow_icon_large.get_height()),
+            color=(10, 10, 10),
+            hover_color=(10, 10, 10),
+            click_color=(10, 10, 10),
+            border_width=0,
+            image=Assets().right_arrow_icon_large,
+            hover_image=Assets().right_arrow_icon_large_hover
         )
 
         self.weekday_labels = []
@@ -66,16 +90,18 @@ class CalendarView(View):
         ]
 
     def create_day_buttons(self) -> None:
+        month_length = self.get_month_length(self.month)
         starting_day = self.get_month_starting_day(self.year, self.month)
-        btn_height = (self.height - 300) // 5
+        n_rows = ((month_length + starting_day) / 7).__ceil__()
+        btn_height = (self.height - 300) // n_rows
         self.day_buttons = [
             Button(
-                self.canvas, (self.width * (i % 7 + 1) // 8, 250 + i // 7 * (btn_height + 10)),
-                (self.width // 8 - 10, btn_height),
+                self.canvas, (self.width * (i % 7 + 1) // 8, 210 + i // 7 * (btn_height + 10) + btn_height // 2),
+                (max(self.width // 8 - 10, 10), max(btn_height, 5)),
                 label=Label(text=str(i - starting_day + 1), font=Assets().font18,
                             vertical_text_alignment=VerticalAlignment.TOP),
                 color=Colors.GREY70, border_width=0, padding=Padding(top=5)
-            ) for i in range(starting_day, starting_day + self.get_month_length(self.month))
+            ) for i in range(starting_day, starting_day + month_length)
         ]
 
     def register_event(self, event: Event) -> bool:
@@ -87,6 +113,10 @@ class CalendarView(View):
             registered_events = True
         if self.month_label.register_event(event):
             registered_events = True
+        if self.next_month_button.register_event(event):
+            registered_events = True
+        if self.previous_month_button.register_event(event):
+            registered_events = True
 
         for button in self.day_buttons:
             if button.register_event(event):
@@ -95,10 +125,12 @@ class CalendarView(View):
         return registered_events
 
     def render(self) -> None:
-        self.canvas.fill(Colors.BLACK)
+        self.canvas.fill((10, 10, 10))
 
         self.year_label.render()
         self.month_label.render()
+        self.previous_month_button.render()
+        self.next_month_button.render()
         for label in self.weekday_labels:
             label.render()
         for button in self.day_buttons:
@@ -113,11 +145,15 @@ class CalendarView(View):
 
         self.year_label.canvas = self.canvas
         self.month_label.canvas = self.canvas
+        self.previous_month_button.canvas = self.canvas
+        self.next_month_button.canvas = self.canvas
         self.create_weekday_labels()
         self.create_day_buttons()
 
         self.year_label.x = self.width // 2
         self.month_label.x = self.width // 2
+        self.previous_month_button.x = self.width // 2 - 150
+        self.next_month_button.x = self.width // 2 + 150
 
     def set_rendering(self, b: bool) -> None:
         self.rendering = b

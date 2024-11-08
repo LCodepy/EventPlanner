@@ -85,6 +85,18 @@ class Label(UIObject):
         self.text = text
         self.update_text()
 
+    def set_wrap_text(self, b: bool) -> None:
+        self.wrap_text = b
+        self.update_text()
+
+    def resize(self, width: int = None, height: int = None) -> None:
+        self.width = width or self.width
+        self.height = height or self.height
+
+        self.label_canvas = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+
+        self.update_text()
+
     def post_init(self, canvas: pygame.Surface, pos: (int, int), size: (int, int)) -> None:
         self.canvas = canvas
         self.x, self.y = pos
@@ -163,6 +175,15 @@ class Label(UIObject):
 
     def get_text_height(self) -> int:
         return self.font.render("A", self.bold, self.text_color).get_rect().h
+
+    def get_min_label_size(self) -> (int, int):
+        height = 0
+        width = 0
+        for text in self.lines:
+            rendered = self.font.render(text, self.bold, self.text_color)
+            width = max(width, rendered.get_width())
+            height += rendered.get_height() + self.line_spacing
+        return width, height - self.line_spacing
 
     def is_hovering(self, mouse_pos) -> bool:
         return self.get_rect().collidepoint(*mouse_pos)

@@ -78,13 +78,15 @@ class TextField(UIObject):
                 return True
         elif (
                 isinstance(event, MouseClickEvent) and
-                event.button is MouseButtons.LEFT_BUTTON
+                event.button is MouseButtons.LEFT_BUTTON and
+                self.is_hovering((event.x, event.y))
         ):
             self.on_click()
             return True
         elif (
                 isinstance(event, MouseReleaseEvent) and
-                event.button is MouseButtons.LEFT_BUTTON
+                event.button is MouseButtons.LEFT_BUTTON and
+                self.is_hovering((event.x, event.y))
         ):
             self.on_release(event)
             return True

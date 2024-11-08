@@ -38,6 +38,8 @@ class ResizingController:
         self.last_window_y = None
         self.last_window_x = None
 
+        self.interacted_last_frame = False
+
         self.view.bind_on_click(self.on_click)
         self.view.bind_on_release(self.on_release)
         self.view.bind_on_mouse_motion(self.on_mouse_motion)
@@ -101,8 +103,13 @@ class ResizingController:
 
     def on_mouse_motion(self, event: MouseMotionEvent) -> bool:
         if self.view.get_rect().collidepoint(event.x, event.y) and not self.pressed:
-            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+            if pygame.mouse.get_cursor() != pygame.SYSTEM_CURSOR_ARROW and self.interacted_last_frame:
+                pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+
+            self.interacted_last_frame = False
         else:
+            self.interacted_last_frame = True
+
             if self.pressed or not self.mouse_pressed:
                 self.set_cursor()
             if not self.pressed:
