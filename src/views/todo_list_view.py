@@ -108,7 +108,7 @@ class TodoTask(UIObject):
         pygame.draw.rect(self.canvas, Colors.BACKGROUND_GREY22,
                          [self.get_rect().x + 8, self.get_rect().y, self.get_rect().w - 8, self.get_rect().h],
                          border_radius=5)
-        pygame.draw.rect(self.canvas, color, [self.x - self.width // 2, self.y - self.height // 2, 4, self.height],
+        pygame.draw.rect(self.canvas, color, [self.get_rect().x, self.get_rect().y, 4, self.height],
                          border_radius=2)
 
         self.description_label.render()
@@ -140,6 +140,28 @@ class TodoTask(UIObject):
         self.description_label.resize(width=max(self.width - 50, 50), height=self.height)
         self.delete_task_button.x = self.x + self.width // 2 - Assets().delete_task_icon_large.get_width() // 2 - 5
 
+    def resize_to_label_size(self, width: int) -> None:
+        self.width = width
+
+        if self.opened:
+            self.description_label = Label(
+                self.canvas,
+                (self.x - 10, self.y),
+                (max(self.width - 50, 50), self.height),
+                text=self.task.description,
+                text_color=(200, 200, 200),
+                font=Assets().font18,
+                horizontal_text_alignment=HorizontalAlignment.LEFT,
+                wrap_text=True
+            )
+            self.description_label.height = self.description_label.get_min_label_size()[1] + 18
+            self.height = self.description_label.get_min_label_size()[1] + 18
+            return
+
+        self.description_label.resize(width=max(self.width - 50, 50))
+
+        self.delete_task_button.x = self.x + self.width // 2 - Assets().delete_task_icon_large.get_width() // 2 - 5
+
     def on_delete(self) -> None:
         if self.on_delete_bind:
             self.on_delete_bind(self.id)
@@ -157,7 +179,7 @@ class TodoTask(UIObject):
         self.on_open = on_open
 
     def get_rect(self) -> pygame.Rect:
-        return pygame.Rect(self.x - self.width // 2, self.y - self.height // 2, self.width, self.height)
+        return pygame.Rect(self.x - self.width // 2, self.y - (self.height / 2).__ceil__(), self.width, self.height)
 
 
 class TodoListView(View):
@@ -184,9 +206,7 @@ class TodoListView(View):
             for i, task in enumerate(self.model.get_tasks())
         }
 
-        # self.move_task_animation = ChangeValuesAnimation("MoveTaskAnimation", self.event_loop, animation_time=0.2)
         self.move_task_animations = {}
-        # self.current_animating_task_id = None
 
         self.move_task = None
         self.delete_task = None
@@ -196,6 +216,7 @@ class TodoListView(View):
         self.on_click = None
         self.on_release = None
         self.on_mouse_motion = None
+        self.on_scroll = None
 
         self.deleted_events = []
 
@@ -229,12 +250,7 @@ class TodoListView(View):
         self.deleted_events = []
 
         if isinstance(event, AddTaskEvent):
-            new_id = self.model.get_next_id()
-            task = Task(new_id, event.description, event.importance)
-            self.model.add_task(task)
-            self.tasks[new_id] = TodoTask(self.canvas, self.get_new_task_position(), self.task_size, task)
-            self.bind_task_methods(task=self.tasks[new_id])
-            self.event_loop.enqueue_event(CloseViewEvent(time.time(), event.view))
+            self.add_new_task(event)
 
         event = self.get_event(event)
 
@@ -258,9 +274,10 @@ class TodoListView(View):
             self.on_click(event)
         elif isinstance(event, MouseReleaseEvent) and self.on_release and event.button is MouseButtons.LEFT_BUTTON:
             self.on_release(event)
-        elif isinstance(event, MouseMotionEvent):
-            if self.on_mouse_motion(event):
-                return True
+        elif isinstance(event, MouseMotionEvent) and self.on_mouse_motion(event):
+            return True
+        elif isinstance(event, (MouseWheelUpEvent, MouseWheelDownEvent)) and self.on_scroll(event):
+            return True
 
         deleted_tasks = []
         for task_id in self.deleted_events:
@@ -274,13 +291,13 @@ class TodoListView(View):
     def render(self) -> None:
         self.canvas.fill(Colors.BACKGROUND_GREY30)
 
-        self.title_label.render()
-
         for task in self.get_sorted_tasks_for_rendering():
             task.render()
 
-        pygame.draw.rect(self.canvas, Colors.BACKGROUND_GREY30, (0, self.add_task_button.y - 40, self.width, 100))
+        pygame.draw.rect(self.canvas, Colors.BACKGROUND_GREY30, (0, 0, self.width, 50))
+        pygame.draw.rect(self.canvas, Colors.BACKGROUND_GREY30, (0, self.task_list_bottom[1], self.width, 100))
 
+        self.title_label.render()
         self.add_task_button.render()
 
         pygame.draw.line(self.canvas, Colors.GREY70, (self.width - 1, 0), (self.width - 1, self.height))
@@ -298,11 +315,14 @@ class TodoListView(View):
 
         self.task_size = (self.width - 10, self.task_size[1])
         self.task_list_pos = (self.width // 2, self.task_list_pos[1])
+        current_y = self.task_list_pos[1] - self.task_size[1] // 2
         for task in self.get_sorted_tasks():
             task.update_canvas(self.canvas)
             if width:
-                task.update_position(x=self.width // 2, set_start_pos=True)
-                task.resize(width=self.task_size[0])
+                task.resize_to_label_size(self.task_size[0])
+                current_y += task.height
+                task.update_position(x=self.width // 2, y=current_y - task.height // 2, set_start_pos=True)
+                current_y += 5
 
         if width:
             self.title_label.x = self.width // 2
@@ -322,6 +342,14 @@ class TodoListView(View):
             if task.y < deleted.y:
                 continue
             task.update_position(y=task.y - deleted.height - 5, set_start_pos=True)
+
+    def add_new_task(self, event: AddTaskEvent) -> None:
+        new_id = self.model.get_next_id()
+        task = Task(new_id, event.description, event.importance)
+        self.model.add_task(task)
+        self.tasks[new_id] = TodoTask(self.canvas, self.get_new_task_position(), self.task_size, task)
+        self.bind_task_methods(task=self.tasks[new_id])
+        self.event_loop.enqueue_event(CloseViewEvent(time.time(), event.view))
 
     def bind_task_methods(self, task: TodoTask = None) -> None:
         tasks = self.tasks.values()
@@ -357,10 +385,13 @@ class TodoListView(View):
     def bind_on_mouse_motion(self, on_mouse_motion: Callable[[MouseMotionEvent], bool]) -> None:
         self.on_mouse_motion = on_mouse_motion
 
+    def bind_on_scroll(self, on_scroll: Callable[[Union[MouseWheelDownEvent, MouseWheelUpEvent]], bool]) -> None:
+        self.on_scroll = on_scroll
+
     def set_rendering(self, b: bool) -> None:
         self.rendering = b
 
-    def is_focused(self, event: Union[MouseClickEvent, MouseReleaseEvent]) -> bool:
+    def is_focused(self, event: Union[MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent]) -> bool:
         return self.x <= event.x < self.x + self.width and self.y <= event.y < self.y + self.height
 
     def get_task_position(self, idx: int) -> (int, int):
@@ -382,3 +413,11 @@ class TodoListView(View):
             if self.tasks[i].pressed:
                 break
         return [self.tasks[k] for k in self.tasks if k != i] + [self.tasks[i]]
+
+    @property
+    def task_list_bottom(self) -> (int, int):
+        return self.task_list_pos[0], self.add_task_button.y - 40
+
+    @property
+    def task_list_top(self) -> (int, int):
+        return self.task_list_pos[0], self.task_list_pos[1] - self.task_size[1] // 2

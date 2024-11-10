@@ -1,9 +1,11 @@
 import time
+from typing import Union
 
 import pygame.display
 
 from src.controllers.add_task_controller import AddTaskController
-from src.events.event import OpenViewEvent, Event, MouseClickEvent, MouseReleaseEvent, MouseMotionEvent, ResizeViewEvent
+from src.events.event import OpenViewEvent, Event, MouseClickEvent, MouseReleaseEvent, MouseMotionEvent, \
+    ResizeViewEvent, MouseWheelUpEvent, MouseWheelDownEvent
 from src.events.event_loop import EventLoop
 from src.models.todo_list_model import TodoListModel
 from src.views.add_task_view import AddTaskView
@@ -19,6 +21,7 @@ class TodoListController:
 
         self.pressed = False
         self.last_frame_interacted = False
+        self.scroll_value = 10
 
         self.view.bind_delete_task(self.delete_task)
         self.view.bind_move_task(self.move_task)
@@ -28,6 +31,7 @@ class TodoListController:
         self.view.bind_on_click(self.on_click)
         self.view.bind_on_release(self.on_release)
         self.view.bind_on_mouse_motion(self.on_mouse_motion)
+        self.view.bind_on_scroll(self.on_scroll)
         self.view.bind_task_methods()
 
     def delete_task(self, id_: int) -> None:
@@ -142,3 +146,19 @@ class TodoListController:
         if self.pressed:
             self.event_loop.enqueue_event(ResizeViewEvent(time.time(), self.view, min(max(event.x, 130), 550)))
             return True
+
+    def on_scroll(self, event: Union[MouseWheelUpEvent, MouseWheelDownEvent]) -> bool:
+        if event.x < 0 or event.x > self.view.width or event.y < 0 or event.y > self.view.height or not self.view.tasks:
+            return False
+
+        if isinstance(event, MouseWheelUpEvent) and self.view.get_sorted_tasks()[0].get_rect().top < self.view.task_list_top[1]:
+            self.scroll_tasks(self.scroll_value)
+            return True
+        elif isinstance(event, MouseWheelDownEvent) and self.view.get_sorted_tasks()[-1].get_rect().bottom > self.view.task_list_bottom[1]:
+            self.scroll_tasks(-self.scroll_value)
+            return True
+
+    def scroll_tasks(self, scroll: int = 0) -> None:
+        for task in self.view.get_sorted_tasks():
+            task.update_position(y=task.y + scroll, set_start_pos=True)
+

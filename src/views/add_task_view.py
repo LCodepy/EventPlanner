@@ -3,7 +3,8 @@ from typing import Union, Callable
 
 import pygame
 
-from src.events.event import Event, MouseClickEvent, MouseReleaseEvent, CloseViewEvent
+from src.events.event import Event, MouseClickEvent, MouseReleaseEvent, CloseViewEvent, MouseWheelUpEvent, \
+    MouseWheelDownEvent
 from src.events.event_loop import EventLoop
 from src.models.todo_list_model import TaskImportance
 from src.ui.button import Button
@@ -205,5 +206,5 @@ class AddTaskView(View):
     def set_rendering(self, b: bool) -> None:
         self.rendering = b
 
-    def is_focused(self, event: Union[MouseClickEvent, MouseReleaseEvent]) -> bool:
+    def is_focused(self, event: Union[MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent]) -> bool:
         return self.x <= event.x < self.x + self.width and self.y <= event.y < self.y + self.height

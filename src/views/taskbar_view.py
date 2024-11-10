@@ -98,5 +98,5 @@ class TaskbarView(View):
     def set_rendering(self, b: bool) -> None:
         self.rendering = b
 
-    def is_focused(self, event: Union[MouseClickEvent, MouseReleaseEvent]) -> bool:
+    def is_focused(self, event: Union[MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent]) -> bool:
         return self.x <= event.x < self.x + self.width and self.y <= event.y < self.y + self.height

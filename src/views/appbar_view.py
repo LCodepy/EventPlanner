@@ -5,7 +5,8 @@ from typing import Callable, Union
 import pyautogui as pyautogui
 import pygame
 
-from src.events.event import Event, MouseMotionEvent, MouseClickEvent, MouseReleaseEvent
+from src.events.event import Event, MouseMotionEvent, MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, \
+    MouseWheelDownEvent
 from src.events.mouse_buttons import MouseButtons
 from src.main.config import Config
 from src.models.appbar_model import AppbarModel
@@ -145,7 +146,7 @@ class AppbarView(View):
         self.app_icon.canvas = self.canvas
         self.title_label.canvas = self.canvas
 
-    def is_focused(self, event: Union[MouseClickEvent, MouseReleaseEvent]) -> bool:
+    def is_focused(self, event: Union[MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent]) -> bool:
         return False
 
     def bind_on_click(self, on_click: Callable[[MouseClickEvent], None]) -> None:

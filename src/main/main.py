@@ -10,7 +10,7 @@ from src.controllers.taskbar_controller import TaskbarController
 from src.controllers.todo_list_controller import TodoListController
 from src.events.event import CloseWindowEvent, WindowResizeEvent, MouseFocusChangedEvent, WindowMoveEvent, \
     OpenViewEvent, CloseViewEvent, MouseClickEvent, MouseReleaseEvent, DeleteCharacterEvent, RenderCursorEvent, \
-    ResizeViewEvent
+    ResizeViewEvent, MouseWheelUpEvent, MouseWheelDownEvent
 from src.events.event_loop import EventLoop
 from src.main.config import Config
 from src.models.appbar_model import AppbarModel

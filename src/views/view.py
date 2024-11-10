@@ -29,7 +29,7 @@ class View(ABC):
         """Sets rendering to ture or false."""
 
     @abstractmethod
-    def is_focused(self, event: Union[MouseClickEvent, MouseReleaseEvent]) -> bool:
+    def is_focused(self, event: Union[MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent]) -> bool:
         """Returns true if event position is inside the view."""
 
     def get_event(self, event: Event) -> Event:

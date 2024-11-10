@@ -59,6 +59,7 @@ class Label(UIObject):
                     self.lines[0] += word + " "
                 else:
                     cut = True
+                    break
             self.lines[0] = self.lines[0][:-1] + ("..." if cut else "")
             return
 
@@ -116,9 +117,9 @@ class Label(UIObject):
             rendered = self.font.render(text, self.bold, self.text_color)
 
             if self.horizontal_text_alignment is HorizontalAlignment.LEFT:
-                aligned_x = -self.width // 2 + self.padding.left
+                aligned_x = -(self.width // 2) + self.padding.left
             elif self.horizontal_text_alignment is HorizontalAlignment.CENTER:
-                aligned_x = -rendered.get_rect().w // 2
+                aligned_x = -(rendered.get_rect().w // 2)
             elif self.horizontal_text_alignment is HorizontalAlignment.RIGHT:
                 aligned_x = self.width // 2 - rendered.get_rect().w - self.padding.right
             else:
@@ -133,7 +134,7 @@ class Label(UIObject):
                 aligned_y = -(len(self.lines) *
                               (rendered.get_rect().h + self.line_spacing) - self.line_spacing) // 2 + current_line_y
             elif self.vertical_text_alignment is VerticalAlignment.TOP:
-                aligned_y = -self.height // 2 + current_line_y + self.padding.top
+                aligned_y = -(self.height // 2) + current_line_y + self.padding.top
             else:
                 raise ValueError("Invalid vertical alignment.")
 

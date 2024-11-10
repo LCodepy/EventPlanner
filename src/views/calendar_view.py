@@ -3,7 +3,7 @@ from typing import Union
 
 import pygame
 
-from src.events.event import MouseClickEvent, MouseReleaseEvent, Event
+from src.events.event import MouseClickEvent, MouseReleaseEvent, Event, MouseWheelUpEvent, MouseWheelDownEvent
 from src.models.calendar_model import CalendarModel
 from src.ui.alignment import VerticalAlignment
 from src.ui.button import Button
@@ -158,7 +158,7 @@ class CalendarView(View):
     def set_rendering(self, b: bool) -> None:
         self.rendering = b
 
-    def is_focused(self, event: Union[MouseClickEvent, MouseReleaseEvent]) -> bool:
+    def is_focused(self, event: Union[MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent]) -> bool:
         return self.x <= event.x < self.x + self.width and self.y <= event.y < self.y + self.height
 
     def get_month_name(self, month: int) -> str:

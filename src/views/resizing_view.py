@@ -3,7 +3,8 @@ from typing import Callable, Union
 
 import pygame
 
-from src.events.event import Event, MouseClickEvent, MouseReleaseEvent, MouseMotionEvent
+from src.events.event import Event, MouseClickEvent, MouseReleaseEvent, MouseMotionEvent, MouseWheelUpEvent, \
+    MouseWheelDownEvent
 from src.events.mouse_buttons import MouseButtons
 from src.utils.pygame_utils import get_window_size
 from src.utils.ui_debugger import UIDebugger
@@ -44,7 +45,7 @@ class ResizingView(View):
     def set_rendering(self, b: bool) -> None:
         pass
 
-    def is_focused(self, event: Union[MouseClickEvent, MouseReleaseEvent]) -> bool:
+    def is_focused(self, event: Union[MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent]) -> bool:
         return False
 
     def bind_on_click(self, on_click: Callable[[MouseClickEvent], bool]) -> None:
