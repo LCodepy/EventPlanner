@@ -130,8 +130,10 @@ class TodoListController:
         self.pressed = False
 
     def on_mouse_motion(self, event: MouseMotionEvent) -> bool:
-        if event.y < 0 and self.last_frame_interacted:
-            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+        if event.y < 0:
+            if self.last_frame_interacted:
+                pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+                self.last_frame_interacted = False
             return False
         if (
             pygame.mouse.get_cursor() != pygame.SYSTEM_CURSOR_SIZEWE and
@@ -144,7 +146,9 @@ class TodoListController:
             self.last_frame_interacted = False
 
         if self.pressed:
-            self.event_loop.enqueue_event(ResizeViewEvent(time.time(), self.view, min(max(event.x, 130), 550)))
+            self.event_loop.enqueue_event(
+                ResizeViewEvent(time.time(), self.view, min(max(event.x, self.view.get_min_size()[0]), 550))
+            )
             return True
 
     def on_scroll(self, event: Union[MouseWheelUpEvent, MouseWheelDownEvent]) -> bool:

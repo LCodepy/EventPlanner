@@ -7,7 +7,7 @@ from src.events.event import MouseClickEvent, MouseReleaseEvent, Event, MouseWhe
 from src.models.calendar_model import CalendarModel
 from src.ui.alignment import VerticalAlignment
 from src.ui.button import Button
-from src.ui.colors import Colors
+from src.ui.colors import Colors, darken
 from src.ui.label import Label
 from src.ui.padding import Padding
 from src.utils.assets import Assets
@@ -98,9 +98,9 @@ class CalendarView(View):
             Button(
                 self.canvas, (self.width * (i % 7 + 1) // 8, 210 + i // 7 * (btn_height + 10) + btn_height // 2),
                 (max(self.width // 8 - 10, 10), max(btn_height, 5)),
-                label=Label(text=str(i - starting_day + 1), font=Assets().font18,
+                label=Label(text=str(i - starting_day + 1), font=Assets().font18, text_color=(220, 220, 220),
                             vertical_text_alignment=VerticalAlignment.TOP),
-                color=Colors.GREY70, border_width=0, padding=Padding(top=5)
+                color=(10, 10, 10), border_color=Colors.BLUE220, border_width=1, border_radius=10, padding=Padding(top=5)
             ) for i in range(starting_day, starting_day + month_length)
         ]
 
@@ -160,6 +160,9 @@ class CalendarView(View):
 
     def is_focused(self, event: Union[MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent]) -> bool:
         return self.x <= event.x < self.x + self.width and self.y <= event.y < self.y + self.height
+
+    def get_min_size(self) -> (int, int):
+        return 350, 450
 
     def get_month_name(self, month: int) -> str:
         return ["siječanj", "veljača", "ožujak", "travanj", "svibanj", "lipanj",

@@ -121,46 +121,46 @@ class ResizingController:
             new_width, new_height = None, None
 
             if self.resize_orientation is ResizeOrientation.N:
-                if self.last_window_y - mouse_y <= 200:
-                    return True
+                # if self.last_window_y - mouse_y <= 200:
+                #     return True
                 self.event_loop.enqueue_event(
                     WindowResizeEvent(time.time(), window_width, self.last_window_y - mouse_y)
                 )
                 self.event_loop.enqueue_event(WindowMoveEvent(time.time(), window_x, mouse_y))
             elif self.resize_orientation is ResizeOrientation.S:
-                if mouse_y - self.last_window_y <= 200:
-                    return True
+                # if mouse_y - self.last_window_y <= 200:
+                #     return True
                 self.event_loop.enqueue_event(
                     WindowResizeEvent(time.time(), window_width, mouse_y - self.last_window_y)
                 )
             elif self.resize_orientation is ResizeOrientation.E:
-                if mouse_x - self.last_window_x <= 270:
-                    return True
+                # if mouse_x - self.last_window_x <= 270:
+                #     return True
                 self.event_loop.enqueue_event(
                     WindowResizeEvent(time.time(), mouse_x - self.last_window_x, window_height)
                 )
             elif self.resize_orientation is ResizeOrientation.W:
-                if self.last_window_x - mouse_x <= 270:
-                    return True
+                # if self.last_window_x - mouse_x <= 270:
+                #     return True
                 self.event_loop.enqueue_event(
                     WindowResizeEvent(time.time(), self.last_window_x - mouse_x, window_height)
                 )
                 self.event_loop.enqueue_event(WindowMoveEvent(time.time(), mouse_x, window_y))
             elif self.resize_orientation is ResizeOrientation.NE:
-                if self.last_window_y - mouse_y > 200:
-                    new_height = self.last_window_y - mouse_y
-                if mouse_x - self.last_window_x > 270:
-                    new_width = mouse_x - self.last_window_x
+                # if self.last_window_y - mouse_y > 200:
+                new_height = self.last_window_y - mouse_y
+                # if mouse_x - self.last_window_x > 270:
+                new_width = mouse_x - self.last_window_x
                 self.event_loop.enqueue_event(
                     WindowResizeEvent(time.time(), new_width or window_width, new_height or window_height)
                 )
                 if new_height:
                     self.event_loop.enqueue_event(WindowMoveEvent(time.time(), window_x, mouse_y))
             elif self.resize_orientation is ResizeOrientation.NW:
-                if self.last_window_x - mouse_x > 270:
-                    new_width = self.last_window_x - mouse_x
-                if self.last_window_y - mouse_y > 200:
-                    new_height = self.last_window_y - mouse_y
+                # if self.last_window_x - mouse_x > 270:
+                new_width = self.last_window_x - mouse_x
+                # if self.last_window_y - mouse_y > 200:
+                new_height = self.last_window_y - mouse_y
                 self.event_loop.enqueue_event(
                     WindowResizeEvent(time.time(), new_width or window_width, new_height or window_height)
                 )
@@ -168,20 +168,20 @@ class ResizingController:
                     WindowMoveEvent(time.time(), mouse_x if new_width else window_x, mouse_y if new_height else window_y)
                 )
             elif self.resize_orientation is ResizeOrientation.SW:
-                if self.last_window_x - mouse_x > 270:
-                    new_width = self.last_window_x - mouse_x
-                if mouse_y - self.last_window_y > 200:
-                    new_height = mouse_y - self.last_window_y
+                # if self.last_window_x - mouse_x > 270:
+                new_width = self.last_window_x - mouse_x
+                # if mouse_y - self.last_window_y > 200:
+                new_height = mouse_y - self.last_window_y
                 self.event_loop.enqueue_event(
                     WindowResizeEvent(time.time(), new_width or window_width, new_height or window_height)
                 )
                 if new_width:
                     self.event_loop.enqueue_event(WindowMoveEvent(time.time(), mouse_x, window_y))
             elif self.resize_orientation is ResizeOrientation.SE:
-                if mouse_x - self.last_window_x > 270:
-                    new_width = mouse_x - self.last_window_x
-                if mouse_y - self.last_window_y > 200:
-                    new_height = mouse_y - self.last_window_y
+                # if mouse_x - self.last_window_x > 270:
+                new_width = mouse_x - self.last_window_x
+                # if mouse_y - self.last_window_y > 200:
+                new_height = mouse_y - self.last_window_y
                 self.event_loop.enqueue_event(
                     WindowResizeEvent(time.time(), new_width or window_width, new_height or window_height)
                 )

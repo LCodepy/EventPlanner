@@ -32,6 +32,10 @@ class View(ABC):
     def is_focused(self, event: Union[MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent]) -> bool:
         """Returns true if event position is inside the view."""
 
+    @abstractmethod
+    def get_min_size(self) -> (int, int):
+        """Returns minimal view size."""
+
     def get_event(self, event: Event) -> Event:
         if isinstance(event, (MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent)):
             return event.__class__(event.exec_time, event.x - self.x, event.y - self.y, *list(event.__dict__.values())[3:])

@@ -414,6 +414,9 @@ class TodoListView(View):
                 break
         return [self.tasks[k] for k in self.tasks if k != i] + [self.tasks[i]]
 
+    def get_min_size(self) -> (int, int):
+        return 130, 170
+
     @property
     def task_list_bottom(self) -> (int, int):
         return self.task_list_pos[0], self.add_task_button.y - 40

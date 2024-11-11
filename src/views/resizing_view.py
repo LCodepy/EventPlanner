@@ -60,3 +60,6 @@ class ResizingView(View):
     def get_rect(self) -> pygame.Rect:
         window_width, window_height = pygame.display.get_window_size()
         return pygame.Rect(self.width, self.width, window_width - self.width * 2, window_height - self.width * 2)
+
+    def get_min_size(self) -> (int, int):
+        return 0, 0

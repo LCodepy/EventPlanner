@@ -100,3 +100,6 @@ class TaskbarView(View):
 
     def is_focused(self, event: Union[MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent]) -> bool:
         return self.x <= event.x < self.x + self.width and self.y <= event.y < self.y + self.height
+
+    def get_min_size(self) -> (int, int):
+        return self.width, 170

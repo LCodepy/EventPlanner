@@ -170,3 +170,6 @@ class AppbarView(View):
     def set_rendering(self, b: bool) -> None:
         self.rendering = b
 
+    def get_min_size(self) -> (int, int):
+        return self.width, self.height
+
