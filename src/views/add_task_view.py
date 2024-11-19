@@ -18,9 +18,8 @@ from src.views.view import View
 
 class AddTaskView(View):
 
-    def __init__(self, display: pygame.Surface, event_loop: EventLoop, width: int, height: int,
-                 x: int = 0, y: int = 0) -> None:
-        super().__init__(x, y)
+    def __init__(self, display: pygame.Surface, event_loop: EventLoop, width: int, height: int, x: int, y: int) -> None:
+        super().__init__(width, height, x, y)
         self.display = display
         self.event_loop = event_loop
         self.width = width

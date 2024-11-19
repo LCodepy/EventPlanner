@@ -1,15 +1,14 @@
-import ctypes
 import time
 from enum import Enum, auto
 
 import pyautogui
 import pygame
 
-from src.controllers.appbar_controller import AppbarController
-from src.events.event import MouseMotionEvent, MouseClickEvent, MouseReleaseEvent, WindowResizeEvent, WindowMoveEvent
+from src.events.event import Event, MouseClickEvent, MouseReleaseEvent, MouseMotionEvent, WindowResizeEvent, \
+    WindowMoveEvent
 from src.events.event_loop import EventLoop
-from src.utils.pygame_utils import get_window_pos, get_window_size, set_window_pos
-from src.views.resizing_view import ResizingView
+from src.events.mouse_buttons import MouseButtons
+from src.utils.pygame_utils import get_window_pos, get_window_size
 
 
 class ResizeOrientation(Enum):
@@ -24,12 +23,11 @@ class ResizeOrientation(Enum):
     SE = auto()
 
 
-class ResizingController:
+class WindowManager:
 
-    def __init__(self, view: ResizingView, event_loop: EventLoop, appbar: AppbarController) -> None:
-        self.view = view
+    def __init__(self, event_loop: EventLoop, width: int) -> None:
         self.event_loop = event_loop
-        self.appbar = appbar
+        self.width = width
 
         self.pressed = False
         self.mouse_pressed = False
@@ -40,46 +38,55 @@ class ResizingController:
 
         self.interacted_last_frame = False
 
-        self.view.bind_on_click(self.on_click)
-        self.view.bind_on_release(self.on_release)
-        self.view.bind_on_mouse_motion(self.on_mouse_motion)
+    def register_event(self, event: Event) -> bool:
+        if pygame.display.get_window_size() == get_window_size():
+            return False
+        if isinstance(event, MouseClickEvent) and event.button is MouseButtons.LEFT_BUTTON:
+            if self.on_click(event):
+                return True
+        elif isinstance(event, MouseReleaseEvent) and event.button is MouseButtons.LEFT_BUTTON:
+            if self.on_release(event):
+                return True
+        elif isinstance(event, MouseMotionEvent):
+            if self.on_mouse_motion(event):
+                return True
 
     def set_cursor(self) -> None:
         if self.pressed:
             return
 
         mouse_x, mouse_y = pygame.mouse.get_pos()
-        if mouse_x >= self.view.get_rect().right and mouse_y >= self.view.get_rect().bottom:
+        if mouse_x >= self.get_rect().right and mouse_y >= self.get_rect().bottom:
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZENWSE)
             self.resize_orientation = ResizeOrientation.SE
-        elif mouse_x <= self.view.get_rect().left and mouse_y <= self.view.get_rect().top:
+        elif mouse_x <= self.get_rect().left and mouse_y <= self.get_rect().top:
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZENWSE)
             self.resize_orientation = ResizeOrientation.NW
-        elif mouse_x >= self.view.get_rect().right and mouse_y <= self.view.get_rect().top:
+        elif mouse_x >= self.get_rect().right and mouse_y <= self.get_rect().top:
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZENESW)
             self.resize_orientation = ResizeOrientation.NE
-        elif mouse_x <= self.view.get_rect().left and mouse_y >= self.view.get_rect().bottom:
+        elif mouse_x <= self.get_rect().left and mouse_y >= self.get_rect().bottom:
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZENESW)
             self.resize_orientation = ResizeOrientation.SW
-        elif mouse_x >= self.view.get_rect().right:
+        elif mouse_x >= self.get_rect().right:
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZEWE)
             self.resize_orientation = ResizeOrientation.E
-        elif mouse_x <= self.view.get_rect().left:
+        elif mouse_x <= self.get_rect().left:
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZEWE)
             self.resize_orientation = ResizeOrientation.W
-        elif mouse_y >= self.view.get_rect().bottom:
+        elif mouse_y >= self.get_rect().bottom:
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZENS)
             self.resize_orientation = ResizeOrientation.S
-        elif mouse_y <= self.view.get_rect().top:
+        elif mouse_y <= self.get_rect().top:
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZENS)
             self.resize_orientation = ResizeOrientation.N
 
     def on_click(self, event: MouseClickEvent) -> bool:
         self.mouse_pressed = True
-        if not self.view.get_rect().collidepoint(event.x, event.y) and not self.appbar.appbar_pressed:
+
+        if not self.get_rect().collidepoint(event.x, event.y):
             self.pressed = True
 
-            mouse_x, mouse_y = pyautogui.position()
             window_x, window_y = get_window_pos()
             window_width, window_height = pygame.display.get_window_size()
 
@@ -102,7 +109,7 @@ class ResizingController:
         self.pressed = False
 
     def on_mouse_motion(self, event: MouseMotionEvent) -> bool:
-        if self.view.get_rect().collidepoint(event.x, event.y) and not self.pressed:
+        if self.get_rect().collidepoint(event.x, event.y) and not self.pressed:
             if pygame.mouse.get_cursor() != pygame.SYSTEM_CURSOR_ARROW and self.interacted_last_frame:
                 pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
@@ -118,7 +125,6 @@ class ResizingController:
             mouse_x, mouse_y = pyautogui.position()
             window_x, window_y = get_window_pos()
             window_width, window_height = pygame.display.get_window_size()
-            new_width, new_height = None, None
 
             if self.resize_orientation is ResizeOrientation.N:
                 # if self.last_window_y - mouse_y <= 200:
@@ -165,7 +171,8 @@ class ResizingController:
                     WindowResizeEvent(time.time(), new_width or window_width, new_height or window_height)
                 )
                 self.event_loop.enqueue_event(
-                    WindowMoveEvent(time.time(), mouse_x if new_width else window_x, mouse_y if new_height else window_y)
+                    WindowMoveEvent(time.time(), mouse_x if new_width else window_x,
+                                    mouse_y if new_height else window_y)
                 )
             elif self.resize_orientation is ResizeOrientation.SW:
                 # if self.last_window_x - mouse_x > 270:
@@ -187,4 +194,9 @@ class ResizingController:
                 )
 
             return True
+
+    def get_rect(self) -> pygame.Rect:
+        win_width, win_height = pygame.display.get_window_size()
+        return pygame.Rect(self.width, self.width, win_width - self.width * 2, win_height - self.width * 2)
+
 

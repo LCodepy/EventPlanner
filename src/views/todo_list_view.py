@@ -185,8 +185,8 @@ class TodoTask(UIObject):
 class TodoListView(View):
 
     def __init__(self, display: pygame.Surface, model: TodoListModel, event_loop: EventLoop, width: int, height: int,
-                 x: int = 0, y: int = 0) -> None:
-        super().__init__(x, y)
+                 x: int, y: int) -> None:
+        super().__init__(width, height, x, y)
         self.display = display
         self.model = model
         self.event_loop = event_loop

@@ -1,18 +1,16 @@
-import ctypes
 import time
 
 import pygame
 
 from src.controllers.appbar_controller import AppbarController
 from src.controllers.calendar_controller import CalendarController
-from src.controllers.resizing_controller import ResizingController
 from src.controllers.taskbar_controller import TaskbarController
-from src.controllers.todo_list_controller import TodoListController
 from src.events.event import CloseWindowEvent, WindowResizeEvent, MouseFocusChangedEvent, WindowMoveEvent, \
     OpenViewEvent, CloseViewEvent, MouseClickEvent, MouseReleaseEvent, DeleteCharacterEvent, RenderCursorEvent, \
-    ResizeViewEvent, MouseWheelUpEvent, MouseWheelDownEvent
+    ResizeViewEvent
 from src.events.event_loop import EventLoop
 from src.main.config import Config
+from src.main.window_manager import WindowManager
 from src.models.appbar_model import AppbarModel
 from src.models.calendar_model import CalendarModel
 from src.models.taskbar_model import TaskbarModel
@@ -22,13 +20,12 @@ from src.utils.animations import ChangeValuesAnimation
 from src.utils.assets import Assets
 from src.utils.logging import Log
 from src.utils.pygame_utils import set_window_pos
-from src.utils.ui_debugger import UIDebugger
 from src.views.appbar_view import AppbarView
 from src.views.calendar_view import CalendarView
-from src.views.resizing_view import ResizingView
 from src.views.taskbar_view import TaskbarView
 from src.views.todo_list_view import TodoListView
 from src.views.view import View
+from src.main.view_manager import ViewManager
 
 
 class Main:
@@ -43,7 +40,7 @@ class Main:
         pygame.display.set_caption(self.config.window_title)
         pygame.display.set_icon(Assets().app_icon)
         pygame.font.init()
-        
+
         # Log.enable()
         # UIDebugger.enable()
 
@@ -56,30 +53,21 @@ class Main:
         self.render_all = False
 
         self.appbar_model = AppbarModel()
-        self.appbar_view = AppbarView(self.win, self.appbar_model, self.win.get_width(), 30)
-        self.appbar_controller = AppbarController(self.appbar_model, self.appbar_view, self.event_loop)
-
-        self.resizing_view = ResizingView(self.win, 5)
-        self.resizing_controller = ResizingController(self.resizing_view, self.event_loop, self.appbar_controller)
+        self.appbar_view = AppbarView(self.win, self.appbar_model, self.win.get_width(), 30, 0, 0)
+        AppbarController(self.appbar_model, self.appbar_view, self.event_loop)
 
         self.taskbar_model = TaskbarModel()
-        self.taskbar_view = TaskbarView(self.win, self.taskbar_model, 60, self.win.get_height() - 30, y=30)
+        self.taskbar_view = TaskbarView(self.win, self.taskbar_model, 60, self.win.get_height() - 30, 0, 30)
         self.taskbar_controller = TaskbarController(self.taskbar_model, self.taskbar_view, self.event_loop)
 
         self.calendar_model = CalendarModel()
         self.calendar_view = CalendarView(self.win, self.calendar_model, self.win.get_width() - self.taskbar_view.width,
                                           self.win.get_height() - self.appbar_view.height, self.taskbar_view.width,
                                           self.appbar_view.height)
-        self.calendar_controller = CalendarController(self.calendar_model, self.calendar_view)
+        self.calendar_controller = CalendarController(self.calendar_model, self.calendar_view, self.event_loop)
 
-        self.todo_list_model = TodoListModel()
-        self.todo_list_view = TodoListView(self.win, self.todo_list_model, self.event_loop, 130, 0)
-
-        self.screen_fog = pygame.Surface((self.window_width, self.window_height - self.appbar_view.height), pygame.SRCALPHA)
-        self.screen_fog_animation = ChangeValuesAnimation("IncreaseScreenFog", self.event_loop, 0.4)
-
-        self.top_view = None
-        self.views: list[View] = [self.appbar_view, self.taskbar_view, self.calendar_view]
+        self.window_manager = WindowManager(self.event_loop, 5)
+        self.view_manager = ViewManager(self.win, self.event_loop, self.appbar_view, self.taskbar_view, self.calendar_view)
 
     def start(self) -> None:
         self.running = True
@@ -87,7 +75,6 @@ class Main:
         self.render_start()
 
         while self.running:
-
             self.event_loop.run()
             self.register_events()
             self.render()
@@ -97,10 +84,7 @@ class Main:
         pygame.quit()
 
     def register_events(self) -> None:
-        for view in self.views:
-            view.set_rendering(False)
-        if self.top_view:
-            self.top_view.set_rendering(False)
+        self.view_manager.reset_views()
 
         self.update_display = False
         self.render_all = False
@@ -121,56 +105,15 @@ class Main:
                 new_window_pos = (event.x, event.y)
                 self.update_display = True
                 Log.i("Registered window move event: " + str(event))
-            if isinstance(event, OpenViewEvent):
-                event.view.display = self.win
-                if event.is_popup:
-                    self.top_view = event.view
-                    self.screen_fog_animation.start([0], [150])
-                else:
-                    self.views.append(event.view)
-                    if isinstance(event.view, TodoListView):
-                        self.todo_list_view = event.view
-                        if self.taskbar_view.width + event.view.width + self.calendar_view.get_min_size()[0] > self.win.get_width():
-                            event.view.resize(width=event.view.get_min_size()[0])
-                        self.calendar_view.resize(width=self.win.get_width() - self.taskbar_view.width - event.view.width)
-                        self.calendar_view.x += event.view.width
-            if isinstance(event, CloseViewEvent):
-                if event.view in self.views:
-                    self.views.remove(event.view)
-                    if isinstance(event.view, TodoListView):
-                        self.calendar_view.resize(width=self.win.get_width() - self.taskbar_view.width)
-                        self.calendar_view.x -= event.view.width
-                        self.todo_list_view.width = 130
-                elif event.view == self.top_view:
-                    self.top_view = None
-                    self.screen_fog_animation.start([150], [0])
-            if isinstance(event, ResizeViewEvent):
-                if isinstance(event.view, TodoListView):
-                    new_calendar_width = max(self.calendar_view.get_min_size()[0], self.win.get_width() - self.taskbar_view.width - event.width)
-                    event.view.resize(width=self.win.get_width() - self.taskbar_view.width - new_calendar_width)
-                    self.calendar_view.resize(width=new_calendar_width)
-                    self.calendar_view.x = self.win.get_width() - new_calendar_width
 
-            if self.resizing_view.register_event(event):
+            if self.window_manager.register_event(event):
                 event = MouseFocusChangedEvent(time.time(), False)
-            if self.screen_fog_animation.register_event(event):
+
+            if self.view_manager.register_events(event):
                 self.update_display = True
 
-            if self.top_view and self.top_view.register_event(event):
-                self.update_display = True
-                self.top_view.set_rendering(True)
-
-            if isinstance(event, (MouseClickEvent, MouseReleaseEvent, )) and self.top_view and self.top_view.is_focused(event):
-                continue
-
-            for view in self.views:
-                if view.register_event(event):
-                    self.update_display = True
-                    view.set_rendering(True)
-                    Log.i(f"Registered {event} on {view.__class__}")
-                if isinstance(event, (MouseClickEvent, MouseReleaseEvent)) and view.is_focused(event) and self.top_view:
-                    self.top_view = None
-                    self.screen_fog_animation.start([150], [0])
+            # if self.screen_fog_animation.register_event(event):
+            #     self.update_display = True
 
         resized = (True, True)
         if new_window_size:
@@ -182,58 +125,37 @@ class Main:
             set_window_pos(y=new_window_pos[1])
 
     def render(self) -> None:
-        for view in self.views:
-            if view.rendering or self.update_display:
-                view.render()
+        self.view_manager.render(self.update_display)
 
-        if self.screen_fog_animation.values:
-            self.screen_fog.fill((0, 0, 0))
-            self.screen_fog.set_alpha(self.screen_fog_animation.values[0])
-            self.win.blit(self.screen_fog, (0, self.appbar_view.height))
-
-        if self.top_view:
-            self.top_view.render()
+        # if self.screen_fog_animation.values:
+        #     self.screen_fog.fill((0, 0, 0))
+        #     self.screen_fog.set_alpha(self.screen_fog_animation.values[0])
+        #     self.win.blit(self.screen_fog, (0, self.appbar_view.height))
 
         if self.update_display:
-            self.resizing_view.render()
             pygame.display.update()
 
     def render_start(self):
         self.win.fill(Colors.BLACK)
 
-        for view in self.views:
-            view.render()
-
-        self.resizing_view.render()
+        self.view_manager.render(True)
 
         pygame.display.update()
 
     def resize_window(self, window_size: (int, int)) -> (bool, bool):
-        min_views_height = max(self.calendar_view.get_min_size()[1], self.todo_list_view.get_min_size()[1])
-        min_view_width = self.todo_list_view.width + self.calendar_view.get_min_size()[0]
-
-        print(self.win.get_width(), min_view_width + self.taskbar_view.width)
-
         resized = [True, True]
-        if window_size[1] < self.appbar_view.get_min_size()[1] + min_views_height:
-            window_size = (window_size[0], self.appbar_view.get_min_size()[1] + min_views_height)
+        if window_size[1] < self.view_manager.get_min_size()[1]:
+            window_size = (window_size[0], self.view_manager.get_min_size()[1])
             resized[1] = False
-        if window_size[0] < self.taskbar_view.get_min_size()[0] + min_view_width:
-            window_size = (self.taskbar_view.get_min_size()[0] + min_view_width, window_size[1])
+        if window_size[0] < self.view_manager.get_min_size()[0]:
+            window_size = (self.view_manager.get_min_size()[0], window_size[1])
             resized[0] = False
 
         self.win = pygame.display.set_mode(window_size, pygame.NOFRAME)
-        self.appbar_view.resize(width=window_size[0])
-        for view in self.views:
-            if isinstance(view, (TaskbarView, TodoListView, )):
-                view.resize(height=window_size[1] - self.appbar_view.height)
-            elif isinstance(view, (CalendarView, )):
-                todo_list_width = self.taskbar_view.width
-                for v in self.views:
-                    if isinstance(v, TodoListView):
-                        todo_list_width += v.width
-                view.resize(width=window_size[0] - todo_list_width, height=window_size[1] - self.appbar_view.height)
-        self.screen_fog = pygame.Surface((window_size[0], window_size[1] - self.appbar_view.height), pygame.SRCALPHA)
+
+        self.view_manager.resize(window_size)
+
+        # self.screen_fog = pygame.Surface((window_size[0], window_size[1] - self.view_manager.top_bar_view.height), pygame.SRCALPHA)
 
         return resized
 

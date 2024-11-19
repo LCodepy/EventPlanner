@@ -79,6 +79,8 @@ class Assets(metaclass=Singleton):
             os.path.join(self.IMAGES_PATH, "left_arrow_icon_large_hover.png")
         ).convert_alpha()
 
+        self.calendar_database_path = os.path.join(self.DATA_PATH, "calendar.db")
+
         # Fonts
         self.font14 = pygame.font.SysFont("arial", 14)
         self.font18 = pygame.font.SysFont("arial", 18)

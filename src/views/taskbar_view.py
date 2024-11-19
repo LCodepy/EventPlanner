@@ -1,9 +1,9 @@
-from typing import Union
+from typing import Union, Callable
 
 import pygame
 
 from src.events.event import Event, MouseWheelUpEvent, MouseWheelDownEvent, MouseReleaseEvent, MouseClickEvent, \
-    MouseMotionEvent
+    MouseMotionEvent, CloseViewEvent
 from src.models.taskbar_model import TaskbarModel
 from src.ui.button import Button
 from src.ui.colors import Colors
@@ -13,8 +13,8 @@ from src.views.view import View
 
 class TaskbarView(View):
 
-    def __init__(self, display: pygame.Surface, model: TaskbarModel, width: int, height: int, x: int = 0, y: int = 0) -> None:
-        super().__init__(x, y)
+    def __init__(self, display: pygame.Surface, model: TaskbarModel, width: int, height: int, x: int, y: int) -> None:
+        super().__init__(width, height, x, y)
         self.display = display
         self.model = model
         self.width = width
@@ -61,6 +61,8 @@ class TaskbarView(View):
             hover_image=Assets().settings_icon_large_hover
         )
 
+        self.on_close = None
+
     def register_event(self, event: Event) -> bool:
         registered_events = False
         event = self.get_event(event)
@@ -71,6 +73,9 @@ class TaskbarView(View):
             registered_events = True
         if self.settings_button.register_event(event):
             registered_events = True
+
+        if isinstance(event, CloseViewEvent):
+            self.on_close(event.view)
 
         return registered_events
 
@@ -100,6 +105,9 @@ class TaskbarView(View):
 
     def is_focused(self, event: Union[MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent]) -> bool:
         return self.x <= event.x < self.x + self.width and self.y <= event.y < self.y + self.height
+
+    def bind_on_close(self, on_close: Callable) -> None:
+        self.on_close = on_close
 
     def get_min_size(self) -> (int, int):
         return self.width, 170

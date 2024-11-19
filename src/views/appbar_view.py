@@ -20,9 +20,8 @@ from src.views.view import View
 
 class AppbarView(View):
 
-    def __init__(self, display: pygame.Surface, model: AppbarModel, width: int, height: int,
-                 x: int = 0, y: int = 0) -> None:
-        super().__init__(x, y)
+    def __init__(self, display: pygame.Surface, model: AppbarModel, width: int, height: int, x: int, y: int) -> None:
+        super().__init__(width, height, x, y)
         self.display = display
         self.model = model
         self.width = width

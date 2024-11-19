@@ -118,7 +118,7 @@ class TodoListController:
     def open_add_task_view(self) -> None:
         win_width, win_height = pygame.display.get_window_size()
         self.view.add_task_button.render_color = self.view.add_task_button.color
-        view = AddTaskView(None, self.event_loop, 400, 500, win_width // 2 - 200, win_height // 2 - 250)
+        view = AddTaskView(self.view.display, self.event_loop, 400, 500, win_width // 2 - 200, win_height // 2 - 250)
         self.event_loop.enqueue_event(OpenViewEvent(time.time(), view, True))
         AddTaskController(view, self.event_loop)
 

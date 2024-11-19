@@ -7,7 +7,9 @@ from src.events.event import Event, MouseClickEvent, MouseReleaseEvent, MouseWhe
 
 class View(ABC):
 
-    def __init__(self, x: int, y: int) -> None:
+    def __init__(self, width: int, height: int, x: int, y: int) -> None:
+        self.width = width
+        self.height = height
         self.x = x
         self.y = y
         self.rendering = False
