@@ -112,9 +112,6 @@ class Main:
             if self.view_manager.register_events(event):
                 self.update_display = True
 
-            # if self.screen_fog_animation.register_event(event):
-            #     self.update_display = True
-
         resized = (True, True)
         if new_window_size:
             resized = self.resize_window(new_window_size)
@@ -126,11 +123,6 @@ class Main:
 
     def render(self) -> None:
         self.view_manager.render(self.update_display)
-
-        # if self.screen_fog_animation.values:
-        #     self.screen_fog.fill((0, 0, 0))
-        #     self.screen_fog.set_alpha(self.screen_fog_animation.values[0])
-        #     self.win.blit(self.screen_fog, (0, self.appbar_view.height))
 
         if self.update_display:
             pygame.display.update()
@@ -151,11 +143,12 @@ class Main:
             window_size = (self.view_manager.get_min_size()[0], window_size[1])
             resized[0] = False
 
+        if window_size == pygame.display.get_window_size():
+            return resized
+
         self.win = pygame.display.set_mode(window_size, pygame.NOFRAME)
 
         self.view_manager.resize(window_size)
-
-        # self.screen_fog = pygame.Surface((window_size[0], window_size[1] - self.view_manager.top_bar_view.height), pygame.SRCALPHA)
 
         return resized
 

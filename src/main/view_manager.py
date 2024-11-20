@@ -116,6 +116,8 @@ class ViewManager:
                 height=window_size[1] - self.top_bar_view.height
             )
 
+        self.screen_fog = pygame.Surface(window_size, pygame.SRCALPHA)
+
     def reset_views(self) -> None:
         for view in self.get_views():
             if view:

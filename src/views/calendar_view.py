@@ -1,4 +1,5 @@
 import datetime
+from dataclasses import dataclass
 from typing import Union
 
 import pygame
@@ -7,12 +8,19 @@ from src.events.event import MouseClickEvent, MouseReleaseEvent, Event, MouseWhe
 from src.models.calendar_model import CalendarModel, CalendarEvent
 from src.ui.alignment import VerticalAlignment
 from src.ui.button import Button
-from src.ui.colors import Colors
+from src.ui.colors import Colors, Color
 from src.ui.label import Label
 from src.ui.padding import Padding
 from src.utils.assets import Assets
 from src.utils.calendar_functions import get_month_name, get_month_length, get_weekday_name, get_month_starting_day
 from src.views.view import View
+
+
+@dataclass
+class MonthEvent:
+
+    event: CalendarEvent
+    label: Label
 
 
 class CalendarView(View):
@@ -33,6 +41,8 @@ class CalendarView(View):
         self.month = datetime.datetime.now().month
         self.day = datetime.datetime.now().day
         self.weekday = datetime.datetime.now().weekday()
+
+        self.today = datetime.datetime.today()
 
         self.year_label = Label(
             self.canvas,
@@ -79,6 +89,8 @@ class CalendarView(View):
         self.weekday_labels = []
         self.create_weekday_labels()
 
+        self.month_events: list[list[MonthEvent]] = [[] for _ in range(31)]
+
         self.day_buttons: list[Button] = []
         self.create_day_buttons()
 
@@ -103,10 +115,27 @@ class CalendarView(View):
                 (max(self.width // 8 - 10, 10), max(btn_height, 5)),
                 label=Label(text=str(i - starting_day + 1), font=Assets().font18, text_color=(220, 220, 220),
                             vertical_text_alignment=VerticalAlignment.TOP),
-                color=(10, 10, 10), border_color=Colors.BLUE220 if (i % 7) < 5 else (84, 168, 240), border_width=1,
+                color=(10, 10, 10), border_color=self.get_day_button_color(i, starting_day), border_width=1,
                 border_radius=10, padding=Padding(top=5)
             ) for i in range(starting_day, starting_day + month_length)
         ]
+
+        self.month_events = [[] for _ in range(len(self.month_events))]
+        for i, events in enumerate(self.model.get_events_for_month(self.year, self.month)):
+            if not events:
+                continue
+            for j, event in enumerate(events):
+                self.month_events[i].append(
+                    MonthEvent(
+                        event,
+                        Label(
+                            self.canvas, (self.day_buttons[i].x,
+                                          self.day_buttons[i].y + 22 * j - self.day_buttons[i].height // 2 + 45),
+                            (self.width // 8 - 30, 18), text=event.description, text_color=(200, 200, 200),
+                            font=Assets().font14, wrap_text=False
+                        )
+                    )
+                )
 
     def register_event(self, event: Event) -> bool:
         registered_events = False
@@ -140,7 +169,45 @@ class CalendarView(View):
         for button in self.day_buttons:
             button.render()
 
+        self.render_events()
+
         self.display.blit(self.canvas, (self.x, self.y))
+
+    def render_events(self) -> None:
+        for i in range(len(self.month_events)):
+            next_y = 0
+            last_rendered = -1
+            for j, event in enumerate(self.month_events[i]):
+                if self.day_buttons[i].height >= event.label.height * (j + 1) + 50:
+                    last_rendered = j
+
+            for j, event in enumerate(self.month_events[i]):
+                if last_rendered == -1 and self.day_buttons[i].height < (j - 1) * 8 + 55:
+                    continue
+                width = event.label.width + 4
+                if self.day_buttons[i].height < event.label.height * (j + 1) + 50 + (len(self.month_events[i]) - last_rendered - 1) * 4 or self.width < 500:
+                    if j == 0:
+                        next_y = event.label.y - event.label.height // 2
+                    pygame.draw.rect(self.canvas, event.event.color, [event.label.x - width // 2, next_y, width, 4],
+                                     border_radius=100)
+                    next_y += 8
+                else:
+                    pygame.draw.rect(self.canvas, event.event.color, [event.label.x - width // 2,
+                                                                      event.label.y - event.label.height // 2, width,
+                                                                      event.label.height], border_radius=5, width=2)
+                    next_y = event.label.y + event.label.height // 2 + 4
+
+                    event.label.render()
+
+                if self.day_buttons[i].hovering:
+                    surf2 = pygame.Surface((width, event.label.height), pygame.SRCALPHA)
+                    surf2.fill((0, 0, 0, 0))
+                    pygame.draw.rect(surf2, (0, 0, 0), [0, 0, width, event.label.height],
+                                     border_radius=5, width=2)
+                    surf2.set_alpha(30)
+                    self.canvas.blit(
+                        surf2, (event.label.x - width // 2, event.label.y - event.label.height // 2)
+                    )
 
     def resize(self, width: int = None, height: int = None) -> None:
         self.width = width or self.width
@@ -160,6 +227,10 @@ class CalendarView(View):
         self.next_month_button.x = self.width // 2 + 150
 
         self.bind_buttons()
+
+    def get_day_button_color(self, idx: int, starting_day: int) -> Color:
+        return Colors.RED if datetime.date(self.year, self.month, idx - starting_day + 1) == self.today.date() else (
+            Colors.BLUE220 if (idx % 7) < 5 else (84, 168, 240))
 
     def set_rendering(self, b: bool) -> None:
         self.rendering = b
