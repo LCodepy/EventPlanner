@@ -146,7 +146,7 @@ class AppbarView(View):
         self.title_label.canvas = self.canvas
 
     def is_focused(self, event: Union[MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent]) -> bool:
-        return False
+        return self.x <= event.x < self.x + self.width and self.y <= event.y < self.y + self.height
 
     def bind_on_click(self, on_click: Callable[[MouseClickEvent], None]) -> None:
         self.on_click = on_click

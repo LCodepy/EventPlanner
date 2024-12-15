@@ -38,9 +38,20 @@ class TaskbarView(View):
             hover_image=Assets().profile_picture_icon_large_hover
         )
 
+        self.calendar_view_button = Button(
+            self.canvas,
+            (self.width // 2, self.width // 2 + self.width),
+            (self.width - 20, self.width - 20),
+            color=Colors.BACKGROUND_GREY22,
+            border_width=0,
+            apply_hover_effects=False,
+            image=Assets().calendar_view_icon_large,
+            hover_image=Assets().calendar_view_icon_large_hover
+        )
+
         self.todo_list_button = Button(
             self.canvas,
-            (self.width // 2 + 3, self.width // 2 + self.width),
+            (self.width // 2 + 3, self.width // 2 + self.width * 2),
             (self.width - 20, self.width - 20),
             color=Colors.BACKGROUND_GREY22,
             border_width=0,
@@ -71,6 +82,8 @@ class TaskbarView(View):
             registered_events = True
         if self.todo_list_button.register_event(event):
             registered_events = True
+        if self.calendar_view_button.register_event(event):
+            registered_events = True
         if self.settings_button.register_event(event):
             registered_events = True
 
@@ -84,6 +97,7 @@ class TaskbarView(View):
 
         self.profile_button.render()
         self.todo_list_button.render()
+        self.calendar_view_button.render()
         self.settings_button.render()
 
         pygame.draw.line(self.canvas, Colors.GREY70, (self.width - 1, 0), (self.width - 1, self.height))
@@ -98,6 +112,7 @@ class TaskbarView(View):
 
         self.profile_button.canvas = self.canvas
         self.todo_list_button.canvas = self.canvas
+        self.calendar_view_button.canvas = self.canvas
         self.settings_button.canvas = self.canvas
 
     def set_rendering(self, b: bool) -> None:

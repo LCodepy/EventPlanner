@@ -33,6 +33,17 @@ class AddTaskView(View):
 
         self.on_importance_button_click = None
 
+        self.close_button = Button(
+            self.canvas,
+            (self.width - 20, 20),
+            (Assets().delete_task_icon_large.get_width(), Assets().delete_task_icon_large.get_height()),
+            color=Colors.BACKGROUND_GREY30,
+            border_width=0,
+            apply_hover_effects=False,
+            image=Assets().delete_task_icon_large,
+            hover_image=Assets().delete_task_icon_large_hover
+        )
+
         self.add_task_label = Label(
             self.canvas,
             (self.width // 2, 40),
@@ -116,6 +127,8 @@ class AddTaskView(View):
 
         event = self.get_event(event)
 
+        if self.close_button.register_event(event):
+            registered_events = True
         if self.add_task_label.register_event(event):
             registered_events = True
         if self.description_text_field.register_event(event):
@@ -137,6 +150,7 @@ class AddTaskView(View):
     def render(self) -> None:
         self.canvas.fill(Colors.BACKGROUND_GREY30)
 
+        self.close_button.render()
         self.add_task_label.render()
         self.description_text_field.render()
         self.importance_label.render()
@@ -155,6 +169,7 @@ class AddTaskView(View):
 
     def update_canvas(self, canvas: pygame.Surface) -> None:
         self.canvas = canvas
+        self.close_button.canvas = canvas
         self.add_task_label.canvas = self.canvas
         self.description_text_field.canvas = self.canvas
         self.importance_label.canvas = self.canvas

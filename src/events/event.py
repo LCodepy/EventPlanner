@@ -1,8 +1,10 @@
+import datetime
 from dataclasses import dataclass
 from typing import Any
 
 from src.events.mouse_buttons import MouseButtons
 from src.models.todo_list_model import TaskImportance
+from src.ui.colors import Color
 
 
 @dataclass
@@ -159,6 +161,22 @@ class AddTaskEvent(Event):
     description: str
     importance: TaskImportance
     view: Any
+
+
+@dataclass
+class AddCalendarEventEvent(Event):
+
+    exec_time: float
+    time: datetime.time
+    description: str
+    color: Color
+    is_recurring: bool
+
+
+@dataclass
+class UpdateCalendarEvent(Event):
+
+    exec_time: float
 
 
 class EventFactory:

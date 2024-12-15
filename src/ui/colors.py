@@ -16,6 +16,17 @@ class Colors:
     BLUE220 = (42, 82, 220)
     YELLOW220 = (200, 220, 50)
 
+    EVENT_GREEN204 = (112, 204, 0)
+    EVENT_GREEN = (40, 100, 0)
+    EVENT_BLUE = (0, 40, 204)
+    EVENT_BLUE204 = (0, 102, 204)
+    EVENT_PURPLE204 = (84, 70, 204)
+    EVENT_PINK204 = (204, 48, 204)
+    EVENT_RED204 = (204, 0, 100)
+    EVENT_RED = (158, 0, 0)
+    EVENT_ORANGE = (255, 84, 0)
+    EVENT_YELLOW204 = (204, 170, 0)
+
 
 def darken(color: Color, value: int):
     brighter = [*color]
@@ -36,4 +47,4 @@ def get_rgb_color(s: str) -> Color:
 
 
 def get_hex_color(color: Color) -> str:
-    return hex(color[0]).zfill(2) + hex(color[1])[2:].zfill(2) + hex(color[2])[2:].zfill(2)
+    return "0x" + hex(color[0])[2:].zfill(2) + hex(color[1])[2:].zfill(2) + hex(color[2])[2:].zfill(2)

@@ -4,7 +4,8 @@ from typing import Union
 
 import pygame
 
-from src.events.event import MouseClickEvent, MouseReleaseEvent, Event, MouseWheelUpEvent, MouseWheelDownEvent
+from src.events.event import MouseClickEvent, MouseReleaseEvent, Event, MouseWheelUpEvent, MouseWheelDownEvent, \
+    UpdateCalendarEvent
 from src.models.calendar_model import CalendarModel, CalendarEvent
 from src.ui.alignment import VerticalAlignment
 from src.ui.button import Button
@@ -151,6 +152,9 @@ class CalendarView(View):
         if self.previous_month_button.register_event(event):
             registered_events = True
 
+        if isinstance(event, UpdateCalendarEvent):
+            self.create_day_buttons()
+
         for button in self.day_buttons:
             if button.register_event(event):
                 registered_events = True
@@ -184,6 +188,8 @@ class CalendarView(View):
             for j, event in enumerate(self.month_events[i]):
                 if last_rendered == -1 and self.day_buttons[i].height < (j - 1) * 8 + 55:
                     continue
+
+                collapsed = False
                 width = event.label.width + 4
                 if self.day_buttons[i].height < event.label.height * (j + 1) + 50 + (len(self.month_events[i]) - last_rendered - 1) * 4 or self.width < 500:
                     if j == 0:
@@ -191,6 +197,7 @@ class CalendarView(View):
                     pygame.draw.rect(self.canvas, event.event.color, [event.label.x - width // 2, next_y, width, 4],
                                      border_radius=100)
                     next_y += 8
+                    collapsed = True
                 else:
                     pygame.draw.rect(self.canvas, event.event.color, [event.label.x - width // 2,
                                                                       event.label.y - event.label.height // 2, width,
@@ -200,9 +207,10 @@ class CalendarView(View):
                     event.label.render()
 
                 if self.day_buttons[i].hovering:
-                    surf2 = pygame.Surface((width, event.label.height), pygame.SRCALPHA)
+                    height = 4 if collapsed else event.label.height
+                    surf2 = pygame.Surface((width, height), pygame.SRCALPHA)
                     surf2.fill((0, 0, 0, 0))
-                    pygame.draw.rect(surf2, (0, 0, 0), [0, 0, width, event.label.height],
+                    pygame.draw.rect(surf2, (0, 0, 0), [0, 0, width, height],
                                      border_radius=5, width=2)
                     surf2.set_alpha(30)
                     self.canvas.blit(
@@ -239,5 +247,5 @@ class CalendarView(View):
         return self.x <= event.x < self.x + self.width and self.y <= event.y < self.y + self.height
 
     def get_min_size(self) -> (int, int):
-        return 350, 450
+        return 350, 500
 

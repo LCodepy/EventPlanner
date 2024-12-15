@@ -9,7 +9,7 @@ from src.events.event import OpenViewEvent, Event, MouseClickEvent, MouseRelease
 from src.events.event_loop import EventLoop
 from src.models.todo_list_model import TodoListModel
 from src.views.add_task_view import AddTaskView
-from src.views.todo_list_view import TodoListView
+from src.views.todo_list_view import TodoListView, TodoTask
 
 
 class TodoListController:
@@ -49,43 +49,65 @@ class TodoListController:
     def place_task(self, id_: int) -> None:
         current_task = self.view.tasks[id_]
 
-        closest = current_task.id
+        closest_task = current_task
         min_distance = float("inf")
         for task in self.view.tasks.values():
             distance = (current_task.x - task.start_pos[0]) ** 2 + (current_task.y - task.start_pos[1]) ** 2
             if distance < min_distance:
                 min_distance = distance
-                closest = task.id
+                closest_task = task
 
-        if min_distance > current_task.height ** 2 or closest == current_task.id:
-            closest = current_task.id
+        if min_distance > current_task.height ** 2 or closest_task.id == current_task.id:
+            closest_task = current_task
             self.view.add_move_task_animation(
-                closest, [self.view.tasks[current_task.id].x, self.view.tasks[current_task.id].y],
+                closest_task.id, [self.view.tasks[current_task.id].x, self.view.tasks[current_task.id].y],
                 [*current_task.start_pos]
             )
-        if closest == current_task.id:
+        if closest_task.id == current_task.id:
             return
 
-        closest_pos = (self.view.tasks[closest].x,
-                       self.view.tasks[closest].y - current_task.height // 2 + self.view.tasks[closest].height // 2)
-        replaced_task_y = current_task.start_pos[1] - current_task.height // 2 + self.view.tasks[closest].height // 2
-        added_height = -current_task.height + self.view.tasks[closest].height
-        if self.view.tasks[closest].start_pos[1] <= current_task.start_pos[1]:
-            closest_pos = (self.view.tasks[closest].x,
-                           self.view.tasks[closest].y - self.view.tasks[closest].height // 2 + current_task.height // 2)
-            replaced_task_y = current_task.start_pos[1] + current_task.height // 2 - self.view.tasks[closest].height // 2
+        # self.switch_tasks(current_task, closest_task)
+        self.move_tasks(current_task, closest_task)
+
+    def switch_tasks(self, current_task: TodoTask, closest_task: TodoTask) -> None:
+        closest_pos = (closest_task.x, closest_task.y - current_task.height // 2 + closest_task.height // 2)
+        replaced_task_y = current_task.start_pos[1] - current_task.height // 2 + closest_task.height // 2
+        added_height = closest_task.height - current_task.height
+
+        if closest_task.start_pos[1] <= current_task.start_pos[1]:
+            closest_pos = (closest_task.x, closest_task.y - closest_task.height // 2 + current_task.height // 2)
+            replaced_task_y = current_task.start_pos[1] + current_task.height // 2 - closest_task.height // 2
             added_height = -added_height
 
         self.view.add_move_task_animation(
-            closest, [self.view.tasks[closest].x, self.view.tasks[closest].y],
+            closest_task.id, [closest_task.x, closest_task.y],
             [current_task.start_pos[0], replaced_task_y]
         )
 
         for task in self.view.get_sorted_tasks():
             if (
-                min(current_task.start_pos[1], self.view.tasks[closest].start_pos[1]) < task.y <
-                max(current_task.start_pos[1], self.view.tasks[closest].start_pos[1]) and
-                task.id not in (current_task.id, closest)
+                    min(current_task.start_pos[1], closest_task.start_pos[1]) < task.y <
+                    max(current_task.start_pos[1], closest_task.start_pos[1]) and
+                    task.id not in (current_task.id, closest_task.id)
+            ):
+                self.view.add_move_task_animation(
+                    task.id, list(task.start_pos), [task.start_pos[0], task.start_pos[1] + added_height]
+                )
+
+        current_task.update_position(*closest_pos, set_start_pos=True)
+
+    def move_tasks(self, current_task: TodoTask, closest_task: TodoTask) -> None:
+        closest_pos = (closest_task.x, closest_task.y - current_task.height // 2 + closest_task.height // 2)
+        added_height = -current_task.height - 5
+
+        if closest_task.start_pos[1] <= current_task.start_pos[1]:
+            closest_pos = (closest_task.x, closest_task.y - closest_task.height // 2 + current_task.height // 2)
+            added_height = -added_height
+
+        for task in self.view.get_sorted_tasks():
+            if (
+                min(current_task.start_pos[1], closest_task.start_pos[1]) <= task.y <=
+                max(current_task.start_pos[1], closest_task.start_pos[1]) and task.id != current_task.id
             ):
                 self.view.add_move_task_animation(
                     task.id, list(task.start_pos), [task.start_pos[0], task.start_pos[1] + added_height]

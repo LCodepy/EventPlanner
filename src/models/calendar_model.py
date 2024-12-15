@@ -46,15 +46,7 @@ class CalendarModel:
         )
         self.conn.commit()
 
-        self.default_events = [
-            CalendarEvent(datetime.date(2024, 11, 1), datetime.time(), "Svi Sveti", (120, 160, 20), False),
-            CalendarEvent(datetime.date(2024, 11, 1), datetime.time(),
-                          "Dan sjećanja na žrtve Domovinskog rata i Dan sjećanja na žrtvu Vukovara i Škabrnje",
-                          Colors.BLUE220, False),
-            CalendarEvent(datetime.date(2024, 11, 1), datetime.time(),
-                          "Nekaj trece",
-                          (180, 20, 50), False)
-        ]
+        self.default_events = []
         self.add_default_events()
 
     def add_default_events(self) -> None:

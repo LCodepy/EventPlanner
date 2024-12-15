@@ -1,3 +1,4 @@
+import string
 import time
 
 import pygame
@@ -19,7 +20,7 @@ class TextField(UIObject):
     def __init__(self, canvas: pygame.Surface, pos: (int, int), size: (int, int), label: Label = None, hint: str = "",
                  color: Color = Colors.WHITE, border_color: Color = Colors.BLACK, border_radius: int = 0,
                  border_width: int = 1, max_length: int = None, hint_text_color: Color = None,
-                 padding: Padding = None) -> None:
+                 allowed_char_set: set[str] = None, underline: Color = None, padding: Padding = None) -> None:
         super().__init__(canvas, pos, padding)
         self.canvas = canvas
         self.x, self.y = pos
@@ -33,6 +34,8 @@ class TextField(UIObject):
         self.border_radius = border_radius
         self.border_width = border_width
         self.max_length = max_length
+        self.allowed_char_set = allowed_char_set or self.create_allowed_charset()
+        self.underline = underline
         self.padding = padding or Padding()
         self.hint_text_color = hint_text_color or brighten(self.label.text_color, 50)
 
@@ -85,8 +88,7 @@ class TextField(UIObject):
             return True
         elif (
                 isinstance(event, MouseReleaseEvent) and
-                event.button is MouseButtons.LEFT_BUTTON and
-                self.is_hovering((event.x, event.y))
+                event.button is MouseButtons.LEFT_BUTTON
         ):
             self.on_release(event)
             return True
@@ -111,15 +113,20 @@ class TextField(UIObject):
 
     def update_text(self, keycode: int, unicode: str) -> None:
         self.label.text_color = self.text_color
-        if keycode == pygame.K_RETURN:
-            self.text += "\n"
-        elif keycode == pygame.K_SPACE:
-            self.text += " "
-        elif keycode == pygame.K_BACKSPACE:
+
+        if keycode == pygame.K_BACKSPACE:
             self.text = self.text[:-1]
             self.backspace_pressed = False
             self.backspace_pressed_time = None
-        elif unicode:
+            self.label.set_text(self.text)
+        elif len(self.text) >= self.max_length:
+            return
+
+        if keycode == pygame.K_RETURN:
+            self.text += "\n"
+        elif keycode == pygame.K_SPACE and " " in self.allowed_char_set:
+            self.text += " "
+        elif unicode and unicode in self.allowed_char_set:
             self.text += unicode
 
         self.label.set_text(self.text)
@@ -139,6 +146,13 @@ class TextField(UIObject):
                 self.canvas, self.border_color, self.get_rect(),
                 width=self.border_width, border_radius=self.border_radius
             )
+
+        if self.underline is not None:
+            pygame.draw.line(
+                self.canvas, self.underline, (self.x - self.width // 2 + 4, self.y + self.height // 2 - 4),
+                (self.x + self.width // 2 - 4, self.y + self.height // 2 - 4)
+            )
+
         if self.label is not None:
             self.label.render()
 
@@ -155,6 +169,13 @@ class TextField(UIObject):
             pygame.draw.rect(self.canvas, UIDebugger.box_color, self.get_rect(), 1)
             pygame.draw.circle(self.canvas, UIDebugger.center_point_color, (self.x, self.y), 2)
 
+    def create_allowed_charset(self) -> set[str]:
+        letters = string.ascii_lowercase + "ćčđšž"
+        numbers = string.digits
+        s = set(letters + letters.upper() + numbers + string.printable[:-2])
+        s.remove("\t")
+        return s
+
     def update_canvas(self, canvas: pygame.Surface) -> None:
         self.canvas = canvas
         self.label.update_canvas(self.canvas)
@@ -164,6 +185,17 @@ class TextField(UIObject):
         self.label.y += (self.y - (y or self.y))
         self.x = x or self.x
         self.y = y or self.y
+
+    def set_focus(self, b: bool) -> None:
+        if b:
+            self.focused = True
+            if not self.text:
+                self.label.set_text("")
+        else:
+            self.focused = False
+            if not self.text:
+                self.label.set_text(self.hint)
+                self.label.text = self.hint_text_color
 
     def on_click(self) -> None:
         pass

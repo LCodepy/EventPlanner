@@ -14,17 +14,13 @@ from src.main.window_manager import WindowManager
 from src.models.appbar_model import AppbarModel
 from src.models.calendar_model import CalendarModel
 from src.models.taskbar_model import TaskbarModel
-from src.models.todo_list_model import TodoListModel
 from src.ui.colors import Colors
-from src.utils.animations import ChangeValuesAnimation
 from src.utils.assets import Assets
 from src.utils.logging import Log
 from src.utils.pygame_utils import set_window_pos
 from src.views.appbar_view import AppbarView
 from src.views.calendar_view import CalendarView
 from src.views.taskbar_view import TaskbarView
-from src.views.todo_list_view import TodoListView
-from src.views.view import View
 from src.main.view_manager import ViewManager
 
 

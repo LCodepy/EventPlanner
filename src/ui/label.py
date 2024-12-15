@@ -209,11 +209,11 @@ class Label(UIObject):
             raise ValueError("Invalid horizontal alignment.")
 
         if vertical_alignment is VerticalAlignment.TOP:
-            aligned_y = pos[0]
+            aligned_y = pos[1]
         elif vertical_alignment is VerticalAlignment.CENTER:
-            aligned_y = pos[0] - rendered.get_rect().h // 2
+            aligned_y = pos[1] - rendered.get_rect().h // 2
         elif vertical_alignment is VerticalAlignment.BOTTOM:
-            aligned_y = pos[0] - rendered.get_rect().h
+            aligned_y = pos[1] - rendered.get_rect().h
         else:
             raise ValueError("Invalid vertical alignment.")
 
