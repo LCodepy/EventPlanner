@@ -4,11 +4,13 @@ from typing import Union
 import pygame.display
 
 from src.controllers.add_task_controller import AddTaskController
+from src.controllers.options_controller import OptionsController
 from src.events.event import OpenViewEvent, Event, MouseClickEvent, MouseReleaseEvent, MouseMotionEvent, \
     ResizeViewEvent, MouseWheelUpEvent, MouseWheelDownEvent
 from src.events.event_loop import EventLoop
 from src.models.todo_list_model import TodoListModel
 from src.views.add_task_view import AddTaskView
+from src.views.options_view import OptionsView
 from src.views.todo_list_view import TodoListView, TodoTask
 
 
@@ -27,6 +29,8 @@ class TodoListController:
         self.view.bind_move_task(self.move_task)
         self.view.bind_place_task(self.place_task)
         self.view.bind_open_task(self.open_task)
+        self.view.bind_open_options(self.open_options)
+        self.view.bind_open_edit_task_view(self.open_edit_task_view)
         self.view.bind_open_add_task_view(self.open_add_task_view)
         self.view.bind_on_click(self.on_click)
         self.view.bind_on_release(self.on_release)
@@ -70,6 +74,7 @@ class TodoListController:
         self.move_tasks(current_task, closest_task)
 
     def switch_tasks(self, current_task: TodoTask, closest_task: TodoTask) -> None:
+        # TODO: ne radi, mora ispravno updejtat taskove
         closest_pos = (closest_task.x, closest_task.y - current_task.height // 2 + closest_task.height // 2)
         replaced_task_y = current_task.start_pos[1] - current_task.height // 2 + closest_task.height // 2
         added_height = closest_task.height - current_task.height
@@ -83,6 +88,8 @@ class TodoListController:
             closest_task.id, [closest_task.x, closest_task.y],
             [current_task.start_pos[0], replaced_task_y]
         )
+        # self.model.update_task(closest_task.id, idx=current_task.task.idx)
+        self.view.update_task_idx(closest_task.id, current_task.task.idx)
 
         for task in self.view.get_sorted_tasks():
             if (
@@ -95,6 +102,8 @@ class TodoListController:
                 )
 
         current_task.update_position(*closest_pos, set_start_pos=True)
+        # self.model.update_task(current_task.id, idx=closest_task.task.idx)
+        self.view.update_task_idx(current_task.id, closest_task.task.idx)
 
     def move_tasks(self, current_task: TodoTask, closest_task: TodoTask) -> None:
         closest_pos = (closest_task.x, closest_task.y - current_task.height // 2 + closest_task.height // 2)
@@ -104,6 +113,8 @@ class TodoListController:
             closest_pos = (closest_task.x, closest_task.y - closest_task.height // 2 + current_task.height // 2)
             added_height = -added_height
 
+        self.view.update_task_idx(current_task.id, closest_task.task.idx)
+
         for task in self.view.get_sorted_tasks():
             if (
                 min(current_task.start_pos[1], closest_task.start_pos[1]) <= task.y <=
@@ -112,6 +123,10 @@ class TodoListController:
                 self.view.add_move_task_animation(
                     task.id, list(task.start_pos), [task.start_pos[0], task.start_pos[1] + added_height]
                 )
+                if added_height < 0:
+                    self.view.update_task_idx(task.id, task.task.idx - 1)
+                else:
+                    self.view.update_task_idx(task.id, task.task.idx + 1)
 
         current_task.update_position(*closest_pos, set_start_pos=True)
 
@@ -122,6 +137,9 @@ class TodoListController:
 
         task.description_label.set_wrap_text(opened)
         if opened:
+            if len(task.description_label.lines) <= 1:
+                task.description_label.set_wrap_text(not opened)
+                return
             task.description_label.resize(height=task.description_label.get_min_label_size()[1] + 18)
             task.resize(height=task.description_label.height)
             task.update_position(y=task.y + task.height // 2 - self.view.task_size[1] // 2, set_start_pos=True)
@@ -137,9 +155,21 @@ class TodoListController:
             new_y = todo_task.y + task.height - self.view.task_size[1] if opened else todo_task.y - task_height + self.view.task_size[1]
             todo_task.update_position(y=new_y, set_start_pos=True)
 
+    def open_options(self, id_: int) -> None:
+        options = OptionsView(self.view.display, self.event_loop, 120, 70, *pygame.mouse.get_pos())
+        OptionsController(options, self.event_loop, task_id=id_)
+        self.event_loop.enqueue_event(OpenViewEvent(time.time(), options, False))
+
+    def open_edit_task_view(self, id_: int) -> None:
+        win_width, win_height = pygame.display.get_window_size()
+        view = AddTaskView(self.view.display, self.event_loop, 400, 500, win_width // 2 - 200, win_height // 2 - 250)
+        task = self.view.tasks[id_].task
+        view.set_edit_state(id_, task.description, task.importance)
+        self.event_loop.enqueue_event(OpenViewEvent(time.time(), view, True))
+        AddTaskController(view, self.event_loop)
+
     def open_add_task_view(self) -> None:
         win_width, win_height = pygame.display.get_window_size()
-        self.view.add_task_button.render_color = self.view.add_task_button.color
         view = AddTaskView(self.view.display, self.event_loop, 400, 500, win_width // 2 - 200, win_height // 2 - 250)
         self.event_loop.enqueue_event(OpenViewEvent(time.time(), view, True))
         AddTaskController(view, self.event_loop)

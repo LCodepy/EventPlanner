@@ -4,7 +4,8 @@ from typing import Union, Callable
 import pygame
 
 from src.events.event import MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent, Event, \
-    MouseMotionEvent, AddCalendarEventEvent, KeyReleaseEvent
+    MouseMotionEvent, AddCalendarEventEvent, KeyReleaseEvent, DeleteCalendarEventEvent, OpenEditCalendarEventEvent, \
+    EditCalendarEventEvent
 from src.events.event_loop import EventLoop
 from src.events.mouse_buttons import MouseButtons
 from src.models.calendar_model import CalendarModel, CalendarEvent
@@ -32,8 +33,12 @@ class EventListEvent(UIObject):
 
         self.start_pos = (self.x, self.y)
         self.pressed = False
+        self.pressed_right = False
+        self.click_pos = None
 
         self.on_delete_callback = None
+        self.on_open_options = None
+        self.open_edit_calendar_event = None
 
         self.description_label = Label(
             self.canvas,
@@ -64,6 +69,11 @@ class EventListEvent(UIObject):
         if self.delete_task_button.register_event(event):
             return True
 
+        if isinstance(event, DeleteCalendarEventEvent) and event.event == self.event:
+            self.on_delete()
+        elif isinstance(event, OpenEditCalendarEventEvent) and event.event == self.event:
+            self.open_edit_calendar_event(self.event)
+
         if (
                 isinstance(event, MouseClickEvent) and
                 self.get_rect().collidepoint((event.x, event.y)) and
@@ -71,10 +81,22 @@ class EventListEvent(UIObject):
         ):
             self.pressed = True
             return True
-        if isinstance(event, MouseReleaseEvent) and self.pressed and event.button is MouseButtons.LEFT_BUTTON:
+        elif (
+                isinstance(event, MouseClickEvent) and
+                self.get_rect().collidepoint((event.x, event.y)) and
+                event.button is MouseButtons.RIGHT_BUTTON
+        ):
+            self.pressed_right = True
+            self.click_pos = (event.x, event.y)
+            return True
+        elif isinstance(event, MouseReleaseEvent) and self.pressed and event.button is MouseButtons.LEFT_BUTTON:
             self.pressed = False
             return True
-        if isinstance(event, MouseMotionEvent) and self.pressed:
+        elif isinstance(event, MouseReleaseEvent) and self.pressed_right and event.button is MouseButtons.RIGHT_BUTTON:
+            self.on_open_options(self.event)
+            self.pressed_right = False
+            return True
+        elif isinstance(event, MouseMotionEvent) and self.pressed:
             return True
 
     def render(self) -> None:
@@ -83,6 +105,10 @@ class EventListEvent(UIObject):
 
         self.description_label.render()
         self.delete_task_button.render()
+
+    def update_event(self, event: CalendarEvent) -> None:
+        self.event = event
+        self.description_label.set_text(event.description)
 
     def update_canvas(self, canvas: pygame.Surface) -> None:
         self.canvas = canvas
@@ -130,6 +156,12 @@ class EventListEvent(UIObject):
     def bind_on_delete(self, on_delete: Callable) -> None:
         self.on_delete_callback = on_delete
 
+    def bind_on_open_options(self, on_open_options) -> None:
+        self.on_open_options = on_open_options
+
+    def bind_open_edit_calendar_event(self, open_edit_calendar_event: Callable) -> None:
+        self.open_edit_calendar_event = open_edit_calendar_event
+
     def get_rect(self) -> pygame.Rect:
         return pygame.Rect(self.x - self.width // 2, self.y - (self.height / 2).__ceil__(), self.width, self.height)
 
@@ -159,6 +191,7 @@ class EventListView(View):
         self.on_resize = None
 
         self.add_event = None
+        self.edit_event = None
 
         self.event_list_x = self.width // 5
         self.events_pos = ((self.width - self.event_list_x) // 2 + self.event_list_x, 120)
@@ -197,6 +230,11 @@ class EventListView(View):
     def register_event(self, event: Event) -> bool:
         registered_events = False
 
+        if isinstance(event, AddCalendarEventEvent):
+            self.add_event(event)
+        elif isinstance(event, EditCalendarEventEvent):
+            self.edit_event(event)
+
         event = self.get_event(event)
 
         if self.title_label.register_event(event):
@@ -212,8 +250,6 @@ class EventListView(View):
             return True
         elif isinstance(event, (MouseWheelUpEvent, MouseWheelDownEvent)) and self.on_scroll(event):
             return True
-        elif isinstance(event, AddCalendarEventEvent):
-            self.add_event(event)
 
         for evs in self.time_table.values():
             for ev in evs:
@@ -305,13 +341,18 @@ class EventListView(View):
         self.create_time_table()
         self.on_resize()
 
-    def bind_event_methods(self, delete_event: Callable) -> None:
+    def bind_event_methods(self, delete_event: Callable, on_open_options: Callable, open_edit_calendar_event: Callable) -> None:
         for events in self.time_table.values():
             for event in events:
                 event.bind_on_delete(delete_event)
+                event.bind_on_open_options(on_open_options)
+                event.bind_open_edit_calendar_event(open_edit_calendar_event)
 
     def bind_add_event(self, add_event: Callable) -> None:
         self.add_event = add_event
+
+    def bind_edit_event(self, edit_event: Callable) -> None:
+        self.edit_event = edit_event
 
     def bind_on_click(self, on_click: Callable[[MouseClickEvent], None]) -> None:
         self.on_click = on_click
@@ -333,6 +374,9 @@ class EventListView(View):
 
     def is_focused(self, event: Union[MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent]) -> bool:
         return self.x <= event.x < self.x + self.width and self.y <= event.y < self.y + self.height
+
+    def on_delete(self) -> None:
+        pass
 
     def get_min_size(self) -> (int, int):
         return 130, 170

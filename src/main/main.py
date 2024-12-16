@@ -90,9 +90,6 @@ class Main:
             event = self.event_loop.next()
             # Log.i("New event: " + str(event))
 
-            if isinstance(event, CloseWindowEvent):
-                self.running = False
-                break
             if isinstance(event, WindowResizeEvent):
                 new_window_size = (event.width, event.height)
                 self.update_display = True
@@ -107,6 +104,10 @@ class Main:
 
             if self.view_manager.register_events(event):
                 self.update_display = True
+
+            if isinstance(event, CloseWindowEvent):
+                self.running = False
+                break
 
         resized = (True, True)
         if new_window_size:

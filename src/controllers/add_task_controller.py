@@ -1,6 +1,6 @@
 import time
 
-from src.events.event import AddTaskEvent, CloseViewEvent
+from src.events.event import AddTaskEvent, CloseViewEvent, EditTaskEvent
 from src.events.event_loop import EventLoop
 from src.models.todo_list_model import TaskImportance
 from src.views.add_task_view import AddTaskView
@@ -25,6 +25,12 @@ class AddTaskController:
         self.importance = importance
 
     def add_task(self) -> None:
-        self.event_loop.enqueue_event(
-            AddTaskEvent(time.time(), self.view.description_text_field.text, self.importance, self.view)
-        )
+        if self.view.editing_state:
+            self.event_loop.enqueue_event(
+                EditTaskEvent(time.time(), self.view.task_to_edit, self.view.description_text_field.text, self.importance)
+            )
+        else:
+            self.event_loop.enqueue_event(
+                AddTaskEvent(time.time(), self.view.description_text_field.text, self.importance)
+            )
+        self.on_close()

@@ -7,6 +7,7 @@ import pygame
 from src.events.event import Event, MouseClickEvent, MouseReleaseEvent, CloseViewEvent, MouseWheelUpEvent, \
     MouseWheelDownEvent, KeyReleaseEvent
 from src.events.event_loop import EventLoop
+from src.models.calendar_model import CalendarEvent
 from src.models.todo_list_model import TaskImportance
 from src.ui.button import Button
 from src.ui.colors import Colors
@@ -34,6 +35,8 @@ class AddEventView(View):
 
         self.selected_color = None
         self.invalid_time_error = "Time is not valid."
+        self.editing_state = False
+        self.event_to_edit = None
 
         self.colors = [
             Colors.EVENT_GREEN204, Colors.EVENT_GREEN, Colors.EVENT_BLUE, Colors.EVENT_BLUE204, Colors.EVENT_PURPLE204,
@@ -155,8 +158,7 @@ class AddEventView(View):
                 self.minutes_input.set_focus(False)
                 self.description_text_field.set_focus(True)
 
-        if registered_events:
-            return True
+        return registered_events
 
     def render(self) -> None:
         self.canvas.fill(Colors.BACKGROUND_GREY30)
@@ -227,11 +229,30 @@ class AddEventView(View):
         for btn in self.color_buttons:
             btn.bind_on_click(callback(btn.color))
 
+    def set_edit_state(self, event: CalendarEvent) -> None:
+        self.editing_state = True
+        self.event_to_edit = event
+
+        self.description_text_field.set_text(event.description)
+        self.hours_input.set_text(str(event.time)[:2])
+        self.minutes_input.set_text(str(event.time)[3:5])
+        self.add_event_button.label.set_text("APPLY")
+
+        for btn in self.color_buttons:
+            if btn.color == event.color:
+                btn.border_width = 2
+                btn.border_color = Colors.WHITE
+            else:
+                btn.border_width = 0
+
     def set_rendering(self, b: bool) -> None:
         self.rendering = b
 
     def is_focused(self, event: Union[MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent]) -> bool:
         return self.x <= event.x < self.x + self.width and self.y <= event.y < self.y + self.height
+
+    def on_delete(self) -> None:
+        pass
 
     def get_min_size(self) -> (int, int):
         return self.width, self.height

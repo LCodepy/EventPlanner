@@ -38,6 +38,10 @@ class View(ABC):
     def get_min_size(self) -> (int, int):
         """Returns minimal view size."""
 
+    @abstractmethod
+    def on_delete(self) -> None:
+        """Handles deletion of the view."""
+
     def get_event(self, event: Event) -> Event:
         if isinstance(event, (MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent)):
             return event.__class__(event.exec_time, event.x - self.x, event.y - self.y, *list(event.__dict__.values())[3:])

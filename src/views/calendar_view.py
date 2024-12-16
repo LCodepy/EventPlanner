@@ -1,6 +1,6 @@
 import datetime
 from dataclasses import dataclass
-from typing import Union
+from typing import Union, Callable
 
 import pygame
 
@@ -96,6 +96,7 @@ class CalendarView(View):
         self.create_day_buttons()
 
         self.bind_buttons = None
+        self.calendar_binding = None
 
     def create_weekday_labels(self) -> None:
         self.weekday_labels = [
@@ -154,6 +155,7 @@ class CalendarView(View):
 
         if isinstance(event, UpdateCalendarEvent):
             self.create_day_buttons()
+            self.calendar_binding()
 
         for button in self.day_buttons:
             if button.register_event(event):
@@ -240,11 +242,17 @@ class CalendarView(View):
         return Colors.RED if datetime.date(self.year, self.month, idx - starting_day + 1) == self.today.date() else (
             Colors.BLUE220 if (idx % 7) < 5 else (84, 168, 240))
 
+    def bind_calendar_binding(self, calendar_binding: Callable) -> None:
+        self.calendar_binding = calendar_binding
+
     def set_rendering(self, b: bool) -> None:
         self.rendering = b
 
     def is_focused(self, event: Union[MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent]) -> bool:
         return self.x <= event.x < self.x + self.width and self.y <= event.y < self.y + self.height
+
+    def on_delete(self) -> None:
+        pass
 
     def get_min_size(self) -> (int, int):
         return 350, 500

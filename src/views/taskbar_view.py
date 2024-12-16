@@ -124,5 +124,8 @@ class TaskbarView(View):
     def bind_on_close(self, on_close: Callable) -> None:
         self.on_close = on_close
 
+    def on_delete(self) -> None:
+        pass
+
     def get_min_size(self) -> (int, int):
         return self.width, 170

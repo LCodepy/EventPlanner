@@ -1,7 +1,7 @@
 import time
 from typing import Callable
 
-from src.events.event import CloseViewEvent, AddCalendarEventEvent
+from src.events.event import CloseViewEvent, AddCalendarEventEvent, EditCalendarEventEvent
 from src.events.event_loop import EventLoop
 from src.ui.colors import Colors, Color
 from src.views.add_event_view import AddEventView
@@ -42,7 +42,12 @@ class AddEventController:
             self.view.show_error(self.view.invalid_time_error)
             return
 
-        self.event_loop.enqueue_event(
-            AddCalendarEventEvent(time.time(), event_time, self.view.description_text_field.text, color, False)
-        )
+        if self.view.editing_state:
+            self.event_loop.enqueue_event(
+                EditCalendarEventEvent(time.time(), self.view.event_to_edit, event_time, self.view.description_text_field.text, color, False)
+            )
+        else:
+            self.event_loop.enqueue_event(
+                AddCalendarEventEvent(time.time(), event_time, self.view.description_text_field.text, color, False)
+            )
 

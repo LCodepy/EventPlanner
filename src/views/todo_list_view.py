@@ -1,10 +1,11 @@
+import threading
 import time
 from typing import Callable, Union
 
 import pygame
 
 from src.events.event import Event, MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent, \
-    MouseMotionEvent, AddTaskEvent, CloseViewEvent
+    MouseMotionEvent, AddTaskEvent, CloseViewEvent, DeleteTaskEvent, CloseWindowEvent, EditTaskEvent, OpenEditTaskEvent
 from src.events.event_loop import EventLoop
 from src.events.mouse_buttons import MouseButtons
 from src.models.todo_list_model import TodoListModel, Task, TaskImportance
@@ -34,6 +35,7 @@ class TodoTask(UIObject):
 
         self.start_pos = (self.x, self.y)
         self.pressed = False
+        self.pressed_right = False
         self.moving_task = False
         self.click_pos = None
         self.opened = False
@@ -42,6 +44,8 @@ class TodoTask(UIObject):
         self.on_move = None
         self.on_release = None
         self.on_open = None
+        self.on_open_options = None
+        self.open_edit_task_view = None
 
         self.description_label = Label(
             self.canvas,
@@ -71,6 +75,11 @@ class TodoTask(UIObject):
         if self.delete_task_button.register_event(event):
             return True
 
+        if isinstance(event, DeleteTaskEvent) and event.id_ == self.id:
+            self.on_delete()
+        elif isinstance(event, OpenEditTaskEvent) and event.id_ == self.id:
+            self.open_edit_task_view(self.id)
+
         if (
                 isinstance(event, MouseClickEvent) and
                 self.get_rect().collidepoint((event.x, event.y)) and
@@ -79,7 +88,15 @@ class TodoTask(UIObject):
             self.pressed = True
             self.click_pos = (event.x, event.y)
             return True
-        if isinstance(event, MouseReleaseEvent) and self.pressed and event.button is MouseButtons.LEFT_BUTTON:
+        elif (
+                isinstance(event, MouseClickEvent) and
+                self.get_rect().collidepoint((event.x, event.y)) and
+                event.button is MouseButtons.RIGHT_BUTTON
+        ):
+            self.pressed_right = True
+            self.click_pos = (event.x, event.y)
+            return True
+        elif isinstance(event, MouseReleaseEvent) and self.pressed and event.button is MouseButtons.LEFT_BUTTON:
             if not self.moving_task:
                 self.opened = not self.opened
                 self.on_open(self.id, self.opened)
@@ -88,7 +105,11 @@ class TodoTask(UIObject):
             self.pressed = False
             self.moving_task = False
             return True
-        if isinstance(event, MouseMotionEvent) and self.pressed:
+        elif isinstance(event, MouseReleaseEvent) and self.pressed_right and event.button is MouseButtons.RIGHT_BUTTON:
+            self.on_open_options(self.id)
+            self.pressed_right = False
+            return True
+        elif isinstance(event, MouseMotionEvent) and self.pressed:
             self.on_move(self.id, event.x, event.y)
             self.moving_task = True
             return True
@@ -162,6 +183,9 @@ class TodoTask(UIObject):
 
         self.delete_task_button.x = self.x + self.width // 2 - Assets().delete_task_icon_large.get_width() // 2 - 5
 
+    def update(self) -> None:
+        self.description_label.set_text(self.task.description)
+
     def on_delete(self) -> None:
         if self.on_delete_bind:
             self.on_delete_bind(self.id)
@@ -177,6 +201,12 @@ class TodoTask(UIObject):
 
     def bind_on_open(self, on_open: Callable[[int, bool], None]) -> None:
         self.on_open = on_open
+
+    def bind_on_open_options(self, on_open_options: Callable[[int], None]) -> None:
+        self.on_open_options = on_open_options
+
+    def bind_open_edit_task_view(self, open_edit_task_view: Callable[[int], None]) -> None:
+        self.open_edit_task_view = open_edit_task_view
 
     def get_rect(self) -> pygame.Rect:
         return pygame.Rect(self.x - self.width // 2, self.y - (self.height / 2).__ceil__(), self.width, self.height)
@@ -202,8 +232,8 @@ class TodoListView(View):
         self.task_list_pos = (self.width // 2, 90)
         self.task_size = (self.width - 10, 40)
         self.tasks: dict[int, TodoTask] = {
-            task.id: TodoTask(self.canvas, self.get_task_position(i), self.task_size, task)
-            for i, task in enumerate(self.model.get_tasks())
+            task.id: TodoTask(self.canvas, (self.task_list_pos[0], self.get_task_position(task.idx)[1]), self.task_size, task)
+            for task in self.model.get_tasks()
         }
 
         self.move_task_animations = {}
@@ -212,6 +242,8 @@ class TodoListView(View):
         self.delete_task = None
         self.place_task = None
         self.open_task = None
+        self.open_options = None
+        self.open_edit_task_view = None
 
         self.on_click = None
         self.on_release = None
@@ -249,8 +281,13 @@ class TodoListView(View):
         registered_events = False
         self.deleted_events = []
 
+        if isinstance(event, CloseWindowEvent):
+            self.save_tasks()
+
         if isinstance(event, AddTaskEvent):
             self.add_new_task(event)
+        elif isinstance(event, EditTaskEvent):
+            self.edit_task(event)
 
         event = self.get_event(event)
 
@@ -342,14 +379,33 @@ class TodoListView(View):
             if task.y < deleted.y:
                 continue
             task.update_position(y=task.y - deleted.height - 5, set_start_pos=True)
+            self.update_task_idx(task.id, task.task.idx - 1)
 
     def add_new_task(self, event: AddTaskEvent) -> None:
         new_id = self.model.get_next_id()
-        task = Task(new_id, event.description, event.importance)
+        task = Task(new_id, event.description, event.importance, len(self.tasks))
         self.model.add_task(task)
         self.tasks[new_id] = TodoTask(self.canvas, self.get_new_task_position(), self.task_size, task)
         self.bind_task_methods(task=self.tasks[new_id])
-        self.event_loop.enqueue_event(CloseViewEvent(time.time(), event.view))
+
+    def edit_task(self, event: EditTaskEvent) -> None:
+        self.tasks[event.id_].task = Task(event.id_, event.description, event.importance, self.tasks[event.id_].task.idx)
+        self.tasks[event.id_].update()
+
+    def update_task_idx(self, id_: int, idx: int) -> None:
+        self.tasks[id_].task.idx = idx
+
+    def save_tasks(self) -> None:
+        def save_threaded(cls):
+            for id_ in cls.tasks:
+                task = cls.tasks[id_]
+                cls.model.update_task(id_, description=task.task.description, importance=task.task.importance, idx=task.task.idx)
+
+        thread = threading.Thread(target=save_threaded, args=(self, ))
+        thread.start()
+
+    def on_delete(self) -> None:
+        self.save_tasks()
 
     def bind_task_methods(self, task: TodoTask = None) -> None:
         tasks = self.tasks.values()
@@ -360,6 +416,8 @@ class TodoListView(View):
             task.bind_on_move(self.move_task)
             task.bind_on_release(self.place_task)
             task.bind_on_open(self.open_task)
+            task.bind_on_open_options(self.open_options)
+            task.bind_open_edit_task_view(self.open_edit_task_view)
 
     def bind_delete_task(self, delete_task: Callable[[int], None]) -> None:
         self.delete_task = delete_task
@@ -372,6 +430,12 @@ class TodoListView(View):
 
     def bind_open_task(self, open_task: Callable[[int, bool], None]) -> None:
         self.open_task = open_task
+
+    def bind_open_options(self, open_options: Callable[[int], None]) -> None:
+        self.open_options = open_options
+
+    def bind_open_edit_task_view(self, open_edit_task_view: Callable[[int], None]) -> None:
+        self.open_edit_task_view = open_edit_task_view
 
     def bind_open_add_task_view(self, add_task: Callable[[], None]) -> None:
         self.add_task_button.bind_on_click(add_task)

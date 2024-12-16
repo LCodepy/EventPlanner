@@ -139,6 +139,11 @@ class TextField(UIObject):
             self.backspace_pressed = False
             self.backspace_pressed_time = None
 
+    def set_text(self, text: str) -> None:
+        self.text = text
+        self.label.text_color = self.text_color
+        self.label.set_text(text)
+
     def render(self) -> None:
         pygame.draw.rect(self.canvas, self.color, self.get_rect(), border_radius=self.border_radius)
         if self.border_width:

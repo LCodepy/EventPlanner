@@ -21,6 +21,7 @@ class CalendarController:
         self.view.next_month_button.bind_on_click(self.change_to_next_month)
         self.view.bind_buttons = self.bind_calendar_buttons
         self.bind_calendar_buttons()
+        self.view.bind_calendar_binding(self.bind_calendar_buttons)
 
     def change_to_previous_month(self) -> None:
         self.view.month -= 1

@@ -19,6 +19,7 @@ class Task:
     id: int
     description: str
     importance: TaskImportance
+    idx: int
 
 
 class TodoListModel:
@@ -32,7 +33,8 @@ class TodoListModel:
             CREATE TABLE IF NOT EXISTS {self.database_name} (
                 id INTEGER PRIMARY KEY,
                 description TEXT,
-                importance BLOB NOT NULL
+                importance BLOB NOT NULL,
+                idx INTEGER
             )
             """
         )
@@ -42,21 +44,31 @@ class TodoListModel:
 
     def load_tasks(self) -> dict[int, Task]:
         with self.conn:
-            self.cursor.execute(f"SELECT id, description, importance FROM {self.database_name}")
+            self.cursor.execute(f"SELECT id, description, importance, idx FROM {self.database_name}")
             rows = self.cursor.fetchall()
-            return {id_: Task(id_, description, pickle.loads(importance)) for id_, description, importance in rows}
+            return {id_: Task(id_, description, pickle.loads(importance), idx) for id_, description, importance, idx in rows}
 
     def add_task(self, task: Task) -> None:
         self.tasks[task.id] = task
         with self.conn:
             self.cursor.execute(
-                f"INSERT INTO {self.database_name} VALUES (?, ?, ?)", (task.id, task.description, pickle.dumps(task.importance))
+                f"INSERT INTO {self.database_name} VALUES (?, ?, ?, ?)", (task.id, task.description, pickle.dumps(task.importance), task.idx)
             )
 
     def remove_task(self, id_: int) -> None:
         self.tasks.pop(id_)
         with self.conn:
             self.cursor.execute(f"DELETE from {self.database_name} WHERE id = :id", {"id": id_})
+
+    def update_task(self, id_: int, description: str = None, importance: TaskImportance = None, idx: int = None) -> None:
+        conn = sqlite3.connect(Assets().todo_list_database_path)
+        cursor = conn.cursor()
+
+        new_task = Task(id_, description or self.tasks[id_].description, importance or self.tasks[id_].importance,
+                        idx or self.tasks[id_].idx)
+        with conn:
+            cursor.execute(f"UPDATE {self.database_name} SET description = ?, importance = ?, idx = ? WHERE id = ?",
+                            (new_task.description, pickle.dumps(new_task.importance), new_task.idx, id_))
 
     def get_next_id(self) -> int:
         ids = {i for i in range(len(self.tasks)+1)}

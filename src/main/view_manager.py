@@ -1,13 +1,15 @@
 import time
+from typing import Optional
 
 import pygame.display
 
 from src.events.event import Event, OpenViewEvent, CloseViewEvent, ResizeViewEvent, MouseReleaseEvent, MouseClickEvent, \
-    MouseFocusChangedEvent, AddTaskEvent, AddCalendarEventEvent
+    MouseFocusChangedEvent, AddTaskEvent, AddCalendarEventEvent, MouseMotionEvent, EditTaskEvent, EditCalendarEventEvent
 from src.events.event_loop import EventLoop
 from src.ui.colors import Colors
 from src.utils.animations import ChangeValuesAnimation
 from src.views.event_list_view import EventListView
+from src.views.options_view import OptionsView
 from src.views.todo_list_view import TodoListView
 from src.views.view import View
 
@@ -20,8 +22,9 @@ class ViewManager:
         self.top_bar_view = top_bar_view
         self.side_bar_view = side_bar_view
         self.main_view = main_view
-        self.side_view = None
-        self.top_view = None
+        self.side_view: Optional[View] = None
+        self.top_view: Optional[View] = None
+        self.options_view: Optional[View] = None
 
         self.opened_top_view_last_frame = False
 
@@ -51,7 +54,10 @@ class ViewManager:
             self.top_bar_view.set_rendering(True)
             registered_events = True
 
-        if not self.opened_top_view_last_frame and not isinstance(event, (AddTaskEvent, AddCalendarEventEvent, )):
+        if (
+                not self.opened_top_view_last_frame and
+                not isinstance(event, (AddTaskEvent, AddCalendarEventEvent, EditTaskEvent, EditCalendarEventEvent))
+        ):
             if self.top_view and isinstance(event, MouseClickEvent) and not self.top_view.is_focused(event) and not \
                     self.top_bar_view.is_focused(event):
                 self.top_view = None
@@ -60,13 +66,15 @@ class ViewManager:
             elif self.top_view:
                 return registered_events
 
+        if isinstance(event, MouseClickEvent) and self.options_view and not self.options_view.is_focused(event):
+            self.options_view = None
+            registered_events = True
+
+        if self.options_view is not None and self.options_view.register_event(event):
+            self.options_view.set_rendering(True)
+            return True
+
         for view in self.get_views():
-            if isinstance(event, MouseClickEvent) and view and view != self.top_view and view.is_focused(event) \
-                    and self.top_view and view != self.top_bar_view:
-                self.top_view = None
-                self.screen_fog_animation.start([150], [0])
-                registered_events = True
-                continue
             if view and view.register_event(event):
                 view.set_rendering(True)
                 registered_events = True
@@ -79,6 +87,8 @@ class ViewManager:
             self.screen_fog_animation.start([0], [150])
             self.opened_top_view_last_frame = True
             self.event_loop.enqueue_event(MouseFocusChangedEvent(time.time(), False))
+        elif isinstance(event.view, OptionsView):
+            self.options_view = event.view
         elif isinstance(event.view, (TodoListView, EventListView, )):
             if self.side_view:
                 self.event_loop.enqueue_event(CloseViewEvent(time.time(), self.side_view))
@@ -110,6 +120,8 @@ class ViewManager:
         elif event.view == self.top_view:
             self.top_view = None
             self.screen_fog_animation.start([150], [0])
+        elif event.view == self.options_view:
+            self.options_view = None
         return True
 
     def resize_view(self, event: ResizeViewEvent) -> bool:
@@ -133,6 +145,9 @@ class ViewManager:
 
         if self.top_view:
             self.top_view.render()
+
+        if self.options_view:
+            self.options_view.render()
 
     def resize(self, window_size: (int, int)) -> None:
         self.top_bar_view.resize(width=window_size[0])
@@ -161,6 +176,7 @@ class ViewManager:
         self.opened_top_view_last_frame = False
 
     def delete_view(self, view: View):
+        view.on_delete()
         if view == self.main_view:
             self.main_view = None
         elif view == self.side_view:

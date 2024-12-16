@@ -69,6 +69,12 @@ class Assets(metaclass=Singleton):
         self.delete_task_icon_large_hover = pygame.image.load(
             os.path.join(self.IMAGES_PATH, "delete_task_icon_large_hover.png")
         ).convert_alpha()
+        self.edit_icon_large = pygame.image.load(
+            os.path.join(self.IMAGES_PATH, "edit_icon_large.png")
+        ).convert_alpha()
+        self.edit_icon_large_hover = pygame.image.load(
+            os.path.join(self.IMAGES_PATH, "edit_icon_large_hover.png")
+        ).convert_alpha()
 
         self.todo_list_database_path = os.path.join(self.DATA_PATH, "todo_list.db")
 

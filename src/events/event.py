@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from src.events.mouse_buttons import MouseButtons
+from src.models.calendar_model import CalendarEvent
 from src.models.todo_list_model import TaskImportance
 from src.ui.colors import Color
 
@@ -160,7 +161,29 @@ class AddTaskEvent(Event):
     exec_time: float
     description: str
     importance: TaskImportance
-    view: Any
+
+
+@dataclass
+class DeleteTaskEvent(Event):
+
+    exec_time: float
+    id_: int
+
+
+@dataclass
+class EditTaskEvent(Event):
+
+    exec_time: float
+    id_: int
+    description: str
+    importance: TaskImportance
+
+
+@dataclass
+class OpenEditTaskEvent(Event):
+
+    exec_time: float
+    id_: int
 
 
 @dataclass
@@ -171,6 +194,31 @@ class AddCalendarEventEvent(Event):
     description: str
     color: Color
     is_recurring: bool
+
+
+@dataclass
+class DeleteCalendarEventEvent(Event):
+
+    exec_time: float
+    event: CalendarEvent
+
+
+@dataclass
+class EditCalendarEventEvent(Event):
+
+    exec_time: float
+    event: CalendarEvent
+    time: datetime.time
+    description: str
+    color: Color
+    is_recurring: bool
+
+
+@dataclass
+class OpenEditCalendarEventEvent(Event):
+
+    exec_time: float
+    event: CalendarEvent
 
 
 @dataclass

@@ -4,12 +4,15 @@ from typing import Union
 import pygame
 
 from src.controllers.add_event_controller import AddEventController
+from src.controllers.options_controller import OptionsController
 from src.events.event import MouseClickEvent, MouseReleaseEvent, MouseMotionEvent, ResizeViewEvent, MouseWheelUpEvent, \
-    MouseWheelDownEvent, OpenViewEvent, AddCalendarEventEvent, CloseViewEvent, UpdateCalendarEvent
+    MouseWheelDownEvent, OpenViewEvent, AddCalendarEventEvent, CloseViewEvent, UpdateCalendarEvent, \
+    EditCalendarEventEvent
 from src.events.event_loop import EventLoop
 from src.models.calendar_model import CalendarModel, CalendarEvent
 from src.views.add_event_view import AddEventView
 from src.views.event_list_view import EventListView
+from src.views.options_view import OptionsView
 
 
 class EventListController:
@@ -31,7 +34,8 @@ class EventListController:
         self.view.bind_on_scroll(self.on_scroll)
         self.view.bind_on_resize(self.on_resize)
         self.view.bind_add_event(self.add_event)
-        self.view.bind_event_methods(self.delete_event)
+        self.view.bind_edit_event(self.edit_event)
+        self.bind_view_methods()
 
     def on_click(self, event: MouseClickEvent) -> None:
         if self.view.width - 5 < event.x < self.view.width and 0 < event.y < self.view.height:
@@ -72,7 +76,7 @@ class EventListController:
             pass
 
     def on_resize(self) -> None:
-        self.view.bind_event_methods(self.delete_event)
+        self.view.bind_event_methods(self.delete_event, self.open_options, self.open_edit_calendar_event)
 
     def delete_event(self, event: CalendarEvent) -> None:
         self.model.remove_event(event)
@@ -86,8 +90,26 @@ class EventListController:
                 events.pop(i)
 
         self.view.create_time_table()
-        self.view.bind_event_methods(self.delete_event)
+        self.bind_view_methods()
         self.event_loop.enqueue_event(UpdateCalendarEvent(time.time()))
+
+    def open_options(self, event: CalendarEvent) -> None:
+        options = OptionsView(self.view.display, self.event_loop, 120, 70, *pygame.mouse.get_pos())
+        options.set_mode(1)
+        OptionsController(options, self.event_loop, event=event)
+        self.event_loop.enqueue_event(OpenViewEvent(time.time(), options, False))
+
+    def open_edit_calendar_event(self, event: CalendarEvent) -> None:
+        self.add_event_view = AddEventView(
+            self.view.display, self.event_loop, 400, 500,
+            self.view.display.get_width() // 2 - 200, self.view.display.get_height() // 2 - 250
+        )
+        self.add_event_view.set_edit_state(event)
+        AddEventController(self.add_event_view, self.event_loop)
+
+        self.event_loop.enqueue_event(
+            OpenViewEvent(time.time(), self.add_event_view, True)
+        )
 
     def open_add_event_view(self) -> None:
         self.add_event_view = AddEventView(
@@ -104,6 +126,18 @@ class EventListController:
         event = CalendarEvent(self.view.date, ev.time, ev.description, ev.color, ev.is_recurring)
         self.model.add_event(event)
         self.view.create_time_table()
-        self.view.bind_event_methods(self.delete_event)
+        self.bind_view_methods()
         self.event_loop.enqueue_event(CloseViewEvent(time.time(), self.add_event_view))
         self.event_loop.enqueue_event(UpdateCalendarEvent(time.time()))
+
+    def edit_event(self, event: EditCalendarEventEvent) -> None:
+        self.model.update_event(self.add_event_view.event_to_edit, event.time, event.description, event.color, event.is_recurring)
+        self.event_loop.enqueue_event(CloseViewEvent(time.time(), self.add_event_view))
+        self.event_loop.enqueue_event(UpdateCalendarEvent(time.time()))
+
+        self.view.create_time_table()
+        self.bind_view_methods()
+
+    def bind_view_methods(self) -> None:
+        self.view.bind_event_methods(self.delete_event, self.open_options, self.open_edit_calendar_event)
+

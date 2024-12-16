@@ -32,6 +32,8 @@ class AddTaskView(View):
         self.canvas = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
 
         self.on_importance_button_click = None
+        self.editing_state = False
+        self.task_to_edit = None
 
         self.close_button = Button(
             self.canvas,
@@ -144,8 +146,7 @@ class AddTaskView(View):
         if self.add_task_button.register_event(event):
             registered_events = True
 
-        if registered_events:
-            return True
+        return registered_events
 
     def render(self) -> None:
         self.canvas.fill(Colors.BACKGROUND_GREY30)
@@ -166,6 +167,19 @@ class AddTaskView(View):
         pygame.draw.line(self.canvas, Colors.GREY70, (20, 70), (self.width - 20, 70))
 
         self.display.blit(self.canvas, (self.x, self.y))
+
+    def set_edit_state(self, id_: int, description: str, importance: TaskImportance) -> None:
+        self.description_text_field.set_text(description)
+        if importance is TaskImportance.LOW:
+            self.on_low_importance_button_click()
+        elif importance is TaskImportance.MEDIUM:
+            self.on_medium_importance_button_click()
+        elif importance is TaskImportance.HIGH:
+            self.on_high_importance_button_click()
+        self.add_task_button.label.set_text("APPLY")
+
+        self.editing_state = True
+        self.task_to_edit = id_
 
     def update_canvas(self, canvas: pygame.Surface) -> None:
         self.canvas = canvas
@@ -222,6 +236,9 @@ class AddTaskView(View):
 
     def is_focused(self, event: Union[MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent]) -> bool:
         return self.x <= event.x < self.x + self.width and self.y <= event.y < self.y + self.height
+
+    def on_delete(self) -> None:
+        pass
 
     def get_min_size(self) -> (int, int):
         return self.width, self.height
