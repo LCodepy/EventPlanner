@@ -1,0 +1,19 @@
+{
+  "months": ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"],
+  "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+  "todo_list": "Todo List",
+  "add_task": "Add Task",
+  "task_description": "Task description...",
+  "importance_level": "Importance Level",
+  "low": "Low",
+  "mid": "Mid",
+  "high": "High",
+  "add": "Add",
+  "apply": "Apply",
+  "edit": "Edit",
+  "delete": "Delete",
+  "add_event": "Add Event",
+  "edit_event": "Edit Event",
+  "event_description": "Event description...",
+  "invalid_time_error": "Time is not valid."
+}

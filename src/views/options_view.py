@@ -3,7 +3,7 @@ from typing import Union
 import pygame
 
 from src.events.event import MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent, Event, \
-    MouseMotionEvent
+    MouseMotionEvent, LanguageChangedEvent
 from src.events.event_loop import EventLoop
 from src.ui.alignment import HorizontalAlignment
 from src.ui.button import Button
@@ -12,6 +12,7 @@ from src.ui.image import Image
 from src.ui.label import Label
 from src.ui.padding import Padding
 from src.utils.assets import Assets
+from src.utils.language_manager import LanguageManager
 from src.views.view import View
 
 
@@ -30,13 +31,15 @@ class OptionsView(View):
 
         self.canvas = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
 
+        self.language_manager = LanguageManager()
+
         self.mode = 0
 
         self.edit_button = Button(
             self.canvas,
             (self.width // 2, self.height // 4),
             (self.width - 6, self.height // 2 - 6),
-            label=Label(text="Edit", text_color=(200, 200, 200), font=Assets().font18,
+            label=Label(text=self.language_manager.get_string("edit"), text_color=(200, 200, 200), font=Assets().font18,
                         horizontal_text_alignment=HorizontalAlignment.LEFT),
             color=Colors.BACKGROUND_GREY22,
             border_width=0,
@@ -48,8 +51,8 @@ class OptionsView(View):
             self.canvas,
             (self.width // 2, self.height // 4 * 3),
             (self.width - 6, self.height // 2 - 6),
-            label=Label(text="Delete", text_color=(200, 200, 200), font=Assets().font18,
-                        horizontal_text_alignment=HorizontalAlignment.LEFT),
+            label=Label(text=self.language_manager.get_string("delete"), text_color=(200, 200, 200),
+                        font=Assets().font18, horizontal_text_alignment=HorizontalAlignment.LEFT),
             color=Colors.BACKGROUND_GREY22,
             border_width=0,
             border_radius=2,
@@ -77,6 +80,9 @@ class OptionsView(View):
             registered_events = True
             if pygame.mouse.get_cursor() != pygame.SYSTEM_CURSOR_ARROW:
                 pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+
+        if isinstance(event, LanguageChangedEvent):
+            self.update_language()
 
         event = self.get_event(event)
 
@@ -116,6 +122,10 @@ class OptionsView(View):
         self.delete_button.update_canvas(self.canvas)
         self.edit_icon.canvas = self.canvas
         self.delete_icon.canvas = self.canvas
+
+    def update_language(self) -> None:
+        self.edit_button.label.set_text(self.language_manager.get_string("edit"))
+        self.delete_button.label.set_text(self.language_manager.get_string("delete"))
 
     def set_rendering(self, b: bool) -> None:
         self.rendering = b

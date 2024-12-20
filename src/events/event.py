@@ -227,6 +227,12 @@ class UpdateCalendarEvent(Event):
     exec_time: float
 
 
+@dataclass
+class LanguageChangedEvent(Event):
+
+    exec_time: float
+
+
 class EventFactory:
 
     @staticmethod

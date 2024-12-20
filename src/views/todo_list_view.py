@@ -5,7 +5,8 @@ from typing import Callable, Union
 import pygame
 
 from src.events.event import Event, MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent, \
-    MouseMotionEvent, AddTaskEvent, CloseViewEvent, DeleteTaskEvent, CloseWindowEvent, EditTaskEvent, OpenEditTaskEvent
+    MouseMotionEvent, AddTaskEvent, CloseViewEvent, DeleteTaskEvent, CloseWindowEvent, EditTaskEvent, OpenEditTaskEvent, \
+    LanguageChangedEvent
 from src.events.event_loop import EventLoop
 from src.events.mouse_buttons import MouseButtons
 from src.models.todo_list_model import TodoListModel, Task, TaskImportance
@@ -17,6 +18,7 @@ from src.ui.padding import Padding
 from src.ui.ui_object import UIObject
 from src.utils.animations import ChangeValuesAnimation
 from src.utils.assets import Assets
+from src.utils.language_manager import LanguageManager
 from src.views.view import View
 
 
@@ -229,6 +231,8 @@ class TodoListView(View):
 
         self.canvas = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
 
+        self.language_manager = LanguageManager()
+
         self.task_list_pos = (self.width // 2, 90)
         self.task_size = (self.width - 10, 40)
         self.tasks: dict[int, TodoTask] = {
@@ -255,8 +259,8 @@ class TodoListView(View):
         self.title_label = Label(
             self.canvas,
             (self.width // 2, 35),
-            (100, 50),
-            text="Todo List",
+            (self.width, 50),
+            text=self.language_manager.get_string("todo_list"),
             text_color=(160, 160, 160),
             font=Assets().font24
         )
@@ -266,7 +270,7 @@ class TodoListView(View):
             (self.width // 2, self.height - 40),
             (120, 40),
             label=Label(
-                text="Add Task",
+                text=self.language_manager.get_string("add_task"),
                 text_color=(160, 160, 160),
                 font=Assets().font18
             ),
@@ -288,6 +292,8 @@ class TodoListView(View):
             self.add_new_task(event)
         elif isinstance(event, EditTaskEvent):
             self.edit_task(event)
+        elif isinstance(event, LanguageChangedEvent):
+            self.update_language()
 
         event = self.get_event(event)
 
@@ -366,6 +372,10 @@ class TodoListView(View):
             self.add_task_button.update_position(x=self.width // 2)
 
         self.add_task_button.update_position(y=self.height - 40)
+
+    def update_language(self) -> None:
+        self.title_label.set_text(self.language_manager.get_string("todo_list"))
+        self.add_task_button.label.set_text(self.language_manager.get_string("add_task"))
 
     def add_move_task_animation(self, id_: int, start: list[int], end: list[int]) -> None:
         self.move_task_animations[id_] = ChangeValuesAnimation(f"MoveTaskAnim{id_}", self.event_loop,

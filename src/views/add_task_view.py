@@ -4,7 +4,7 @@ from typing import Union, Callable
 import pygame
 
 from src.events.event import Event, MouseClickEvent, MouseReleaseEvent, CloseViewEvent, MouseWheelUpEvent, \
-    MouseWheelDownEvent
+    MouseWheelDownEvent, LanguageChangedEvent
 from src.events.event_loop import EventLoop
 from src.models.todo_list_model import TaskImportance
 from src.ui.button import Button
@@ -13,6 +13,7 @@ from src.ui.label import Label
 from src.ui.padding import Padding
 from src.ui.text_field import TextField
 from src.utils.assets import Assets
+from src.utils.language_manager import LanguageManager
 from src.views.view import View
 
 
@@ -30,6 +31,8 @@ class AddTaskView(View):
         self.rendering = False
 
         self.canvas = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+
+        self.language_manager = LanguageManager()
 
         self.on_importance_button_click = None
         self.editing_state = False
@@ -50,7 +53,7 @@ class AddTaskView(View):
             self.canvas,
             (self.width // 2, 40),
             (150, 50),
-            text="Add Task",
+            text=self.language_manager.get_string("add_task"),
             text_color=(160, 160, 160),
             font=Assets().font24
         )
@@ -60,7 +63,7 @@ class AddTaskView(View):
             (self.width // 2, 210),
             (self.width - 40, 180),
             label=Label(text_color=(160, 160, 160), font=Assets().font18),
-            hint="Task description...",
+            hint=self.language_manager.get_string("task_description"),
             hint_text_color=(100, 100, 100),
             color=Colors.BACKGROUND_GREY22,
             border_width=0,
@@ -71,7 +74,7 @@ class AddTaskView(View):
             self.canvas,
             (self.width // 2, 345),
             (150, 30),
-            text="Importance Level",
+            text=self.language_manager.get_string("importance_level"),
             text_color=(160, 160, 160),
             font=Assets().font18
         )
@@ -81,7 +84,7 @@ class AddTaskView(View):
             (self.width // 4 - 20, 390),
             (70, 40),
             color=Colors.BACKGROUND_GREY30,
-            label=Label(text="Low", text_color=(220, 220, 220), font=Assets().font18),
+            label=Label(text=self.language_manager.get_string("low"), text_color=(220, 220, 220), font=Assets().font18),
             border_color=Colors.GREY140,
             border_radius=10,
             padding=Padding(left=10)
@@ -93,7 +96,7 @@ class AddTaskView(View):
             (self.width // 2, 390),
             (70, 40),
             color=Colors.BACKGROUND_GREY30,
-            label=Label(text="Mid", text_color=(220, 220, 220), font=Assets().font18),
+            label=Label(text=self.language_manager.get_string("mid"), text_color=(220, 220, 220), font=Assets().font18),
             border_color=Colors.GREY140,
             border_radius=10,
             padding=Padding(left=10)
@@ -105,7 +108,7 @@ class AddTaskView(View):
             (self.width // 4 * 3 + 20, 390),
             (70, 40),
             color=Colors.BACKGROUND_GREY30,
-            label=Label(text="High", text_color=(220, 220, 220), font=Assets().font18),
+            label=Label(text=self.language_manager.get_string("high"), text_color=(220, 220, 220), font=Assets().font18),
             border_color=Colors.GREY140,
             border_radius=10,
             padding=Padding(left=10)
@@ -119,13 +122,16 @@ class AddTaskView(View):
             color=Colors.BLACK,
             hover_color=(50, 50, 50),
             click_color=(60, 60, 60),
-            label=Label(text="Add", text_color=(220, 220, 220), font=Assets().font18),
+            label=Label(text=self.language_manager.get_string("add"), text_color=(220, 220, 220), font=Assets().font18),
             border_width=0,
             border_radius=3
         )
 
     def register_event(self, event: Event) -> bool:
         registered_events = False
+
+        if isinstance(event, LanguageChangedEvent):
+            self.update_language()
 
         event = self.get_event(event)
 
@@ -176,7 +182,7 @@ class AddTaskView(View):
             self.on_medium_importance_button_click()
         elif importance is TaskImportance.HIGH:
             self.on_high_importance_button_click()
-        self.add_task_button.label.set_text("APPLY")
+        self.add_task_button.label.set_text(self.language_manager.get_string("apply"))
 
         self.editing_state = True
         self.task_to_edit = id_
@@ -203,6 +209,15 @@ class AddTaskView(View):
         self.canvas = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
 
         self.update_canvas(self.canvas)
+
+    def update_language(self) -> None:
+        self.add_task_label.set_text(self.language_manager.get_string("add_task"))
+        self.description_text_field.set_hint(self.language_manager.get_string("task_description"))
+        self.importance_label.set_text(self.language_manager.get_string("importance_level"))
+        self.low_importance_button.label.set_text(self.language_manager.get_string("low"))
+        self.medium_importance_button.label.set_text(self.language_manager.get_string("mid"))
+        self.high_importance_button.label.set_text(self.language_manager.get_string("high"))
+        self.add_task_button.label.set_text(self.language_manager.get_string("add"))
 
     def on_low_importance_button_click(self) -> None:
         self.low_importance_button.border_color = Colors.WHITE

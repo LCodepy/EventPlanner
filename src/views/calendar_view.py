@@ -5,7 +5,7 @@ from typing import Union, Callable
 import pygame
 
 from src.events.event import MouseClickEvent, MouseReleaseEvent, Event, MouseWheelUpEvent, MouseWheelDownEvent, \
-    UpdateCalendarEvent
+    UpdateCalendarEvent, LanguageChangedEvent
 from src.models.calendar_model import CalendarModel, CalendarEvent
 from src.ui.alignment import VerticalAlignment
 from src.ui.button import Button
@@ -13,7 +13,8 @@ from src.ui.colors import Colors, Color
 from src.ui.label import Label
 from src.ui.padding import Padding
 from src.utils.assets import Assets
-from src.utils.calendar_functions import get_month_name, get_month_length, get_weekday_name, get_month_starting_day
+from src.utils.calendar_functions import get_month_length, get_month_starting_day
+from src.utils.language_manager import LanguageManager
 from src.views.view import View
 
 
@@ -38,6 +39,8 @@ class CalendarView(View):
 
         self.canvas = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
 
+        self.language_manager = LanguageManager()
+
         self.year = datetime.datetime.now().year
         self.month = datetime.datetime.now().month
         self.day = datetime.datetime.now().day
@@ -58,7 +61,7 @@ class CalendarView(View):
             self.canvas,
             (self.width // 2, 100),
             (200, 50),
-            text=str(get_month_name(self.month).upper()),
+            text=str(self.get_month_name(self.month).upper()),
             text_color=(200, 200, 200),
             font=Assets().font36
         )
@@ -102,7 +105,7 @@ class CalendarView(View):
         self.weekday_labels = [
             Label(
                 self.canvas, (self.width * i // 8, 170), (50, 30),
-                text=get_weekday_name(i), text_color=(170, 170, 170), font=Assets().font24
+                text=self.get_weekday_name(i), text_color=(170, 170, 170), font=Assets().font24
             ) for i in range(1, 8)
         ]
 
@@ -132,8 +135,8 @@ class CalendarView(View):
                         event,
                         Label(
                             self.canvas, (self.day_buttons[i].x,
-                                          self.day_buttons[i].y + 22 * j - self.day_buttons[i].height // 2 + 45),
-                            (self.width // 8 - 30, 18), text=event.description, text_color=(200, 200, 200),
+                                          self.day_buttons[i].y + 26 * j - self.day_buttons[i].height // 2 + 45),
+                            (self.width // 8 - 30, 22), text=event.description, text_color=(200, 200, 200),
                             font=Assets().font14, wrap_text=False
                         )
                     )
@@ -141,6 +144,9 @@ class CalendarView(View):
 
     def register_event(self, event: Event) -> bool:
         registered_events = False
+
+        if isinstance(event, LanguageChangedEvent):
+            self.update_language()
 
         event = self.get_event(event)
 
@@ -196,13 +202,13 @@ class CalendarView(View):
                 if self.day_buttons[i].height < event.label.height * (j + 1) + 50 + (len(self.month_events[i]) - last_rendered - 1) * 4 or self.width < 500:
                     if j == 0:
                         next_y = event.label.y - event.label.height // 2
-                    pygame.draw.rect(self.canvas, event.event.color, [event.label.x - width // 2, next_y, width, 4],
+                    pygame.draw.rect(self.canvas, event.event.color, [event.label.x - width // 2, next_y - 1, width, 4],
                                      border_radius=100)
                     next_y += 8
                     collapsed = True
                 else:
                     pygame.draw.rect(self.canvas, event.event.color, [event.label.x - width // 2,
-                                                                      event.label.y - event.label.height // 2, width,
+                                                                      event.label.y - event.label.height // 2 - 1, width,
                                                                       event.label.height], border_radius=5, width=2)
                     next_y = event.label.y + event.label.height // 2 + 4
 
@@ -238,12 +244,21 @@ class CalendarView(View):
 
         self.bind_buttons()
 
+    def update_language(self) -> None:
+        pass
+
     def get_day_button_color(self, idx: int, starting_day: int) -> Color:
         return Colors.RED if datetime.date(self.year, self.month, idx - starting_day + 1) == self.today.date() else (
             Colors.BLUE220 if (idx % 7) < 5 else (84, 168, 240))
 
     def bind_calendar_binding(self, calendar_binding: Callable) -> None:
         self.calendar_binding = calendar_binding
+
+    def get_weekday_name(self, idx: int) -> str:
+        return self.language_manager.get_string("days")[idx-1]
+
+    def get_month_name(self, idx: int) -> str:
+        return self.language_manager.get_string("months")[idx-1]
 
     def set_rendering(self, b: bool) -> None:
         self.rendering = b

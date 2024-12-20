@@ -5,7 +5,7 @@ from typing import Union, Callable
 import pygame
 
 from src.events.event import Event, MouseClickEvent, MouseReleaseEvent, CloseViewEvent, MouseWheelUpEvent, \
-    MouseWheelDownEvent, KeyReleaseEvent
+    MouseWheelDownEvent, KeyReleaseEvent, LanguageChangedEvent
 from src.events.event_loop import EventLoop
 from src.models.calendar_model import CalendarEvent
 from src.models.todo_list_model import TaskImportance
@@ -15,6 +15,7 @@ from src.ui.label import Label
 from src.ui.padding import Padding
 from src.ui.text_field import TextField
 from src.utils.assets import Assets
+from src.utils.language_manager import LanguageManager
 from src.views.view import View
 
 
@@ -33,8 +34,10 @@ class AddEventView(View):
 
         self.canvas = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
 
+        self.language_manager = LanguageManager()
+
         self.selected_color = None
-        self.invalid_time_error = "Time is not valid."
+        self.invalid_time_error = self.language_manager.get_string("invalid_time_error")
         self.editing_state = False
         self.event_to_edit = None
 
@@ -59,8 +62,8 @@ class AddEventView(View):
         self.add_event_label = Label(
             self.canvas,
             (self.width // 2, 40),
-            (150, 50),
-            text="Add Event",
+            (self.width, 50),
+            text=self.language_manager.get_string("add_event"),
             text_color=(160, 160, 160),
             font=Assets().font24
         )
@@ -70,7 +73,7 @@ class AddEventView(View):
             (self.width // 2, 170),
             (self.width - 80, 140),
             label=Label(text_color=(160, 160, 160), font=Assets().font18),
-            hint="Event description...",
+            hint=self.language_manager.get_string("event_description"),
             hint_text_color=(100, 100, 100),
             color=Colors.BACKGROUND_GREY22,
             border_width=0,
@@ -120,13 +123,16 @@ class AddEventView(View):
             color=Colors.BLACK,
             hover_color=(50, 50, 50),
             click_color=(60, 60, 60),
-            label=Label(text="Add", text_color=(220, 220, 220), font=Assets().font18),
+            label=Label(text=self.language_manager.get_string("add"), text_color=(220, 220, 220), font=Assets().font18),
             border_width=0,
             border_radius=3
         )
 
     def register_event(self, event: Event) -> bool:
         registered_events = False
+
+        if isinstance(event, LanguageChangedEvent):
+            self.update_language()
 
         event = self.get_event(event)
 
@@ -219,6 +225,12 @@ class AddEventView(View):
 
         self.update_canvas(self.canvas)
 
+    def update_language(self) -> None:
+        self.invalid_time_error = self.language_manager.get_string("invalid_time_error")
+        self.add_event_label.set_text(self.language_manager.get_string("add_event"))
+        self.description_text_field.set_hint(self.language_manager.get_string("event_description"))
+        self.add_event_button.label.set_text(self.language_manager.get_string("add"))
+
     def get_time(self) -> datetime.time:
         return datetime.time(int(self.hours_input.text or "00"), int(self.minutes_input.text or "00"))
 
@@ -233,10 +245,11 @@ class AddEventView(View):
         self.editing_state = True
         self.event_to_edit = event
 
+        self.add_event_label.set_text(self.language_manager.get_string("edit_event"))
         self.description_text_field.set_text(event.description)
         self.hours_input.set_text(str(event.time)[:2])
         self.minutes_input.set_text(str(event.time)[3:5])
-        self.add_event_button.label.set_text("APPLY")
+        self.add_event_button.label.set_text(self.language_manager.get_string("apply"))
 
         for btn in self.color_buttons:
             if btn.color == event.color:

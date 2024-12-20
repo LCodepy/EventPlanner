@@ -16,8 +16,10 @@ from src.models.calendar_model import CalendarModel
 from src.models.taskbar_model import TaskbarModel
 from src.ui.colors import Colors
 from src.utils.assets import Assets
+from src.utils.language_manager import LanguageManager
 from src.utils.logging import Log
 from src.utils.pygame_utils import set_window_pos
+from src.utils.ui_debugger import UIDebugger
 from src.views.appbar_view import AppbarView
 from src.views.calendar_view import CalendarView
 from src.views.taskbar_view import TaskbarView
@@ -47,6 +49,8 @@ class Main:
         self.running = False
         self.update_display = False
         self.render_all = False
+
+        LanguageManager(self.event_loop)
 
         self.appbar_model = AppbarModel()
         self.appbar_view = AppbarView(self.win, self.appbar_model, self.win.get_width(), 30, 0, 0)

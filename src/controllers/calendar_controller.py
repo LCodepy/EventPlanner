@@ -5,7 +5,6 @@ from src.controllers.event_list_controller import EventListController
 from src.events.event import OpenViewEvent
 from src.events.event_loop import EventLoop
 from src.models.calendar_model import CalendarModel
-from src.utils.calendar_functions import get_month_name
 from src.views.calendar_view import CalendarView
 from src.views.event_list_view import EventListView
 
@@ -32,7 +31,7 @@ class CalendarController:
         self.view.create_weekday_labels()
         self.view.create_day_buttons()
 
-        self.view.month_label.set_text(get_month_name(self.view.month).upper())
+        self.view.month_label.set_text(self.view.get_month_name(self.view.month).upper())
         self.view.year_label.set_text(str(self.view.year))
 
         self.bind_calendar_buttons()
@@ -46,7 +45,7 @@ class CalendarController:
         self.view.create_weekday_labels()
         self.view.create_day_buttons()
 
-        self.view.month_label.set_text(get_month_name(self.view.month).upper())
+        self.view.month_label.set_text(self.view.get_month_name(self.view.month).upper())
         self.view.year_label.set_text(str(self.view.year))
 
         self.bind_calendar_buttons()

@@ -5,7 +5,7 @@ import pygame
 
 from src.events.event import MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent, Event, \
     MouseMotionEvent, AddCalendarEventEvent, KeyReleaseEvent, DeleteCalendarEventEvent, OpenEditCalendarEventEvent, \
-    EditCalendarEventEvent
+    EditCalendarEventEvent, LanguageChangedEvent
 from src.events.event_loop import EventLoop
 from src.events.mouse_buttons import MouseButtons
 from src.models.calendar_model import CalendarModel, CalendarEvent
@@ -16,6 +16,7 @@ from src.ui.label import Label
 from src.ui.padding import Padding
 from src.ui.ui_object import UIObject
 from src.utils.assets import Assets
+from src.utils.language_manager import LanguageManager
 from src.views.view import View
 
 
@@ -184,6 +185,8 @@ class EventListView(View):
 
         self.canvas = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
 
+        self.language_manager = LanguageManager()
+
         self.on_click = None
         self.on_release = None
         self.on_mouse_motion = None
@@ -216,7 +219,7 @@ class EventListView(View):
             (self.width // 2, self.height - 40),
             (120, 40),
             label=Label(
-                text="Add Event",
+                text=self.language_manager.get_string("add_event"),
                 text_color=(160, 160, 160),
                 font=Assets().font18
             ),
@@ -234,6 +237,8 @@ class EventListView(View):
             self.add_event(event)
         elif isinstance(event, EditCalendarEventEvent):
             self.edit_event(event)
+        elif isinstance(event, LanguageChangedEvent):
+            self.update_language()
 
         event = self.get_event(event)
 
@@ -287,7 +292,7 @@ class EventListView(View):
 
     def create_time_table(self) -> None:
         self.time_table = {}
-        for event in self.model.get_events_for_date(self.date):
+        for event in self.get_sorted_events():
             event_obj = EventListEvent(
                 self.canvas, (self.events_pos[0], self.events_pos[1]), self.events_size, event
             )
@@ -340,6 +345,13 @@ class EventListView(View):
 
         self.create_time_table()
         self.on_resize()
+
+    def update_language(self) -> None:
+        self.add_event_button.label.set_text(self.language_manager.get_string("add_event"))
+
+    def get_sorted_events(self) -> list[CalendarEvent]:
+        events = self.model.get_events_for_date(self.date)
+        return sorted(events, key=lambda ev: ev.time)
 
     def bind_event_methods(self, delete_event: Callable, on_open_options: Callable, open_edit_calendar_event: Callable) -> None:
         for events in self.time_table.values():

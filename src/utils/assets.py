@@ -95,9 +95,12 @@ class Assets(metaclass=Singleton):
 
         self.calendar_database_path = os.path.join(self.DATA_PATH, "calendar.db")
 
+        self.settings_database_path = os.path.join(self.DATA_PATH, "settings.json")
+
         # Fonts
-        self.font14 = pygame.font.SysFont("arial", 14)
-        self.font18 = pygame.font.SysFont("arial", 18)
-        self.font24 = pygame.font.SysFont("arial", 24)
-        self.font32 = pygame.font.SysFont("arial", 32)
-        self.font36 = pygame.font.SysFont("arial", 36)
+        self.font = "roboto"
+        self.font14 = pygame.font.SysFont(self.font, 14)
+        self.font18 = pygame.font.SysFont(self.font, 18)
+        self.font24 = pygame.font.SysFont(self.font, 24)
+        self.font32 = pygame.font.SysFont(self.font, 32)
+        self.font36 = pygame.font.SysFont(self.font, 36)

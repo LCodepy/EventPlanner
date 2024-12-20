@@ -144,6 +144,11 @@ class TextField(UIObject):
         self.label.text_color = self.text_color
         self.label.set_text(text)
 
+    def set_hint(self, hint: str) -> None:
+        self.hint = hint
+        self.label.set_text(self.hint)
+        self.label.text_color = self.hint_text_color
+
     def render(self) -> None:
         pygame.draw.rect(self.canvas, self.color, self.get_rect(), border_radius=self.border_radius)
         if self.border_width:
@@ -200,7 +205,7 @@ class TextField(UIObject):
             self.focused = False
             if not self.text:
                 self.label.set_text(self.hint)
-                self.label.text = self.hint_text_color
+                self.label.text_color = self.hint_text_color
 
     def on_click(self) -> None:
         pass
