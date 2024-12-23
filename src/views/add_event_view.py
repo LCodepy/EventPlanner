@@ -7,10 +7,11 @@ import pygame
 from src.events.event import Event, MouseClickEvent, MouseReleaseEvent, CloseViewEvent, MouseWheelUpEvent, \
     MouseWheelDownEvent, KeyReleaseEvent, LanguageChangedEvent
 from src.events.event_loop import EventLoop
-from src.models.calendar_model import CalendarEvent
+from src.models.calendar_model import CalendarEvent, EventRecurring
 from src.models.todo_list_model import TaskImportance
 from src.ui.button import Button
 from src.ui.colors import Colors
+from src.ui.dropdown import DropDown
 from src.ui.label import Label
 from src.ui.padding import Padding
 from src.ui.text_field import TextField
@@ -82,7 +83,7 @@ class AddEventView(View):
 
         self.hours_input = TextField(
             self.canvas,
-            (self.width // 2 - 25, 380),
+            (self.width // 4 - 25, 380),
             (40, 40),
             label=Label(text_color=(160, 160, 160), font=Assets().font24),
             hint="00",
@@ -91,12 +92,12 @@ class AddEventView(View):
             border_width=0,
             max_length=2,
             allowed_char_set=set("0123456789"),
-            underline=(100, 100, 100)
+            underline=(160, 160, 160)
         )
 
         self.minutes_input = TextField(
             self.canvas,
-            (self.width // 2 + 25, 380),
+            (self.width // 4 + 25, 380),
             (40, 40),
             label=Label(text_color=(160, 160, 160), font=Assets().font24),
             hint="00",
@@ -105,7 +106,28 @@ class AddEventView(View):
             border_width=0,
             max_length=2,
             allowed_char_set=set("0123456789"),
-            underline=(100, 100, 100)
+            underline=(160, 160, 160)
+        )
+
+        self.recurring_label = Label(
+            self.canvas,
+            (self.width // 2 + 30, 380),
+            (100, 40),
+            text=self.language_manager.get_string("recurring"),
+            text_color=(100, 100, 100),
+            font=Assets().font20
+        )
+
+        self.dropdown = DropDown(
+            self.canvas,
+            (320, 380),
+            (86, 34),
+            self.language_manager.get_string("event_dropdown_options"),
+            color=Colors.BACKGROUND_GREY22,
+            border_color=(100, 100, 100),
+            text_color=(160, 160, 160),
+            font=Assets().font20,
+            selected_option=3
         )
 
         self.error_label = Label(
@@ -136,18 +158,9 @@ class AddEventView(View):
 
         event = self.get_event(event)
 
-        if self.close_button.register_event(event):
-            registered_events = True
-        if self.add_event_label.register_event(event):
-            registered_events = True
-        if self.description_text_field.register_event(event):
-            registered_events = True
-        if self.hours_input.register_event(event):
-            registered_events = True
-        if self.minutes_input.register_event(event):
-            registered_events = True
-        if self.add_event_button.register_event(event):
-            registered_events = True
+        for obj in self.get_ui_elements():
+            if obj.register_event(event):
+                registered_events = True
 
         for btn in self.color_buttons:
             if btn.register_event(event):
@@ -169,18 +182,13 @@ class AddEventView(View):
     def render(self) -> None:
         self.canvas.fill(Colors.BACKGROUND_GREY30)
 
-        self.close_button.render()
-        self.add_event_label.render()
-        self.description_text_field.render()
-        self.hours_input.render()
-        self.minutes_input.render()
-        self.error_label.render()
-        self.add_event_button.render()
+        for obj in self.get_ui_elements():
+            obj.render()
 
         for btn in self.color_buttons:
             btn.render()
 
-        Label.render_text(self.canvas, ":", (self.width // 2, 378), Assets().font24, Colors.GREY140, True)
+        Label.render_text(self.canvas, ":", (self.width // 4, 378), Assets().font24, Colors.GREY140, True)
 
         pygame.draw.line(self.canvas, Colors.GREY70, (20, 70), (self.width - 20, 70))
 
@@ -203,13 +211,10 @@ class AddEventView(View):
 
     def update_canvas(self, canvas: pygame.Surface) -> None:
         self.canvas = canvas
-        self.close_button.canvas = canvas
-        self.add_event_label.canvas = self.canvas
-        self.description_text_field.canvas = self.canvas
-        self.hours_input.canvas = self.canvas
-        self.minutes_input.canvas = self.canvas
-        self.error_label.canvas = self.canvas
-        self.add_event_button.canvas = self.canvas
+
+        for obj in self.get_ui_elements():
+            obj.update_canvas(self.canvas)
+
         for btn in self.color_buttons:
             btn.update_canvas(self.canvas)
 
@@ -229,10 +234,33 @@ class AddEventView(View):
         self.invalid_time_error = self.language_manager.get_string("invalid_time_error")
         self.add_event_label.set_text(self.language_manager.get_string("add_event"))
         self.description_text_field.set_hint(self.language_manager.get_string("event_description"))
+        self.recurring_label.set_text(self.language_manager.get_string("recurring"))
         self.add_event_button.label.set_text(self.language_manager.get_string("add"))
+        self.dropdown.update_options(self.language_manager.get_string("event_dropdown_options"))
 
     def get_time(self) -> datetime.time:
         return datetime.time(int(self.hours_input.text or "00"), int(self.minutes_input.text or "00"))
+
+    def get_event_recurring(self) -> EventRecurring:
+        options = self.language_manager.get_string("event_dropdown_options")
+
+        if self.dropdown.get_selected_option() == options[3]:
+            return EventRecurring.NEVER
+        elif self.dropdown.get_selected_option() == options[0]:
+            return EventRecurring.WEEKLY
+        elif self.dropdown.get_selected_option() == options[1]:
+            return EventRecurring.MONTHLY
+        elif self.dropdown.get_selected_option() == options[2]:
+            return EventRecurring.YEARLY
+
+    def get_dropdown_option(self, option: EventRecurring) -> int:
+        if option == EventRecurring.NEVER:
+            return 3
+        elif option == EventRecurring.WEEKLY:
+            return 0
+        elif option == EventRecurring.MONTHLY:
+            return 1
+        return 2
 
     def bind_on_add_button_click(self, on_click: Callable) -> None:
         self.add_event_button.bind_on_click(on_click)
@@ -249,6 +277,7 @@ class AddEventView(View):
         self.description_text_field.set_text(event.description)
         self.hours_input.set_text(str(event.time)[:2])
         self.minutes_input.set_text(str(event.time)[3:5])
+        self.dropdown.set_option(self.get_dropdown_option(event.recurring))
         self.add_event_button.label.set_text(self.language_manager.get_string("apply"))
 
         for btn in self.color_buttons:

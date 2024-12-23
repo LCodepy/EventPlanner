@@ -5,6 +5,7 @@ import pygame
 from src.events.event import Event, MouseMotionEvent, MouseReleaseEvent, MouseClickEvent, MouseFocusChangedEvent, \
     WindowMinimizedEvent, WindowUnminimizedEvent
 from src.events.mouse_buttons import MouseButtons
+from src.ui.button import Button
 from src.ui.colors import Color, Colors, brighten
 from src.ui.label import Label
 from src.ui.padding import Padding
@@ -12,59 +13,62 @@ from src.ui.ui_object import UIObject
 from src.utils.ui_debugger import UIDebugger
 
 
-class Button(UIObject):
+class DropDown(UIObject):
 
-    def __init__(self, canvas: pygame.Surface, pos: (int, int), size: (int, int), label: Label = None,
-                 color: Color = Colors.WHITE, border_color: Color = Colors.BLACK, border_radius: int = 0,
-                 border_width: int = 1, apply_hover_effects: bool = True, hover_color: Color = None,
-                 click_color: Color = None, image: pygame.Surface = None, hover_image: pygame.Surface = None,
-                 padding: Padding = None) -> None:
+    def __init__(self, canvas: pygame.Surface, pos: (int, int), size: (int, int), options: list[str],
+                 color: Color = Colors.WHITE, border_color: Color = Colors.BLACK, text_color: Color = Colors.WHITE,
+                 border_radius: int = 0,  border_width: int = 1,  hover_color: Color = None, click_color: Color = None,
+                 selected_option: int = 0, font: pygame.font.Font = None, padding: Padding = None) -> None:
         super().__init__(canvas, pos, padding)
         self.canvas = canvas
         self.x, self.y = pos
         self.width, self.height = size
 
-        self.label = label
+        self.options = options
         self.color = color
+        self.text_color = text_color
         self.border_color = border_color
         self.border_radius = border_radius
         self.border_width = border_width
-        self.apply_hover_effects = apply_hover_effects
-        self.hover_color = hover_color or brighten(self.color, 20)
-        self.click_color = click_color or brighten(self.color, 30)
-        self.image = image
-        self.hover_image = hover_image
+        self.hover_color = hover_color or brighten(self.text_color, 20)
+        self.click_color = click_color or brighten(self.text_color, 30)
+        self.selected_option = selected_option
+        self.font = font or pygame.font.SysFont("arial", 12)
         self.padding = padding or Padding()
-
-        self.render_color = self.color[:]
-
-        if self.label:
-            self.label.post_init(self.canvas, pos, size)
-            self.label.x += self.padding.left - self.padding.right
-            self.label.y += self.padding.top - self.padding.bottom
-
-        if self.image:
-            self.image = pygame.transform.scale(self.image, (self.width, self.height))
-        if self.hover_image:
-            self.hover_image = pygame.transform.scale(self.hover_image, (self.width, self.height))
 
         self.hovering = False
         self.pressed = False
+        self.opened = False
 
-        self.on_click_bind = None
-        self.on_enter_bind = None
-        self.on_exit_bind = None
+        self.label = Label(
+            self.canvas,
+            (self.x, self.y),
+            (self.width, self.height),
+            text=self.options[self.selected_option],
+            text_color=self.text_color,
+            font=self.font
+        )
+
+        self.buttons: list[Button] = []
 
     def register_event(self, event: Event) -> bool:
+        registered_events = False
+
+        for btn in self.buttons:
+            if btn.register_event(event):
+                registered_events = True
+
+        if registered_events:
+            return True
+
         if isinstance(event, MouseMotionEvent):
             currently_hovering = self.is_hovering((event.x, event.y))
             if currently_hovering != self.hovering:
                 if self.hovering:
-                    self.hovering = currently_hovering
                     self.on_exit()
                 else:
-                    self.hovering = currently_hovering
                     self.on_enter()
+                self.hovering = currently_hovering
                 return True
         elif isinstance(event, MouseFocusChangedEvent):
             if self.hovering and not event.focused:
@@ -94,72 +98,101 @@ class Button(UIObject):
             self.pressed = False
             self.on_release()
             return True
-
-        if self.label is not None and self.label.register_event(event):
+        elif (
+            isinstance(event, MouseClickEvent) and
+            not self.is_hovering((event.x, event.y))
+        ):
+            self.opened = False
+            self.buttons = []
             return True
-        return False
 
     def render(self) -> None:
-        pygame.draw.rect(self.canvas, self.render_color, self.get_rect(), border_radius=self.border_radius)
-        if self.border_width:
-            pygame.draw.rect(
-                self.canvas, self.border_color, self.get_rect(), width=self.border_width, border_radius=self.border_radius
-            )
-        if self.hover_image and self.hovering:
-            self.canvas.blit(self.hover_image, self.get_rect().topleft)
-        elif self.image:
-            self.canvas.blit(self.image, self.get_rect().topleft)
+        pygame.draw.line(self.canvas, self.label.text_color, (self.x - self.width // 2, self.y + self.height // 2),
+                         (self.x + self.width // 2 - 1, self.y + self.height // 2))
 
-        if self.label is not None:
-            self.label.render()
+        self.label.render()
+
+        if self.opened:
+            pygame.draw.rect(self.canvas, self.color,
+                             [self.get_rect().x, self.y + self.height // 2, self.width, (self.height - 4) * 3],
+                             border_radius=self.border_radius)
+            if self.border_width:
+                pygame.draw.rect(self.canvas, self.border_color,
+                                 [self.get_rect().x, self.y + self.height // 2, self.width, (self.height - 4) * 3],
+                                 border_radius=self.border_radius, width=self.border_width)
+
+        for btn in self.buttons:
+            btn.render()
 
         # UI debugging
         if UIDebugger.is_enabled():
-            pygame.draw.rect(self.canvas, UIDebugger.box_color, self.get_rect(), 1)
             pygame.draw.circle(self.canvas, UIDebugger.center_point_color, (self.x, self.y), 2)
 
     def update_canvas(self, canvas: pygame.Surface) -> None:
         self.canvas = canvas
-        if self.label:
-            self.label.update_canvas(self.canvas)
+        self.label.update_canvas(self.canvas)
 
     def update_position(self, x: int = None, y: int = None) -> None:
-        if self.label:
-            self.label.x -= (self.x - (x or self.x))
-            self.label.y -= (self.y - (y or self.y))
+        self.label.x -= (self.x - (x or self.x))
+        self.label.y -= (self.y - (y or self.y))
         self.x = x or self.x
         self.y = y or self.y
 
+    def update_options(self, options: list[str]) -> None:
+        self.options = options
+        self.label.set_text(self.options[self.selected_option])
+        self.create_buttons()
+
+    def create_buttons(self) -> None:
+        self.buttons = []
+        i = 0
+        for j in range(len(self.options)):
+            if j == self.selected_option:
+                continue
+            self.buttons.append(
+                Button(
+                    self.canvas,
+                    (self.x, self.y + 6 + (i + 1) * (self.height - 6)),
+                    (self.width - 6, self.height - 6),
+                    label=Label(text=self.options[j], text_color=self.text_color, font=self.font),
+                    color=self.color,
+                    border_width=0,
+                    border_radius=0
+                )
+            )
+            self.buttons[i].bind_on_click(lambda idx=j: self.on_button_click(idx))
+            i += 1
+
+    def get_selected_option(self) -> str:
+        return self.options[self.selected_option]
+
+    def set_option(self, idx: int) -> None:
+        self.selected_option = idx
+        self.label.set_text(self.options[idx])
+
+    def on_button_click(self, idx: int) -> None:
+        self.selected_option = idx
+        self.label.set_text(self.options[idx])
+        self.opened = False
+        self.buttons = []
+
     def on_click(self) -> None:
-        if self.apply_hover_effects:
-            self.render_color = self.click_color or brighten(self.color, 50)
+        pass
 
     def on_release(self) -> None:
-        if self.apply_hover_effects:
-            self.render_color = self.hover_color[:]
-        if self.on_click_bind is not None:
-            self.on_click_bind()
+        if self.opened:
+            self.opened = False
+            self.buttons = []
+            return
+
+        self.opened = True
+        self.create_buttons()
 
     def on_enter(self) -> None:
-        if self.apply_hover_effects:
-            self.render_color = self.hover_color
-        if self.on_enter_bind is not None:
-            self.on_enter_bind()
+        self.label.text_color = self.hover_color
 
     def on_exit(self) -> None:
-        if self.apply_hover_effects:
-            self.render_color = self.color[:]
-        if self.on_exit_bind is not None:
-            self.on_exit_bind()
-
-    def bind_on_click(self, on_click: Callable) -> None:
-        self.on_click_bind = on_click
-
-    def bind_on_enter(self, on_enter: Callable) -> None:
-        self.on_enter_bind = on_enter
-
-    def bind_on_exit(self, on_exit: Callable) -> None:
-        self.on_exit_bind = on_exit
+        self.label.text_color = self.text_color
 
     def is_hovering(self, mouse_pos) -> bool:
         mouse_x, mouse_y = mouse_pos

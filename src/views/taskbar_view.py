@@ -8,6 +8,7 @@ from src.models.taskbar_model import TaskbarModel
 from src.ui.button import Button
 from src.ui.colors import Colors
 from src.utils.assets import Assets
+from src.utils.language_manager import LanguageManager
 from src.views.view import View
 
 
@@ -25,6 +26,8 @@ class TaskbarView(View):
         self.canvas = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
 
         self.rendering = False
+
+        self.language_manager = LanguageManager()
 
         self.profile_button = Button(
             self.canvas,

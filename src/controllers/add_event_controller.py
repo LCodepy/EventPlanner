@@ -44,10 +44,10 @@ class AddEventController:
 
         if self.view.editing_state:
             self.event_loop.enqueue_event(
-                EditCalendarEventEvent(time.time(), self.view.event_to_edit, event_time, self.view.description_text_field.text, color, False)
+                EditCalendarEventEvent(time.time(), self.view.event_to_edit, event_time, self.view.description_text_field.text, color, self.view.get_event_recurring())
             )
         else:
             self.event_loop.enqueue_event(
-                AddCalendarEventEvent(time.time(), event_time, self.view.description_text_field.text, color, False)
+                AddCalendarEventEvent(time.time(), event_time, self.view.description_text_field.text, color, self.view.get_event_recurring())
             )
 

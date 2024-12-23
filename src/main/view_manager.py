@@ -4,9 +4,11 @@ from typing import Optional
 import pygame.display
 
 from src.events.event import Event, OpenViewEvent, CloseViewEvent, ResizeViewEvent, MouseReleaseEvent, MouseClickEvent, \
-    MouseFocusChangedEvent, AddTaskEvent, AddCalendarEventEvent, MouseMotionEvent, EditTaskEvent, EditCalendarEventEvent
+    MouseFocusChangedEvent, AddTaskEvent, AddCalendarEventEvent, MouseMotionEvent, EditTaskEvent, \
+    EditCalendarEventEvent, ShowIndependentLabelEvent, HideIndependentLabelEvent, TimerEvent
 from src.events.event_loop import EventLoop
 from src.ui.colors import Colors
+from src.ui.independent_label import IndependentLabel
 from src.utils.animations import ChangeValuesAnimation
 from src.views.event_list_view import EventListView
 from src.views.options_view import OptionsView
@@ -25,6 +27,7 @@ class ViewManager:
         self.side_view: Optional[View] = None
         self.top_view: Optional[View] = None
         self.options_view: Optional[View] = None
+        self.independent_label: Optional[IndependentLabel] = None
 
         self.opened_top_view_last_frame = False
 
@@ -42,6 +45,12 @@ class ViewManager:
             registered_events = self.close_view(event)
         elif isinstance(event, ResizeViewEvent):
             registered_events = self.resize_view(event)
+        elif isinstance(event, ShowIndependentLabelEvent):
+            self.independent_label = event.label
+            registered_events = True
+        elif isinstance(event, HideIndependentLabelEvent):
+            self.independent_label = None
+            registered_events = True
 
         if self.screen_fog_animation.register_event(event):
             registered_events = True
@@ -87,7 +96,7 @@ class ViewManager:
             self.screen_fog_animation.start([0], [150])
             self.opened_top_view_last_frame = True
             self.event_loop.enqueue_event(MouseFocusChangedEvent(time.time(), False))
-        elif isinstance(event.view, OptionsView):
+        elif isinstance(event.view, (OptionsView, )):
             self.options_view = event.view
         elif isinstance(event.view, (TodoListView, EventListView, )):
             if self.side_view:
@@ -112,6 +121,8 @@ class ViewManager:
         return True
 
     def close_view(self, event: CloseViewEvent) -> bool:
+        event.view.on_delete()
+
         if event.view in self.get_views():
             self.delete_view(event.view)
             if isinstance(event.view, (TodoListView, EventListView,)):
@@ -148,6 +159,9 @@ class ViewManager:
 
         if self.options_view:
             self.options_view.render()
+
+        if self.independent_label:
+            self.independent_label.render()
 
     def resize(self, window_size: (int, int)) -> None:
         self.top_bar_view.resize(width=window_size[0])

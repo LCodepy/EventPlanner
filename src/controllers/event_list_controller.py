@@ -123,7 +123,7 @@ class EventListController:
         )
 
     def add_event(self, ev: AddCalendarEventEvent) -> None:
-        event = CalendarEvent(self.view.date, ev.time, ev.description, ev.color, ev.is_recurring)
+        event = CalendarEvent(self.view.date, ev.time, ev.description, ev.color, ev.recurring, 0)
         self.model.add_event(event)
         self.view.create_time_table()
         self.bind_view_methods()
@@ -131,7 +131,7 @@ class EventListController:
         self.event_loop.enqueue_event(UpdateCalendarEvent(time.time()))
 
     def edit_event(self, event: EditCalendarEventEvent) -> None:
-        self.model.update_event(self.add_event_view.event_to_edit, event.time, event.description, event.color, event.is_recurring)
+        self.model.update_event(self.add_event_view.event_to_edit, event.event.date, event.time, event.description, event.color, event.recurring)
         self.event_loop.enqueue_event(CloseViewEvent(time.time(), self.add_event_view))
         self.event_loop.enqueue_event(UpdateCalendarEvent(time.time()))
 

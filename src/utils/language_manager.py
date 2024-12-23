@@ -49,12 +49,12 @@ class LanguageManager(metaclass=Singleton):
         try:
             with open(os.path.join(self.LANGUAGES_PATH, filename + ".json"), encoding="utf-16") as file:
                 self.strings = json.load(file)
-        except UnicodeDecodeError:
+        except (UnicodeDecodeError, UnicodeError):
             with open(os.path.join(self.LANGUAGES_PATH, filename + ".json")) as file:
                 self.strings = json.load(file)
 
         self.event_loop.enqueue_event(LanguageChangedEvent(time.time()))
 
-    def get_string(self, key: str) -> str:
+    def get_string(self, key: str) -> Union[str, list[str]]:
         return self.strings[key]
 

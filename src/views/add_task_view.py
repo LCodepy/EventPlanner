@@ -135,36 +135,17 @@ class AddTaskView(View):
 
         event = self.get_event(event)
 
-        if self.close_button.register_event(event):
-            registered_events = True
-        if self.add_task_label.register_event(event):
-            registered_events = True
-        if self.description_text_field.register_event(event):
-            registered_events = True
-        if self.importance_label.register_event(event):
-            registered_events = True
-        if self.low_importance_button.register_event(event):
-            registered_events = True
-        if self.medium_importance_button.register_event(event):
-            registered_events = True
-        if self.high_importance_button.register_event(event):
-            registered_events = True
-        if self.add_task_button.register_event(event):
-            registered_events = True
+        for obj in self.get_ui_elements():
+            if obj.register_event(event):
+                registered_events = True
 
         return registered_events
 
     def render(self) -> None:
         self.canvas.fill(Colors.BACKGROUND_GREY30)
 
-        self.close_button.render()
-        self.add_task_label.render()
-        self.description_text_field.render()
-        self.importance_label.render()
-        self.low_importance_button.render()
-        self.medium_importance_button.render()
-        self.high_importance_button.render()
-        self.add_task_button.render()
+        for obj in self.get_ui_elements():
+            obj.render()
 
         pygame.draw.rect(self.canvas, Colors.BLUE220, [self.width // 4 - 46, 384, 12, 12])
         pygame.draw.rect(self.canvas, Colors.YELLOW220, [self.width // 2 - 26, 384, 12, 12])
@@ -189,14 +170,9 @@ class AddTaskView(View):
 
     def update_canvas(self, canvas: pygame.Surface) -> None:
         self.canvas = canvas
-        self.close_button.canvas = canvas
-        self.add_task_label.canvas = self.canvas
-        self.description_text_field.canvas = self.canvas
-        self.importance_label.canvas = self.canvas
-        self.low_importance_button.canvas = self.canvas
-        self.medium_importance_button.canvas = self.canvas
-        self.high_importance_button.canvas = self.canvas
-        self.add_task_button.canvas = self.canvas
+
+        for obj in self.get_ui_elements():
+            obj.update_canvas(self.canvas)
 
     def update_position(self, x: int = None, y: int = None) -> None:
         self.x = x or self.x

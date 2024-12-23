@@ -30,6 +30,7 @@ class OptionsView(View):
         self.rendering = False
 
         self.canvas = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+        self.shadow_canvas = pygame.Surface((self.width + 16, self.height + 16), pygame.SRCALPHA)
 
         self.language_manager = LanguageManager()
 
@@ -104,6 +105,12 @@ class OptionsView(View):
         self.edit_icon.render()
         self.delete_icon.render()
 
+        self.shadow_canvas.fill((0, 0, 0, 0))
+        for i in range(8):
+            pygame.draw.rect(self.shadow_canvas, (0, 0, 0, max(70 - i * 9, 0)),
+                             (8 - i, 0, self.width + 2*i, self.height + 2*i), border_radius=4 + 2*i, width=2)
+
+        self.display.blit(self.shadow_canvas, (self.x-8, self.y))
         self.display.blit(self.canvas, (self.x, self.y))
 
     def resize(self, width: int = None, height: int = None) -> None:

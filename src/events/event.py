@@ -1,9 +1,9 @@
 import datetime
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Callable
 
 from src.events.mouse_buttons import MouseButtons
-from src.models.calendar_model import CalendarEvent
+from src.models.calendar_model import CalendarEvent, EventRecurring
 from src.models.todo_list_model import TaskImportance
 from src.ui.colors import Color
 
@@ -156,6 +156,19 @@ class ResizeViewEvent(Event):
 
 
 @dataclass
+class ShowIndependentLabelEvent(Event):
+
+    exec_time: float
+    label: Any
+
+
+@dataclass
+class HideIndependentLabelEvent(Event):
+
+    exec_time: float
+
+
+@dataclass
 class AddTaskEvent(Event):
 
     exec_time: float
@@ -193,7 +206,7 @@ class AddCalendarEventEvent(Event):
     time: datetime.time
     description: str
     color: Color
-    is_recurring: bool
+    recurring: EventRecurring
 
 
 @dataclass
@@ -211,7 +224,7 @@ class EditCalendarEventEvent(Event):
     time: datetime.time
     description: str
     color: Color
-    is_recurring: bool
+    recurring: EventRecurring
 
 
 @dataclass
@@ -231,6 +244,14 @@ class UpdateCalendarEvent(Event):
 class LanguageChangedEvent(Event):
 
     exec_time: float
+
+
+@dataclass
+class TimerEvent(Event):
+
+    exec_time: float
+    duration: float
+    callback: Callable
 
 
 class EventFactory:

@@ -150,14 +150,9 @@ class CalendarView(View):
 
         event = self.get_event(event)
 
-        if self.year_label.register_event(event):
-            registered_events = True
-        if self.month_label.register_event(event):
-            registered_events = True
-        if self.next_month_button.register_event(event):
-            registered_events = True
-        if self.previous_month_button.register_event(event):
-            registered_events = True
+        for obj in self.get_ui_elements():
+            if obj.register_event(event):
+                registered_events = True
 
         if isinstance(event, UpdateCalendarEvent):
             self.create_day_buttons()
@@ -230,10 +225,9 @@ class CalendarView(View):
         self.height = height or self.height
         self.canvas = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
 
-        self.year_label.canvas = self.canvas
-        self.month_label.canvas = self.canvas
-        self.previous_month_button.canvas = self.canvas
-        self.next_month_button.canvas = self.canvas
+        for obj in self.get_ui_elements():
+            obj.update_canvas(self.canvas)
+
         self.create_weekday_labels()
         self.create_day_buttons()
 
@@ -245,7 +239,8 @@ class CalendarView(View):
         self.bind_buttons()
 
     def update_language(self) -> None:
-        pass
+        self.create_day_buttons()
+        self.create_weekday_labels()
 
     def get_day_button_color(self, idx: int, starting_day: int) -> Color:
         return Colors.RED if datetime.date(self.year, self.month, idx - starting_day + 1) == self.today.date() else (

@@ -1,6 +1,7 @@
 {
   "months": ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"],
   "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+  "event_dropdown_options": ["Weekly", "Monthly", "Yearly", "Never"],
   "todo_list": "Todo List",
   "add_task": "Add Task",
   "task_description": "Task description...",
@@ -15,5 +16,9 @@
   "add_event": "Add Event",
   "edit_event": "Edit Event",
   "event_description": "Event description...",
-  "invalid_time_error": "Time is not valid."
+  "invalid_time_error": "Time is not valid.",
+  "recurring": "Recurring:",
+  "calendar": "Calendar",
+  "profile": "Profile",
+  "settings": "Settings"
 }

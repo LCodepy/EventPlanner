@@ -21,3 +21,6 @@ class UIObject(ABC):
     def render(self) -> None:
         """Renders the UI object."""
 
+    def update_canvas(self, canvas: pygame.Surface) -> None:
+        self.canvas = canvas
+

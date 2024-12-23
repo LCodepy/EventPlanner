@@ -5,7 +5,7 @@ import pygame
 
 from src.events.event import CloseWindowEvent, MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, \
     MouseWheelDownEvent, MouseMotionEvent, Event, KeyPressEvent, KeyReleaseEvent, MouseFocusChangedEvent, \
-    WindowUnminimizedEvent, WindowMinimizedEvent
+    WindowUnminimizedEvent, WindowMinimizedEvent, TimerEvent
 from src.events.mouse_buttons import MouseButtons
 from src.events.queue import EventQueue
 
@@ -23,6 +23,7 @@ class EventLoop:
     def __init__(self) -> None:
         self.event_queue = EventQueue()
         self.repeating_events: list[RepeatingEvent] = []
+        self.timer_events: list[TimerEvent] = []
         self.mouse_focused = False
 
     def run(self) -> None:
@@ -83,6 +84,15 @@ class EventLoop:
                 r_event.last_queued = current_time
                 self.event_queue.add(r_event.event(current_time))
 
+        timers_to_remove = []
+        for event in self.timer_events:
+            if time.time() - event.exec_time >= event.duration:
+                event.callback()
+                timers_to_remove.append(event)
+
+        for event in timers_to_remove:
+            self.timer_events.remove(event)
+
     def add_repeating_event(self, event: type, timer: float) -> None:
         if not issubclass(event, Event):
             return
@@ -98,6 +108,10 @@ class EventLoop:
             self.repeating_events.pop(idx)
 
     def enqueue_event(self, event: Event) -> None:
+        if isinstance(event, TimerEvent):
+            self.timer_events.append(event)
+            return
+
         self.event_queue.add(event)
 
     def next(self) -> Event:
