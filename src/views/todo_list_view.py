@@ -340,12 +340,23 @@ class TodoListView(View):
         pygame.draw.rect(self.canvas, Colors.BACKGROUND_GREY30, (0, 0, self.width, 50))
         pygame.draw.rect(self.canvas, Colors.BACKGROUND_GREY30, (0, self.task_list_bottom[1], self.width, 100))
 
+        self.render_shadow()
+
         self.title_label.render()
         self.add_task_button.render()
 
         pygame.draw.line(self.canvas, Colors.GREY70, (self.width - 1, 0), (self.width - 1, self.height))
 
         self.display.blit(self.canvas, (self.x, self.y))
+
+    def render_shadow(self) -> None:
+        pygame.draw.rect(self.canvas, Colors.BACKGROUND_GREY30, [0, 0, self.width, 50])
+        pygame.draw.rect(self.canvas, Colors.BACKGROUND_GREY30, (0, self.task_list_bottom[1], self.width, 100))
+        c = pygame.Surface(self.canvas.get_size(), pygame.SRCALPHA)
+        for i in range(22):
+            y = self.task_list_bottom[1] - i
+            pygame.draw.line(c, (30, 30, 30, 255 - i * 12), (0, y), (self.width, y))
+        self.canvas.blit(c, (0, 0))
 
     def resize(self, width: int = None, height: int = None) -> None:
         self.width = width or self.width
@@ -489,7 +500,7 @@ class TodoListView(View):
         return [self.tasks[k] for k in self.tasks if k != i] + [self.tasks[i]]
 
     def get_min_size(self) -> (int, int):
-        return 130, 170
+        return 150, 170
 
     @property
     def task_list_bottom(self) -> (int, int):

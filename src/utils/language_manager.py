@@ -32,7 +32,7 @@ class LanguageManager(metaclass=Singleton):
         if not os.path.exists(Assets().settings_database_path):
             return
 
-        with open(Assets().settings_database_path) as file:
+        with open(Assets().settings_database_path, encoding="utf-16") as file:
             self.language = json.load(file)["language"]
 
     def set_language(self, language: Union[Language, str]) -> None:

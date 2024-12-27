@@ -12,6 +12,7 @@ from src.ui.independent_label import IndependentLabel
 from src.utils.animations import ChangeValuesAnimation
 from src.views.event_list_view import EventListView
 from src.views.options_view import OptionsView
+from src.views.search_view import SearchView
 from src.views.todo_list_view import TodoListView
 from src.views.view import View
 
@@ -98,7 +99,7 @@ class ViewManager:
             self.event_loop.enqueue_event(MouseFocusChangedEvent(time.time(), False))
         elif isinstance(event.view, (OptionsView, )):
             self.options_view = event.view
-        elif isinstance(event.view, (TodoListView, EventListView, )):
+        elif isinstance(event.view, (TodoListView, EventListView, SearchView, )):
             if self.side_view:
                 self.event_loop.enqueue_event(CloseViewEvent(time.time(), self.side_view))
                 event.view.resize(width=self.side_view.width)
@@ -125,7 +126,7 @@ class ViewManager:
 
         if event.view in self.get_views():
             self.delete_view(event.view)
-            if isinstance(event.view, (TodoListView, EventListView,)):
+            if isinstance(event.view, (TodoListView, EventListView, SearchView, )):
                 self.main_view.resize(width=pygame.display.get_window_size()[0] - self.side_bar_view.width)
                 self.main_view.x -= event.view.width
         elif event.view == self.top_view:
@@ -136,7 +137,7 @@ class ViewManager:
         return True
 
     def resize_view(self, event: ResizeViewEvent) -> bool:
-        if isinstance(event.view, (TodoListView, EventListView,)):
+        if isinstance(event.view, (TodoListView, EventListView, SearchView, )):
             main_view_width = max(self.main_view.get_min_size()[0],
                                   pygame.display.get_window_size()[0] - self.side_bar_view.width - event.width)
             event.view.resize(width=pygame.display.get_window_size()[0] - self.side_bar_view.width - main_view_width)

@@ -164,15 +164,15 @@ class TodoListController:
         win_width, win_height = pygame.display.get_window_size()
         view = AddTaskView(self.view.display, self.event_loop, 400, 500, win_width // 2 - 200, win_height // 2 - 250)
         task = self.view.tasks[id_].task
+        AddTaskController(view, self.event_loop)
         view.set_edit_state(id_, task.description, task.importance)
         self.event_loop.enqueue_event(OpenViewEvent(time.time(), view, True))
-        AddTaskController(view, self.event_loop)
 
     def open_add_task_view(self) -> None:
         win_width, win_height = pygame.display.get_window_size()
         view = AddTaskView(self.view.display, self.event_loop, 400, 500, win_width // 2 - 200, win_height // 2 - 250)
-        self.event_loop.enqueue_event(OpenViewEvent(time.time(), view, True))
         AddTaskController(view, self.event_loop)
+        self.event_loop.enqueue_event(OpenViewEvent(time.time(), view, True))
 
     def on_click(self, event: MouseClickEvent) -> None:
         if self.view.width - 5 < event.x < self.view.width and 0 < event.y < self.view.height:
@@ -210,7 +210,7 @@ class TodoListController:
         if isinstance(event, MouseWheelUpEvent) and self.view.get_sorted_tasks()[0].get_rect().top < self.view.task_list_top[1]:
             self.scroll_tasks(self.scroll_value)
             return True
-        elif isinstance(event, MouseWheelDownEvent) and self.view.get_sorted_tasks()[-1].get_rect().bottom > self.view.task_list_bottom[1]:
+        elif isinstance(event, MouseWheelDownEvent) and self.view.get_sorted_tasks()[-1].get_rect().bottom > self.view.task_list_bottom[1] - 30:
             self.scroll_tasks(-self.scroll_value)
             return True
 

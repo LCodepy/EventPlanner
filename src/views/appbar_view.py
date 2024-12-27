@@ -73,7 +73,7 @@ class AppbarView(View):
 
         self.app_icon = Image(
             self.canvas,
-            (22, 15),
+            (22, 14),
             Assets().app_icon
         )
 

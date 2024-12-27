@@ -1,6 +1,7 @@
 from typing import Union
 
 import pygame
+import pygame.gfxdraw
 
 from src.events.event import Event
 from src.ui.colors import Colors
@@ -31,10 +32,14 @@ class IndependentLabel(UIObject):
     def render(self) -> None:
         self.canvas.fill((0, 0, 0, 0))
 
-        pygame.draw.polygon(self.canvas, Colors.BACKGROUND_GREY22, self.get_triangle())
-        pygame.draw.polygon(self.canvas, Colors.GREY70, self.get_triangle(), width=1)
+        pygame.gfxdraw.filled_polygon(self.canvas, self.get_triangle(), Colors.BACKGROUND_GREY22)
+        pygame.gfxdraw.aapolygon(self.canvas, self.get_triangle(), (100, 100, 100))
+        pygame.gfxdraw.aapolygon(self.canvas, self.get_triangle(), (100, 100, 100))
+        pygame.gfxdraw.aapolygon(self.canvas, self.get_triangle(), Colors.GREY70)
+
         pygame.draw.rect(self.canvas, Colors.BACKGROUND_GREY22, self.get_rect(), border_radius=4)
         pygame.draw.rect(self.canvas, Colors.GREY70, self.get_rect(), width=1, border_radius=4)
+
         pygame.draw.line(self.canvas, Colors.BACKGROUND_GREY22, (10, self.height // 4 + 1), (10, self.height // 4 * 3))
 
         self.label.render()
@@ -42,7 +47,8 @@ class IndependentLabel(UIObject):
         self.shadow_canvas.fill((0, 0, 0, 0))
         for i in range(8):
             pygame.draw.rect(self.shadow_canvas, (0, 0, 0, max(70 - i * 9, 0)),
-                             (self.get_rect()[0], 0, self.get_rect()[2] + i, self.get_rect()[3] + i), border_radius=4 + 2 * i, width=2)
+                             (self.get_rect()[0], 0, self.get_rect()[2] + i, self.get_rect()[3] + i),
+                             border_radius=4 + 2 * i, width=2)
 
         self.display.blit(self.shadow_canvas, (self.x, self.y))
         self.display.blit(self.canvas, (self.x, self.y))

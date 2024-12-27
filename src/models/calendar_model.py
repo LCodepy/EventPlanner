@@ -1,4 +1,5 @@
 import datetime
+import json
 import os
 import pickle
 import sqlite3
@@ -7,7 +8,7 @@ from enum import Enum, auto
 
 from src.ui.colors import Color, Colors, get_rgb_color, get_hex_color
 from src.utils.assets import Assets
-from src.utils.calendar_functions import get_month_length
+from src.utils.calendar_functions import get_month_length, calculate_easter
 
 
 class EventRecurring(Enum):
@@ -57,19 +58,49 @@ class CalendarModel:
         )
         self.conn.commit()
 
-        self.current_recurring_id = 0
+        self.current_recurring_id = None
+        self.load_recurring_id()
 
         self.default_events = []
+        self.default_event_color = None
+        self.catholic_event_color = None
+        self.load_default_events()
         self.add_default_events()
+
+    def load_default_events(self) -> None:
+        with open(Assets().settings_database_path, "r", encoding="utf-16") as file:
+            fjson = json.load(file)
+
+            self.default_event_color = fjson["default_event_color"]
+            self.catholic_event_color = fjson["catholic_event_color"]
+
+            for i, event in enumerate(fjson["default_events"]):
+                if not event["date"]:
+                    continue
+                month, day = event["date"].split("-")
+                date = datetime.date(datetime.datetime.now().year, int(month), int(day))
+
+                self.default_events.append(
+                    CalendarEvent(
+                        date, datetime.time(0, 0), event["description"], get_rgb_color(self.default_event_color),
+                        EventRecurring.YEARLY, -(i + 4)
+                    )
+                )
+
+    def load_recurring_id(self) -> None:
+        with open(Assets().settings_database_path, "r", encoding="utf-16") as file:
+            self.current_recurring_id = json.load(file)["current_recurring_id"]
 
     def add_default_events(self) -> None:
         if self.calendar_exists:
             return
 
         for event in self.default_events:
-            self.add_event(event)
+            self.add_event(event, default_event=True)
 
-    def add_event(self, event: CalendarEvent) -> None:
+    def add_event(self, event: CalendarEvent, default_event: bool = False) -> None:
+        current_recurring_id = event.recurrence_id if default_event else self.current_recurring_id
+
         with self.conn:
             self.cursor.execute(
                 f"""
@@ -78,10 +109,22 @@ class CalendarModel:
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (event.date.year, event.date.month, event.date.day, event.time.hour, event.time.minute,
                       int(event.time.second), event.description, get_hex_color(event.color),
-                      pickle.dumps(event.recurring), self.current_recurring_id)
+                      pickle.dumps(event.recurring), current_recurring_id)
             )
             self.conn.commit()
-            self.current_recurring_id += 1
+
+        if default_event:
+            return
+
+        self.current_recurring_id += 1
+
+        with open(Assets().settings_database_path, "r", encoding="utf-16") as file:
+            data = json.load(file)
+
+        data["current_recurring_id"] = self.current_recurring_id
+
+        with open(Assets().settings_database_path, "w", encoding="utf-16") as file:
+            json.dump(data, file)
 
     def get_events_for_date(self, date: datetime.date) -> list[CalendarEvent]:
         with self.conn:
@@ -93,7 +136,11 @@ class CalendarModel:
                 """,
                 (date.year, date.month, date.day, pickle.dumps(EventRecurring.NEVER))
             )
-        return list(
+
+        easter_events = list(filter(lambda ev: ev.date == date, self.get_easter_events(date.year)))
+        catholic_events = list(filter(lambda ev: ev.date == date, self.get_catholic_events()))
+
+        return easter_events + catholic_events + list(
             map(
                 lambda t: CalendarEvent(
                     datetime.date(t[0], t[1], t[2]), datetime.time(t[3], t[4], t[5]), t[6], get_rgb_color(t[7]),
@@ -124,14 +171,14 @@ class CalendarModel:
                 )
             )
 
+        easter_events = list(filter(lambda ev: ev.date.month == month, self.get_easter_events(year)))
+        catholic_events = list(filter(lambda ev: ev.date.month == month, self.get_catholic_events()))
+
         recurring_events = self.get_recurring_events(year, month)
 
         ret = [[] for _ in range(get_month_length(month))]
 
-        for event in events:
-            ret[event.date.day - 1].append(event)
-
-        for event in recurring_events:
+        for event in easter_events + catholic_events + events + recurring_events:
             ret[event.date.day - 1].append(event)
 
         return ret
@@ -192,6 +239,49 @@ class CalendarModel:
 
         return ret
 
+    def get_easter_events(self, year: int) -> list[CalendarEvent]:
+        easter = datetime.date(*calculate_easter(year))
+        easter_m = easter + datetime.timedelta(days=1)
+        tijelovo = easter + datetime.timedelta(days=60)
+
+        easter_events = [
+            CalendarEvent(
+                easter, datetime.time(0, 0), "Uskrs", self.default_event_color, EventRecurring.NEVER, -1
+            ),
+            CalendarEvent(
+                easter_m, datetime.time(0, 0), "Uskršnji ponedjeljak", self.default_event_color,
+                EventRecurring.NEVER, -2
+            ),
+            CalendarEvent(
+                tijelovo, datetime.time(0, 0), "Tijelovo", self.default_event_color, EventRecurring.NEVER, -3
+            )
+        ]
+
+        return easter_events
+
+    def get_catholic_events(self) -> list[CalendarEvent]:
+        with open(Assets().settings_database_path, "r", encoding="utf-16") as file:
+            fjson = json.load(file)
+
+            if not fjson["show_catholic_events"]:
+                return []
+
+            events = []
+            for i, event in enumerate(fjson["catholic_events"]):
+                if not event["date"]:
+                    continue
+                month, day = event["date"].split("-")
+                date = datetime.date(datetime.datetime.now().year, int(month), int(day))
+
+                events.append(
+                    CalendarEvent(
+                        date, datetime.time(0, 0), event["description"], get_rgb_color(self.catholic_event_color),
+                        EventRecurring.NEVER, -(i + 100)
+                    )
+                )
+
+            return events
+
     def remove_event(self, event: CalendarEvent) -> None:
         with self.conn:
             if event.recurring is not EventRecurring.NEVER:
@@ -209,8 +299,8 @@ class CalendarModel:
                                      "color": get_hex_color(event.color), "recurring": pickle.dumps(event.recurring),
                                      "recurrence_id": event.recurrence_id})
 
-    def update_event(self, event: CalendarEvent, d: datetime.date = None, t: datetime.time = None, description: str = None, color: Color = None,
-                     recurring: EventRecurring = EventRecurring.NEVER):
+    def update_event(self, event: CalendarEvent, d: datetime.date = None, t: datetime.time = None,
+                     description: str = None, color: Color = None, recurring: EventRecurring = EventRecurring.NEVER):
         date = d if event.recurring is not EventRecurring.NEVER else event.date
         new_event = CalendarEvent(date, t or event.time, description or event.description, color or event.color,
                                   recurring or event.recurring, 0)
@@ -222,3 +312,26 @@ class CalendarModel:
                                  new_event.time.minute, new_event.description, get_hex_color(new_event.color),
                                  pickle.dumps(new_event.recurring), event.recurrence_id)
                                 )
+
+    def search_events(self, query: str) -> list[CalendarEvent]:
+        with self.conn:
+            self.cursor.execute(
+                f"""
+                SELECT year, month, day, hour, minute, second, description, color, recurring, recurrence_id
+                FROM {self.database_name}
+                WHERE description LIKE ?
+                """,
+                (f"%{query}%",)
+            )
+
+            catholic_events = list(filter(lambda ev: query.lower() in ev.description.lower(), self.get_catholic_events()))
+
+            return catholic_events + list(
+                map(
+                    lambda t: CalendarEvent(
+                        datetime.date(t[0], t[1], t[2]), datetime.time(t[3], t[4], t[5]), t[6], get_rgb_color(t[7]),
+                        pickle.loads(t[8]), t[9]
+                    ),
+                    self.cursor.fetchall()
+                )
+            )

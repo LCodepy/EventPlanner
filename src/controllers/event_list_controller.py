@@ -24,7 +24,7 @@ class EventListController:
 
         self.pressed = False
         self.last_frame_interacted = False
-        self.scroll_value = 10
+        self.scroll_value = 15
         self.add_event_view = None
 
         self.view.add_event_button.bind_on_click(self.open_add_event_view)
@@ -70,10 +70,19 @@ class EventListController:
         if event.x < 0 or event.x > self.view.width or event.y < 0 or event.y > self.view.height:
             return False
 
-        if isinstance(event, MouseWheelUpEvent):
-            pass
-        elif isinstance(event, MouseWheelDownEvent):
-            pass
+        max_event_y = 0
+        for t in self.view.time_table:
+            max_event_y = max(max_event_y, max(self.view.time_table[t], key=lambda e: e.y).get_rect().bottom)
+
+        if isinstance(event, MouseWheelUpEvent) and min(map(lambda l: l.y, self.view.time_labels)) < self.view.events_pos[1]:
+            self.view.scroll_offset += self.scroll_value
+        elif isinstance(event, MouseWheelDownEvent) and max_event_y > self.view.task_list_bottom[1] - 30:
+            self.view.scroll_offset -= self.scroll_value
+
+        self.view.create_time_table()
+        self.bind_view_methods()
+
+        return True
 
     def on_resize(self) -> None:
         self.view.bind_event_methods(self.delete_event, self.open_options, self.open_edit_calendar_event)
@@ -94,6 +103,8 @@ class EventListController:
         self.event_loop.enqueue_event(UpdateCalendarEvent(time.time()))
 
     def open_options(self, event: CalendarEvent) -> None:
+        if event.recurrence_id < 0:
+            return
         options = OptionsView(self.view.display, self.event_loop, 120, 70, *pygame.mouse.get_pos())
         options.set_mode(1)
         OptionsController(options, self.event_loop, event=event)

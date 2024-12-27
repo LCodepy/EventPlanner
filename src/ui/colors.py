@@ -43,6 +43,8 @@ def brighten(color: Color, value: int):
 
 
 def get_rgb_color(s: str) -> Color:
+    if s.startswith("#"):
+        s = "0x" + s[1:]
     return tuple(eval("0x" + s[i * 2:i * 2 + 2]) for i in range(1, 4))
 
 

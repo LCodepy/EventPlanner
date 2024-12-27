@@ -20,5 +20,7 @@
   "recurring": "Recurring:",
   "calendar": "Calendar",
   "profile": "Profile",
-  "settings": "Settings"
+  "settings": "Settings",
+  "search": "Search",
+  "search_events": "Search Events"
 }

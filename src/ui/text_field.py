@@ -1,5 +1,6 @@
 import string
 import time
+from typing import Callable
 
 import pygame
 
@@ -20,7 +21,8 @@ class TextField(UIObject):
     def __init__(self, canvas: pygame.Surface, pos: (int, int), size: (int, int), label: Label = None, hint: str = "",
                  color: Color = Colors.WHITE, border_color: Color = Colors.BLACK, border_radius: int = 0,
                  border_width: int = 1, max_length: int = None, hint_text_color: Color = None,
-                 allowed_char_set: set[str] = None, underline: Color = None, padding: Padding = None) -> None:
+                 allowed_char_set: set[str] = None, underline: Color = None,
+                 oneline: bool = False, padding: Padding = None) -> None:
         super().__init__(canvas, pos, padding)
         self.canvas = canvas
         self.x, self.y = pos
@@ -36,13 +38,16 @@ class TextField(UIObject):
         self.max_length = max_length
         self.allowed_char_set = allowed_char_set or self.create_allowed_charset()
         self.underline = underline
+        self.oneline = oneline
         self.padding = padding or Padding()
         self.hint_text_color = hint_text_color or brighten(self.label.text_color, 50)
 
         self.text = ""
 
         self.text_color = self.label.text_color
-        self.label.post_init(self.canvas, pos, size)
+        self.label.post_init(self.canvas, pos, (size[0] - self.padding.left - self.padding.right,
+                                                size[1] - self.padding.top - self.padding.bottom))
+        self.label.oneline = oneline
         self.label.set_text(self.hint)
         self.label.text_color = self.hint_text_color
         self.label.x += self.padding.left - self.padding.right
@@ -51,12 +56,23 @@ class TextField(UIObject):
         self.hovering = False
         self.focused = False
 
+        self.on_enter = lambda: None
+        self.on_exit = lambda: None
+        self.on_key = lambda: None
+
         self.render_cursor = False
+        self.cursor_pos = -1
+        self.label_offsets = []
 
         self.backspace_pressed = False
         self.backspace_pressed_time = None
         self.last_backspace_time = 0
         self.initiate_deleting_time = 0.4
+
+        self.arrow_pressed = {pygame.K_LEFT: False, pygame.K_RIGHT: False, pygame.K_UP: False, pygame.K_DOWN: False}
+        self.arrow_pressed_time = None
+        self.last_arrow_time = 0
+        self.initiate_arrow_time = 0.4
 
     def register_event(self, event: Event) -> bool:
         if isinstance(event, MouseMotionEvent):
@@ -94,40 +110,52 @@ class TextField(UIObject):
             return True
         elif isinstance(event, KeyReleaseEvent) and self.focused:
             self.update_text(event.keycode, event.unicode)
+            self.on_key()
             return True
         elif isinstance(event, KeyPressEvent) and self.focused:
             self.update_text_on_press(event.keycode, event.unicode)
+            self.on_key()
             return True
         elif isinstance(event, RenderCursorEvent) and self.focused:
             self.render_cursor = not self.render_cursor
             return True
-        elif isinstance(event, DeleteCharacterEvent) and self.focused and self.backspace_pressed:
-            if time.time() - self.backspace_pressed_time > self.initiate_deleting_time:
-                self.text = self.text[:-1]
-                self.label.set_text(self.text)
+        elif isinstance(event, DeleteCharacterEvent) and self.focused:
+            if self.backspace_pressed and time.time() - self.backspace_pressed_time > self.initiate_deleting_time:
+                self.delete_char()
+            elif self.arrow_pressed_time and time.time() - self.arrow_pressed_time > self.initiate_arrow_time:
+                if self.arrow_pressed[pygame.K_LEFT] and self.cursor_pos >= 0:
+                    self.move_cursor(-1)
+                elif self.arrow_pressed[pygame.K_RIGHT] and self.cursor_pos < len(self.text) - 1:
+                    self.move_cursor(1)
             return True
 
         if self.label is not None and self.label.register_event(event):
             return True
+
         return False
 
     def update_text(self, keycode: int, unicode: str) -> None:
         self.label.text_color = self.text_color
 
+        if keycode == pygame.K_LEFT:
+            self.arrow_pressed[pygame.K_LEFT] = False
+        elif keycode == pygame.K_RIGHT:
+            self.arrow_pressed[pygame.K_RIGHT] = False
+
         if keycode == pygame.K_BACKSPACE:
-            self.text = self.text[:-1]
+            self.delete_char()
             self.backspace_pressed = False
             self.backspace_pressed_time = None
-            self.label.set_text(self.text)
-        elif len(self.text) >= self.max_length:
+
+        if len(self.text) >= self.max_length:
             return
 
-        if keycode == pygame.K_RETURN:
-            self.text += "\n"
+        if keycode == pygame.K_RETURN and not self.oneline:
+            self.add_char("\n")
         elif keycode == pygame.K_SPACE and " " in self.allowed_char_set:
-            self.text += " "
-        elif unicode and unicode in self.allowed_char_set:
-            self.text += unicode
+            self.add_char(" ")
+        elif unicode and unicode in self.allowed_char_set and keycode != pygame.K_RETURN:
+            self.add_char(unicode)
 
         self.label.set_text(self.text)
 
@@ -139,10 +167,64 @@ class TextField(UIObject):
             self.backspace_pressed = False
             self.backspace_pressed_time = None
 
+        if keycode == pygame.K_LEFT and self.cursor_pos >= 0:
+            self.move_cursor(-1)
+            self.arrow_pressed[pygame.K_LEFT] = True
+            self.arrow_pressed_time = time.time()
+            return
+        else:
+            self.arrow_pressed[pygame.K_LEFT] = False
+            self.arrow_pressed_time = None
+
+        if keycode == pygame.K_RIGHT and self.cursor_pos < len(self.text) - 1:
+            self.move_cursor(1)
+            self.arrow_pressed[pygame.K_RIGHT] = True
+            self.arrow_pressed_time = time.time()
+            return
+        else:
+            self.arrow_pressed[pygame.K_RIGHT] = False
+            self.arrow_pressed_time = None
+
+    def delete_char(self) -> None:
+        if self.cursor_pos == len(self.text) - 1:
+            self.text = self.text[:-1]
+        elif self.cursor_pos != -1:
+            self.text = self.text[:self.cursor_pos] + self.text[self.cursor_pos + 1:]
+        self.move_cursor(-1, delete=True)
+        self.label.set_text(self.text)
+
+    def add_char(self, char: str) -> None:
+        self.text = self.text[:self.cursor_pos+1] + char + self.text[self.cursor_pos+1:]
+        self.label.set_text(self.text)
+        self.move_cursor(1)
+
+    def move_cursor(self, direction: int, delete: bool = False) -> None:
+        self.cursor_pos = max(min(self.cursor_pos + direction, len(self.text)-1), -1)
+
+        if not self.oneline:
+            return
+
+        char_pos = self.label.get_char_pos(self.cursor_pos)[0] + self.label.width // 2 - self.label.x
+        char_pos0 = self.label.get_char_pos(-1)[0] + self.label.width // 2 - self.label.x
+        diff = self.label.width - char_pos
+
+        if direction > 0 and char_pos > self.label.width:
+            self.label.x_offset += diff
+            self.label_offsets.append(diff)
+        elif direction < 0 and char_pos0 < 0 and delete:
+            self.label.x_offset -= self.label_offsets.pop()
+        elif direction < 0 and char_pos < 0 and not delete:
+            self.label.x_offset -= char_pos
+            self.label_offsets.append(-char_pos)
+
+    def get_relative_char_pos(self, char_pos: int) -> int:
+        return self.label.get_char_pos(char_pos)[0] + self.label.width // 2 - self.x
+
     def set_text(self, text: str) -> None:
         self.text = text
         self.label.text_color = self.text_color
         self.label.set_text(text)
+        self.cursor_pos = len(text) - 1
 
     def set_hint(self, hint: str) -> None:
         self.hint = hint
@@ -167,7 +249,7 @@ class TextField(UIObject):
             self.label.render()
 
         if self.render_cursor and self.focused:
-            end_x, end_y = self.label.get_text_end_pos()
+            end_x, end_y = self.label.get_char_pos(self.cursor_pos)
             text_height = self.label.get_text_height()
             end_x = end_x or 0
             end_y = end_y or 0
@@ -213,7 +295,9 @@ class TextField(UIObject):
     def on_release(self, event: MouseReleaseEvent) -> None:
         if self.is_hovering((event.x, event.y)):
             self.focused = True
-            if not self.text:
+            if self.text:
+                self.cursor_pos = self.label.get_closest_character(event.x, event.y)
+            else:
                 self.label.set_text("")
         else:
             self.focused = False
@@ -221,11 +305,14 @@ class TextField(UIObject):
                 self.label.set_text(self.hint)
                 self.label.text_color = self.hint_text_color
 
-    def on_exit(self) -> None:
-        pass
+    def bind_on_enter(self, on_enter: Callable) -> None:
+        self.on_enter = on_enter
 
-    def on_enter(self) -> None:
-        pass
+    def bind_on_exit(self, on_exit: Callable) -> None:
+        self.on_exit = on_exit
+
+    def bind_on_key(self, on_key: Callable) -> None:
+        self.on_key = on_key
 
     def is_hovering(self, mouse_pos) -> bool:
         return self.get_rect().collidepoint(*mouse_pos)

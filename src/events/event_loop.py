@@ -59,7 +59,7 @@ class EventLoop:
             elif event.type == pygame.MOUSEWHEEL:
                 if event.y == 1:
                     self.event_queue.add(MouseWheelUpEvent(current_time, mouse_x, mouse_y))
-                else:
+                elif event.y == -1:
                     self.event_queue.add(MouseWheelDownEvent(current_time, mouse_x, mouse_y))
             elif event.type == pygame.MOUSEMOTION:
                 x, y = event.pos

@@ -32,6 +32,8 @@ class EventListEvent(UIObject):
         self.event = event
         self.padding = padding
 
+        self.editable = self.event.recurrence_id >= 0
+
         self.start_pos = (self.x, self.y)
         self.pressed = False
         self.pressed_right = False
@@ -49,7 +51,7 @@ class EventListEvent(UIObject):
             text_color=(200, 200, 200),
             font=Assets().font18,
             horizontal_text_alignment=HorizontalAlignment.LEFT,
-            wrap_text=False
+            wrap_text=True
         )
         self.resize_to_label_size()
 
@@ -64,10 +66,11 @@ class EventListEvent(UIObject):
             click_color=Colors.BACKGROUND_GREY30,
             border_width=0
         )
-        self.delete_task_button.bind_on_click(self.on_delete)
+        if self.editable:
+            self.delete_task_button.bind_on_click(self.on_delete)
 
     def register_event(self, event: Event) -> bool:
-        if self.delete_task_button.register_event(event):
+        if self.editable and self.delete_task_button.register_event(event):
             return True
 
         if isinstance(event, DeleteCalendarEventEvent) and event.event == self.event:
@@ -105,7 +108,8 @@ class EventListEvent(UIObject):
         pygame.draw.rect(self.canvas, self.event.color, self.get_rect(), 2, 6)
 
         self.description_label.render()
-        self.delete_task_button.render()
+        if self.editable:
+            self.delete_task_button.render()
 
     def update_event(self, event: CalendarEvent) -> None:
         self.event = event
@@ -147,7 +151,7 @@ class EventListEvent(UIObject):
             text_color=(200, 200, 200),
             font=Assets().font18,
             horizontal_text_alignment=HorizontalAlignment.LEFT,
-            wrap_text=False
+            wrap_text=True
         )
         self.height = self.description_label.get_min_label_size()[1] + 18
 
@@ -199,6 +203,7 @@ class EventListView(View):
         self.event_list_x = self.width // 5
         self.events_pos = ((self.width - self.event_list_x) // 2 + self.event_list_x, 120)
         self.events_size = (self.width - self.event_list_x - 20, 40)
+        self.scroll_offset = 0
 
         self.time_table: dict[datetime.time, list[EventListEvent]] = {}
         self.time_labels: list[Label] = []
@@ -266,13 +271,15 @@ class EventListView(View):
     def render(self) -> None:
         self.canvas.fill(Colors.BACKGROUND_GREY30)
 
-        self.title_label.render()
-        self.add_event_button.render()
-
         pygame.draw.line(self.canvas, Colors.GREY70, (self.event_list_x, 60), (self.event_list_x, self.height - 80))
         pygame.draw.line(self.canvas, Colors.GREY70, (10, 100), (self.width - 10, 100))
 
         self.render_events()
+
+        self.render_shadow()
+
+        self.title_label.render()
+        self.add_event_button.render()
 
         pygame.draw.line(self.canvas, Colors.GREY70, (self.width - 1, 0), (self.width - 1, self.height))
 
@@ -290,18 +297,30 @@ class EventListView(View):
         for label in self.time_labels:
             label.render()
 
+    def render_shadow(self) -> None:
+        pygame.draw.rect(self.canvas, Colors.BACKGROUND_GREY30, [0, 0, self.width, 100])
+        pygame.draw.rect(
+            self.canvas, Colors.BACKGROUND_GREY30,
+            [0, self.add_event_button.y - 40, self.width, self.height - self.add_event_button.y + 40]
+        )
+        c2 = pygame.Surface(self.canvas.get_size(), pygame.SRCALPHA)
+        for i in range(22):
+            y = self.add_event_button.y - 40 - i
+            pygame.draw.line(c2, (30, 30, 30, 255 - i * 12), (0, y), (self.width, y))
+        self.canvas.blit(c2, (0, 0))
+
     def create_time_table(self) -> None:
         self.time_table = {}
         for event in self.get_sorted_events():
             event_obj = EventListEvent(
-                self.canvas, (self.events_pos[0], self.events_pos[1]), self.events_size, event
+                self.canvas, (self.events_pos[0], self.events_pos[1] + self.scroll_offset), self.events_size, event
             )
             if event.time not in self.time_table:
                 self.time_table[event.time] = []
             self.time_table[event.time].append(event_obj)
 
         self.time_labels = []
-        current_y = self.events_pos[1]
+        current_y = self.events_pos[1] + self.scroll_offset
         for t, events in self.time_table.items():
             self.time_labels.append(Label(
                 self.canvas, (30, current_y), (50, 40), text=t.isoformat()[:5],
@@ -391,5 +410,13 @@ class EventListView(View):
         pass
 
     def get_min_size(self) -> (int, int):
-        return 130, 170
+        return 150, 170
+
+    @property
+    def task_list_bottom(self) -> (int, int):
+        return self.events_pos[0], self.add_event_button.y - 40
+
+    @property
+    def task_list_top(self) -> (int, int):
+        return self.events_pos[0], self.events_pos[1]
 

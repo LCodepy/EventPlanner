@@ -15,7 +15,7 @@ class Label(UIObject):
                  text_color: Color = Colors.BLACK, font: pygame.font.Font = None, bold: bool = True,
                  horizontal_text_alignment: HorizontalAlignment = HorizontalAlignment.CENTER,
                  vertical_text_alignment: VerticalAlignment = VerticalAlignment.CENTER,
-                 padding: Padding = None, line_spacing: int = 2, wrap_text: bool = True) -> None:
+                 padding: Padding = None, line_spacing: int = 2, wrap_text: bool = True, oneline: bool = False) -> None:
         if canvas and pos and size:
             super().__init__(canvas, pos, padding)
             self.canvas = canvas
@@ -34,8 +34,9 @@ class Label(UIObject):
         self.padding = padding or Padding()
         self.line_spacing = line_spacing
         self.wrap_text = wrap_text
+        self.oneline = oneline
 
-        self.text_end_pos = (self.x, self.y)
+        self.x_offset, self.y_offset = 0, 0
 
         self.lines = None
         self.hovering = False
@@ -44,43 +45,56 @@ class Label(UIObject):
             self.update_text()
 
     def update_text(self) -> None:
-        self.text_end_pos = (self.x, self.y - self.font.render("A", self.bold, self.text_color).get_height() // 2)
-
-        text = " \n ".join(self.text.split("\n"))
-        words = list(filter(bool, text.split(" ")))
         self.lines = [""]
 
         if not self.wrap_text:
             cut = False
-            for word in words:
-                if word == "\n":
+            for char in self.text:
+                if char == "\n":
                     continue
-                if self.font.render(self.lines[0] + word + "...", self.bold, self.text_color).get_width() < self.width:
-                    self.lines[0] += word + " "
+                if self.font.render(self.lines[0] + char + "...", self.bold, self.text_color).get_width() < self.width:
+                    self.lines[0] += char
                 else:
                     cut = True
                     break
-            self.lines[0] = self.lines[0][:-1] + ("..." if cut else "")
+            self.lines[0] = self.lines[0].rstrip()
+            if cut:
+                self.lines[0] += "..."
+            return
+
+        if self.oneline:
+            for char in self.text:
+                if char == "\n":
+                    continue
+                self.lines[0] += char
             return
 
         line = 0
-        for word in words:
-            if word == "\n":
-                self.lines[line] = self.lines[line][:-1]
-                self.lines.append("")
+        for j, char in enumerate(self.text):
+            if char == "\n":
+                self.lines.append("\n")
                 line += 1
                 continue
-            if (
-                self.font.render(self.lines[line] + word, self.bold, self.text_color).get_width() > self.width and
-                self.lines[line]
-            ):
-                self.lines[line] = self.lines[line][:-1]
-                self.lines.append("")
-                line += 1
-            self.lines[line] += word + " "
 
-        if len(text) > 0 and text[-1] != " ":
-            self.lines[line] = self.lines[line][:-1]
+            if self.font.render(self.lines[line] + char, self.bold, self.text_color).get_width() >= self.width:
+                if char == " ":
+                    self.lines.append("")
+                    line += 1
+                else:
+                    new_line = ""
+                    i = len(self.lines[line]) - 1
+                    while i >= 0 and self.lines[line][i] != " ":
+                        new_line = self.lines[line][i] + new_line
+                        self.lines[line] = self.lines[line][:-1]
+                        i -= 1
+                    self.lines.append(new_line)
+                    line += 1
+
+            if line > 0 and not self.lines[line - 1]:
+                self.lines.pop(line - 1)
+                line -= 1
+
+            self.lines[line] += char
 
     def set_text(self, text: str) -> None:
         self.text = text
@@ -106,43 +120,21 @@ class Label(UIObject):
 
         self.label_canvas = pygame.Surface(size, pygame.SRCALPHA)
 
-        self.text_end_pos = (self.x, self.y)
-
         self.update_text()
 
     def render(self) -> None:
         self.label_canvas.fill((0, 0, 0, 0))
         current_line_y = 0
         for text in self.lines:
-            rendered = self.font.render(text, self.bold, self.text_color)
+            text = text.replace("\n", "")
 
-            if self.horizontal_text_alignment is HorizontalAlignment.LEFT:
-                aligned_x = -(self.width // 2) + self.padding.left
-            elif self.horizontal_text_alignment is HorizontalAlignment.CENTER:
-                aligned_x = -(rendered.get_rect().w // 2)
-            elif self.horizontal_text_alignment is HorizontalAlignment.RIGHT:
-                aligned_x = self.width // 2 - rendered.get_rect().w - self.padding.right
-            else:
-                raise ValueError("Invalid horizontal alignment.")
-
-            if self.vertical_text_alignment is VerticalAlignment.BOTTOM or \
-                (self.vertical_text_alignment is VerticalAlignment.CENTER and
-                 len(self.lines) * (rendered.get_rect().h + self.line_spacing) > self.height):
-                aligned_y = self.height // 2 - len(self.lines) * (rendered.get_rect().h + self.line_spacing) \
-                            + current_line_y - self.padding.bottom
-            elif self.vertical_text_alignment is VerticalAlignment.CENTER:
-                aligned_y = -(len(self.lines) *
-                              (rendered.get_rect().h + self.line_spacing) - self.line_spacing) // 2 + current_line_y
-            elif self.vertical_text_alignment is VerticalAlignment.TOP:
-                aligned_y = -(self.height // 2) + current_line_y + self.padding.top
-            else:
-                raise ValueError("Invalid vertical alignment.")
+            rendered, aligned_x, aligned_y = self.align_text(text, current_line_y)
 
             current_line_y += rendered.get_rect().h + self.line_spacing
 
-            self.label_canvas.blit(rendered, (aligned_x + self.width // 2, aligned_y + self.height // 2))
-
-            self.text_end_pos = (self.x + aligned_x + rendered.get_rect().w, self.y + aligned_y)
+            self.label_canvas.blit(
+                rendered, (aligned_x + self.width // 2 + self.x_offset, aligned_y + self.height // 2 + self.y_offset)
+            )
 
         self.canvas.blit(self.label_canvas, (self.x - self.width // 2, self.y - self.height // 2))
 
@@ -171,8 +163,71 @@ class Label(UIObject):
     def update_canvas(self, canvas: pygame.Surface) -> None:
         self.canvas = canvas
 
-    def get_text_end_pos(self) -> (int, int):
-        return self.text_end_pos
+    def align_text(self, text: str, current_line_y: int) -> (pygame.Surface, int, int):
+        rendered = self.font.render(text, self.bold, self.text_color)
+
+        if self.horizontal_text_alignment is HorizontalAlignment.LEFT:
+            aligned_x = -(self.width // 2) + self.padding.left
+        elif self.horizontal_text_alignment is HorizontalAlignment.CENTER:
+            aligned_x = -(rendered.get_rect().w // 2)
+        elif self.horizontal_text_alignment is HorizontalAlignment.RIGHT:
+            aligned_x = self.width // 2 - rendered.get_rect().w - self.padding.right
+        else:
+            raise ValueError("Invalid horizontal alignment.")
+
+        if self.vertical_text_alignment is VerticalAlignment.BOTTOM or \
+                (self.vertical_text_alignment is VerticalAlignment.CENTER and
+                 len(self.lines) * (rendered.get_rect().h + self.line_spacing) > self.height):
+            aligned_y = self.height // 2 - len(self.lines) * (rendered.get_rect().h + self.line_spacing) \
+                        + current_line_y - self.padding.bottom
+        elif self.vertical_text_alignment is VerticalAlignment.CENTER:
+            aligned_y = -(len(self.lines) *
+                          (rendered.get_rect().h + self.line_spacing) - self.line_spacing) // 2 + current_line_y
+        elif self.vertical_text_alignment is VerticalAlignment.TOP:
+            aligned_y = -(self.height // 2) + current_line_y + self.padding.top
+        else:
+            raise ValueError("Invalid vertical alignment.")
+
+        return rendered, aligned_x, aligned_y
+
+    def get_char_pos(self, char_index: int) -> (int, int):
+        if len(self.lines) < 2 and not self.lines[0]:
+            x = self.x
+            if self.horizontal_text_alignment == HorizontalAlignment.LEFT:
+                x -= self.width // 2 - self.padding.left
+            elif self.horizontal_text_alignment == HorizontalAlignment.RIGHT:
+                x += self.width // 2 + self.padding.right
+
+            return x + self.x_offset, self.y - self.get_text_height() // 2 + self.y_offset
+        elif char_index == -1:
+            _, aligned_x, aligned_y = self.align_text(self.lines[0], 0)
+            return self.x + aligned_x + self.x_offset, self.y + aligned_y + self.y_offset
+
+        current_line_y = 0
+        for text in self.lines:
+            if char_index < len(text):
+                text = text.replace("\n", "")
+                _, aligned_x, aligned_y = self.align_text(text, current_line_y)
+                rendered = self.font.render(text[:char_index+1], self.bold, self.text_color)
+                return self.x + aligned_x + rendered.get_width() + self.x_offset, self.y + aligned_y + self.y_offset
+
+            current_line_y += self.get_text_height() + self.line_spacing
+            char_index -= len(text)
+
+    def get_char_width(self, char_index: int) -> int:
+        if char_index == -1:
+            return 0
+        return self.font.render(self.text[char_index], self.bold, self.text_color).get_width()
+
+    def get_closest_character(self, x: int, y: int) -> int:
+        min_dist = float("inf")
+        closest_char = -1
+        for i in range(-1, len(self.text)):
+            pos = self.get_char_pos(i)
+            if (pos[0] - x) ** 2 + (pos[1] - y) ** 2 < min_dist:
+                min_dist = (pos[0] - x) ** 2 + (pos[1] - y) ** 2
+                closest_char = i
+        return closest_char
 
     def get_text_height(self) -> int:
         return self.font.render("A", self.bold, self.text_color).get_rect().h
