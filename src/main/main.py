@@ -6,9 +6,9 @@ from src.controllers.appbar_controller import AppbarController
 from src.controllers.calendar_controller import CalendarController
 from src.controllers.taskbar_controller import TaskbarController
 from src.events.event import CloseWindowEvent, WindowResizeEvent, MouseFocusChangedEvent, WindowMoveEvent, \
-    OpenViewEvent, CloseViewEvent, MouseClickEvent, MouseReleaseEvent, DeleteCharacterEvent, RenderCursorEvent, \
-    ResizeViewEvent
+    DeleteCharacterEvent, RenderCursorEvent
 from src.events.event_loop import EventLoop
+from src.main.account_manager import AccountManager
 from src.main.config import Config
 from src.main.window_manager import WindowManager
 from src.models.appbar_model import AppbarModel
@@ -16,10 +16,9 @@ from src.models.calendar_model import CalendarModel
 from src.models.taskbar_model import TaskbarModel
 from src.ui.colors import Colors
 from src.utils.assets import Assets
-from src.utils.language_manager import LanguageManager
+from src.main.language_manager import LanguageManager
 from src.utils.logging import Log
 from src.utils.pygame_utils import set_window_pos
-from src.utils.ui_debugger import UIDebugger
 from src.views.appbar_view import AppbarView
 from src.views.calendar_view import CalendarView
 from src.views.taskbar_view import TaskbarView
@@ -51,6 +50,7 @@ class Main:
         self.render_all = False
 
         LanguageManager(self.event_loop)
+        self.account_manager = AccountManager()
 
         self.appbar_model = AppbarModel()
         self.appbar_view = AppbarView(self.win, self.appbar_model, self.win.get_width(), 30, 0, 0)
@@ -105,7 +105,8 @@ class Main:
 
             if self.window_manager.register_event(event):
                 event = MouseFocusChangedEvent(time.time(), False)
-
+            if self.account_manager.register_event(event):
+                pass
             if self.view_manager.register_events(event):
                 self.update_display = True
 

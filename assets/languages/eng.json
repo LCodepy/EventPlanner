@@ -22,5 +22,7 @@
   "profile": "Profile",
   "settings": "Settings",
   "search": "Search",
-  "search_events": "Search Events"
+  "search_events": "Search Events",
+  "event_appear_message": "Events will appear here...",
+  "sign_in": "Sign in"
 }

@@ -1,6 +1,7 @@
 import time
 from typing import Callable
 
+from src.controllers.profile_controller import ProfileController
 from src.controllers.search_controller import SearchController
 from src.controllers.todo_list_controller import TodoListController
 from src.events.event import OpenViewEvent, CloseViewEvent, ShowIndependentLabelEvent, HideIndependentLabelEvent, \
@@ -16,6 +17,7 @@ from src.ui.independent_label import IndependentLabel
 from src.ui.label import Label
 from src.utils.assets import Assets
 from src.views.calendar_view import CalendarView
+from src.views.profile_view import ProfileView
 from src.views.search_view import SearchView
 from src.views.taskbar_view import TaskbarView
 from src.views.todo_list_view import TodoListView
@@ -31,8 +33,10 @@ class TaskbarController:
 
         self.todo_list_opened = False
         self.search_opened = False
+        self.profile_opened = False
         self.todo_list_view = None
         self.search_view = None
+        self.profile_view = None
 
         self.showing_labels = False
         self.in_show_mode = False
@@ -45,6 +49,7 @@ class TaskbarController:
 
         self.view.bind_on_close(self.on_close)
 
+        self.view.profile_button.bind_on_click(self.open_profile_view)
         self.view.profile_button.bind_on_enter(self.show_profile_label)
         self.view.profile_button.bind_on_exit(self.hide_label)
 
@@ -62,6 +67,19 @@ class TaskbarController:
 
         self.view.settings_button.bind_on_enter(self.show_settings_label)
         self.view.settings_button.bind_on_exit(self.hide_label)
+
+    def open_profile_view(self) -> None:
+        if self.profile_opened:
+            self.event_loop.enqueue_event(CloseViewEvent(time.time(), self.profile_view))
+        else:
+            self.profile_view = ProfileView(
+                self.view.display, self.event_loop, 300, self.view.display.get_height() - 30, 0, 0
+            )
+            ProfileController(self.profile_view, self.event_loop)
+            self.event_loop.enqueue_event(OpenViewEvent(time.time(), self.profile_view, False))
+
+        self.profile_opened = not self.profile_opened
+        self.hide_label()
 
     def open_search_view(self) -> None:
         if self.search_opened:
@@ -105,6 +123,8 @@ class TaskbarController:
             self.todo_list_opened = False
         elif view == self.search_view:
             self.search_opened = False
+        elif view == self.profile_view:
+            self.profile_opened = False
 
     def hide_label(self) -> None:
         self.event_loop.enqueue_event(HideIndependentLabelEvent(time.time()))

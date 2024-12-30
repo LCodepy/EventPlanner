@@ -6,12 +6,22 @@ from src.events.mouse_buttons import MouseButtons
 from src.models.calendar_model import CalendarEvent, EventRecurring
 from src.models.todo_list_model import TaskImportance
 from src.ui.colors import Color
+from src.utils.authentication import User
 
 
 @dataclass
 class Event:
 
     exec_time: float
+
+
+@dataclass
+class ThreadedEvent(Event):
+
+    exec_time: float
+
+    def __init__(self):
+        self.registered = False
 
 
 @dataclass
@@ -252,6 +262,14 @@ class TimerEvent(Event):
     exec_time: float
     duration: float
     callback: Callable
+
+
+@dataclass
+class UserSignInEvent(ThreadedEvent):
+
+    exec_time: float
+    user: User
+    registered: bool = False
 
 
 class EventFactory:

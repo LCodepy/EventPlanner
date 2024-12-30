@@ -1,11 +1,12 @@
 import datetime
+import time
 from typing import Union, Callable
 
 import pygame
 
 from src.events.event import MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent, Event, \
-    MouseMotionEvent, AddCalendarEventEvent, KeyReleaseEvent, DeleteCalendarEventEvent, OpenEditCalendarEventEvent, \
-    EditCalendarEventEvent, LanguageChangedEvent
+    MouseMotionEvent, AddCalendarEventEvent, DeleteCalendarEventEvent, OpenEditCalendarEventEvent, \
+    EditCalendarEventEvent, LanguageChangedEvent, TimerEvent
 from src.events.event_loop import EventLoop
 from src.events.mouse_buttons import MouseButtons
 from src.models.calendar_model import CalendarModel, CalendarEvent
@@ -15,21 +16,23 @@ from src.ui.colors import Colors
 from src.ui.label import Label
 from src.ui.padding import Padding
 from src.ui.ui_object import UIObject
+from src.utils.animations import ChangeValuesAnimation
 from src.utils.assets import Assets
-from src.utils.language_manager import LanguageManager
+from src.main.language_manager import LanguageManager
 from src.views.view import View
 
 
 class EventListEvent(UIObject):
 
     def __init__(self, canvas: pygame.Surface, pos: (int, int), size: (int, int), event: CalendarEvent,
-                 padding: Padding = None) -> None:
+                 event_loop: EventLoop, padding: Padding = None) -> None:
         super().__init__(canvas, pos, padding)
 
         self.canvas = canvas
         self.x, self.y = pos
         self.width, self.height = size
         self.event = event
+        self.event_loop = event_loop
         self.padding = padding
 
         self.editable = self.event.recurrence_id >= 0
@@ -42,6 +45,11 @@ class EventListEvent(UIObject):
         self.on_delete_callback = None
         self.on_open_options = None
         self.open_edit_calendar_event = None
+
+        self.highlight_animation = ChangeValuesAnimation(
+            "HighlightAnimation" + str(self.event.recurrence_id), self.event_loop, 0.3
+        )
+        self.highlight_animation.bind_on_stop(lambda: self.highlight(1))
 
         self.description_label = Label(
             self.canvas,
@@ -70,6 +78,9 @@ class EventListEvent(UIObject):
             self.delete_task_button.bind_on_click(self.on_delete)
 
     def register_event(self, event: Event) -> bool:
+        if self.highlight_animation.register_event(event):
+            return True
+
         if self.editable and self.delete_task_button.register_event(event):
             return True
 
@@ -104,12 +115,24 @@ class EventListEvent(UIObject):
             return True
 
     def render(self) -> None:
-        # pygame.draw.rect(self.canvas, Colors.BACKGROUND_GREY22, self.get_rect())
         pygame.draw.rect(self.canvas, self.event.color, self.get_rect(), 2, 6)
+        if self.highlight_animation.active and self.highlight_animation.values:
+            c2 = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+            pygame.draw.rect(c2, (255, 255, 255), [0, 0, self.width, self.height], 2, 6)
+            c2.set_alpha(int(self.highlight_animation.values[0]))
+            self.canvas.blit(c2, (self.x - self.width // 2, self.y - self.height // 2))
 
         self.description_label.render()
         if self.editable:
             self.delete_task_button.render()
+
+    def highlight(self, order: int = 0) -> None:
+        if order == 0:
+            self.highlight_animation.start([0], [255])
+            self.highlight_animation.bind_on_stop(lambda: self.highlight(1))
+        else:
+            self.highlight_animation.start([255], [0])
+            self.highlight_animation.bind_on_stop(lambda: None)
 
     def update_event(self, event: CalendarEvent) -> None:
         self.event = event
@@ -200,6 +223,8 @@ class EventListView(View):
         self.add_event = None
         self.edit_event = None
 
+        self.event_to_highlight = None
+
         self.event_list_x = self.width // 5
         self.events_pos = ((self.width - self.event_list_x) // 2 + self.event_list_x, 120)
         self.events_size = (self.width - self.event_list_x - 20, 40)
@@ -245,12 +270,23 @@ class EventListView(View):
         elif isinstance(event, LanguageChangedEvent):
             self.update_language()
 
+        if self.event_to_highlight:
+            self.event_loop.enqueue_event(
+                TimerEvent(time.time(), 0.2, lambda e=self.event_to_highlight: self.highlight_event(e))
+            )
+            self.event_to_highlight = None
+
         event = self.get_event(event)
 
         if self.title_label.register_event(event):
             registered_events = True
         if self.add_event_button.register_event(event):
             registered_events = True
+
+        for evs in self.time_table.values():
+            for ev in evs:
+                if ev.register_event(event):
+                    registered_events = True
 
         if isinstance(event, MouseClickEvent) and self.on_click and event.button is MouseButtons.LEFT_BUTTON:
             self.on_click(event)
@@ -260,11 +296,6 @@ class EventListView(View):
             return True
         elif isinstance(event, (MouseWheelUpEvent, MouseWheelDownEvent)) and self.on_scroll(event):
             return True
-
-        for evs in self.time_table.values():
-            for ev in evs:
-                if ev.register_event(event):
-                    registered_events = True
 
         return registered_events
 
@@ -313,7 +344,8 @@ class EventListView(View):
         self.time_table = {}
         for event in self.get_sorted_events():
             event_obj = EventListEvent(
-                self.canvas, (self.events_pos[0], self.events_pos[1] + self.scroll_offset), self.events_size, event
+                self.canvas, (self.events_pos[0], self.events_pos[1] + self.scroll_offset), self.events_size, event,
+                self.event_loop
             )
             if event.time not in self.time_table:
                 self.time_table[event.time] = []
@@ -331,6 +363,12 @@ class EventListView(View):
                 event.update_position(y=current_y + event.height // 2, set_start_pos=True)
                 current_y += event.height + 10
             current_y += 30
+
+    def highlight_event(self, event: CalendarEvent) -> None:
+        for events in self.time_table.values():
+            for ev in events:
+                if ev.event == event:
+                    ev.highlight()
 
     def resize(self, width: int = None, height: int = None) -> None:
         self.width = width or self.width

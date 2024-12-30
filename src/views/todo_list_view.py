@@ -1,11 +1,10 @@
 import threading
-import time
 from typing import Callable, Union
 
 import pygame
 
 from src.events.event import Event, MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent, \
-    MouseMotionEvent, AddTaskEvent, CloseViewEvent, DeleteTaskEvent, CloseWindowEvent, EditTaskEvent, OpenEditTaskEvent, \
+    MouseMotionEvent, AddTaskEvent, DeleteTaskEvent, CloseWindowEvent, EditTaskEvent, OpenEditTaskEvent, \
     LanguageChangedEvent
 from src.events.event_loop import EventLoop
 from src.events.mouse_buttons import MouseButtons
@@ -18,7 +17,7 @@ from src.ui.padding import Padding
 from src.ui.ui_object import UIObject
 from src.utils.animations import ChangeValuesAnimation
 from src.utils.assets import Assets
-from src.utils.language_manager import LanguageManager
+from src.main.language_manager import LanguageManager
 from src.views.view import View
 
 

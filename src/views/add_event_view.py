@@ -1,22 +1,19 @@
 import datetime
-import time
 from typing import Union, Callable
 
 import pygame
 
-from src.events.event import Event, MouseClickEvent, MouseReleaseEvent, CloseViewEvent, MouseWheelUpEvent, \
+from src.events.event import Event, MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, \
     MouseWheelDownEvent, KeyReleaseEvent, LanguageChangedEvent
 from src.events.event_loop import EventLoop
 from src.models.calendar_model import CalendarEvent, EventRecurring
-from src.models.todo_list_model import TaskImportance
 from src.ui.button import Button
 from src.ui.colors import Colors
 from src.ui.dropdown import DropDown
 from src.ui.label import Label
-from src.ui.padding import Padding
 from src.ui.text_field import TextField
 from src.utils.assets import Assets
-from src.utils.language_manager import LanguageManager
+from src.main.language_manager import LanguageManager
 from src.views.view import View
 
 

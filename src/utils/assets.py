@@ -9,6 +9,7 @@ class Assets(metaclass=Singleton):
 
     IMAGES_PATH = os.getcwd() + "\\assets\\images"
     DATA_PATH = os.getcwd() + "\\assets\\data"
+    GOOGLE_PATH = os.getcwd() + "\\assets\\google"
 
     def __init__(self) -> None:
         # App Bar icons
@@ -38,6 +39,9 @@ class Assets(metaclass=Singleton):
         ).convert_alpha()
         self.profile_picture_icon_large_hover = pygame.image.load(
             os.path.join(self.IMAGES_PATH, "profile_picture_icon_large_hover.png")
+        ).convert_alpha()
+        self.profile_picture_icon_400x400 = pygame.image.load(
+            os.path.join(self.IMAGES_PATH, "profile_picture_icon_400x400.png")
         ).convert_alpha()
 
         self.search_icon_large = pygame.image.load(
@@ -103,6 +107,11 @@ class Assets(metaclass=Singleton):
         self.calendar_database_path = os.path.join(self.DATA_PATH, "calendar.db")
 
         self.settings_database_path = os.path.join(self.DATA_PATH, "settings.json")
+
+        self.google_credentials_file_path = os.path.join(self.GOOGLE_PATH, "credentials.json")
+        self.google_tokens_path = os.path.join(self.GOOGLE_PATH, "tokens")
+
+        self.user_profile_picture = self.profile_picture_icon_large
 
         # Fonts
         self.font = "roboto"

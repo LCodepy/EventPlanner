@@ -3,12 +3,12 @@ from typing import Union, Callable
 import pygame
 
 from src.events.event import Event, MouseWheelUpEvent, MouseWheelDownEvent, MouseReleaseEvent, MouseClickEvent, \
-    MouseMotionEvent, CloseViewEvent
+    CloseViewEvent
 from src.models.taskbar_model import TaskbarModel
 from src.ui.button import Button
 from src.ui.colors import Colors
 from src.utils.assets import Assets
-from src.utils.language_manager import LanguageManager
+from src.main.language_manager import LanguageManager
 from src.views.view import View
 
 

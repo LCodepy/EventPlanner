@@ -11,12 +11,13 @@ from src.utils.ui_debugger import UIDebugger
 class Image(UIObject):
 
     def __init__(self, canvas: pygame.Surface, pos: (int, int), image: pygame.Surface, size: (int, int) = None,
-                 hover_image: pygame.Surface = None, padding: Padding = None) -> None:
+                 hover_image: pygame.Surface = None, border_radius: int = None, padding: Padding = None) -> None:
         super().__init__(canvas, pos, padding)
         self.canvas = canvas
         self.x, self.y = pos
         self.image = image
         self.hover_image = hover_image
+        self.border_radius = border_radius
         self.padding = padding or Padding()
 
         self.width, self.height = size or self.image.get_rect().size
@@ -60,7 +61,24 @@ class Image(UIObject):
             return True
 
     def render(self) -> None:
-        if self.hover_image and self.hovering:
+        if self.border_radius:
+            mask = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+            mask.fill((0, 0, 0, 0))
+            pygame.draw.rect(mask, (255, 255, 255, 255), [0, 0, self.width, self.height], border_radius=self.border_radius)
+
+            if self.hover_image and self.hovering:
+                self.hover_image.set_colorkey((0, 0, 0))
+                masked_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+                masked_surface.blit(self.hover_image, (0, 0))
+                masked_surface.blit(mask, (0, 0), special_flags=pygame.BLEND_RGBA_MIN)
+                self.canvas.blit(masked_surface, self.get_rect().topleft)
+            else:
+                self.image.set_colorkey((0, 0, 0))
+                masked_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+                masked_surface.blit(self.image, (0, 0))
+                masked_surface.blit(mask, (0, 0), special_flags=pygame.BLEND_RGBA_MIN)
+                self.canvas.blit(masked_surface, self.get_rect().topleft)
+        elif self.hover_image and self.hovering:
             self.canvas.blit(self.hover_image, self.get_rect().topleft)
         else:
             self.canvas.blit(self.image, self.get_rect().topleft)
@@ -68,6 +86,9 @@ class Image(UIObject):
         if UIDebugger.is_enabled():
             pygame.draw.rect(self.canvas, UIDebugger.box_color, self.get_rect(), 1)
             pygame.draw.circle(self.canvas, UIDebugger.center_point_color, (self.x, self.y), 2)
+
+    def set_image(self, img: pygame.Surface) -> None:
+        self.image = pygame.transform.scale(img, (self.width, self.height))
 
     def update_canvas(self, canvas: pygame.Surface) -> None:
         self.canvas = canvas

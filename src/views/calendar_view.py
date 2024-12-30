@@ -14,7 +14,7 @@ from src.ui.label import Label
 from src.ui.padding import Padding
 from src.utils.assets import Assets
 from src.utils.calendar_functions import get_month_length, get_month_starting_day
-from src.utils.language_manager import LanguageManager
+from src.main.language_manager import LanguageManager
 from src.views.view import View
 
 

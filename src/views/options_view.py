@@ -12,7 +12,7 @@ from src.ui.image import Image
 from src.ui.label import Label
 from src.ui.padding import Padding
 from src.utils.assets import Assets
-from src.utils.language_manager import LanguageManager
+from src.main.language_manager import LanguageManager
 from src.views.view import View
 
 

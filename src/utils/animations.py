@@ -23,6 +23,8 @@ class ChangeValuesAnimation:
         self.start_time = None
         self.frames = None
 
+        self.on_stop = None
+
     def start(self, start_values: list[float], end_values: list[float], animation_time: float = None) -> None:
         if self.active:
             self.event_loop.remove_repeating_event(self.type)
@@ -44,6 +46,9 @@ class ChangeValuesAnimation:
         self.event_loop.remove_repeating_event(self.type)
 
         self.values = self.end_values
+
+        if self.on_stop:
+            self.on_stop()
 
     def calculate_frames(self) -> list[list[float]]:
         n_frames = int(self.fps * self.animation_time)
@@ -68,3 +73,6 @@ class ChangeValuesAnimation:
         n_frames = self.fps * self.animation_time
         current_frame = int((time.time() - self.start_time) / self.animation_time * n_frames)
         self.values = self.frames[current_frame]
+
+    def bind_on_stop(self, on_stop: Callable) -> None:
+        self.on_stop = on_stop

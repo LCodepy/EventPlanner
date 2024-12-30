@@ -138,7 +138,8 @@ class CalendarModel:
             )
 
         easter_events = list(filter(lambda ev: ev.date == date, self.get_easter_events(date.year)))
-        catholic_events = list(filter(lambda ev: ev.date == date, self.get_catholic_events()))
+        catholic_events = list(filter(lambda ev: ev.date.month == date.month and ev.date.day == date.day,
+                                      self.get_catholic_events()))
 
         return easter_events + catholic_events + list(
             map(

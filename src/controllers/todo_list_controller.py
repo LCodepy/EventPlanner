@@ -23,7 +23,7 @@ class TodoListController:
 
         self.pressed = False
         self.last_frame_interacted = False
-        self.scroll_value = 10
+        self.scroll_value = 15
 
         self.view.bind_delete_task(self.delete_task)
         self.view.bind_move_task(self.move_task)

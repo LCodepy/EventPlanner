@@ -1,19 +1,19 @@
 import time
+from threading import Thread
 
 import pygame
 
-from src.controllers.event_list_controller import EventListController
-from src.events.event import MouseMotionEvent, MouseClickEvent, MouseReleaseEvent, ResizeViewEvent, OpenViewEvent
+from src.events.event import MouseMotionEvent, MouseClickEvent, MouseReleaseEvent, ResizeViewEvent, OpenViewEvent, \
+    UserSignInEvent
 from src.events.event_loop import EventLoop
-from src.models.calendar_model import CalendarModel, CalendarEvent
-from src.views.event_list_view import EventListView
-from src.views.search_view import SearchView
+from src.main.account_manager import AccountManager
+from src.utils.authentication import GoogleAuthentication, User
+from src.views.profile_view import ProfileView
 
 
-class SearchController:
+class ProfileController:
 
-    def __init__(self, model: CalendarModel, view: SearchView, event_loop: EventLoop) -> None:
-        self.model = model
+    def __init__(self, view: ProfileView, event_loop: EventLoop) -> None:
         self.view = view
         self.event_loop = event_loop
 
@@ -24,8 +24,7 @@ class SearchController:
         self.view.bind_on_release(self.on_release)
         self.view.bind_on_mouse_motion(self.on_mouse_motion)
 
-        self.view.search_bar.bind_on_key(self.on_search_bar_typed)
-        self.view.bind_on_search_event_release(self.on_search_event_release)
+        self.view.sign_in_button.bind_on_click(self.sign_in)
 
     def on_click(self, event: MouseClickEvent) -> None:
         if self.view.width - 5 < event.x < self.view.width and 0 < event.y < self.view.height:
@@ -54,24 +53,13 @@ class SearchController:
             self.event_loop.enqueue_event(
                 ResizeViewEvent(time.time(), self.view, min(max(event.x, self.view.get_min_size()[0]), 550))
             )
-            self.view.search_bar.set_focus(False)
             return True
 
-    def on_search_bar_typed(self) -> None:
-        query = self.view.search_bar.text
+    def sign_in(self) -> None:
+        def authenticate(on_complete):
+            on_complete(GoogleAuthentication.authenticate_new_user())
 
-        search_results = []
-        if query:
-            search_results = self.model.search_events(query)
+        def callback(user: User) -> None:
+            self.event_loop.enqueue_threaded_event(UserSignInEvent(time.time(), user))
 
-        self.view.create_search_events(search_results)
-        self.view.bind_search_event_methods()
-
-    def on_search_event_release(self, event: CalendarEvent) -> None:
-        view = EventListView(
-            self.view.display, self.model, self.event_loop, 300, self.view.display.get_height() - 30, 0, 0, event.date
-        )
-        EventListController(self.view.model, view, self.event_loop)
-        view.event_to_highlight = event
-        self.event_loop.enqueue_event(OpenViewEvent(time.time(), view, False))
-
+        Thread(target=authenticate, args=(callback, )).start()

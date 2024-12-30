@@ -5,7 +5,7 @@ import pygame
 
 from src.events.event import CloseWindowEvent, MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, \
     MouseWheelDownEvent, MouseMotionEvent, Event, KeyPressEvent, KeyReleaseEvent, MouseFocusChangedEvent, \
-    WindowUnminimizedEvent, WindowMinimizedEvent, TimerEvent
+    WindowUnminimizedEvent, WindowMinimizedEvent, TimerEvent, UserSignInEvent, ThreadedEvent
 from src.events.mouse_buttons import MouseButtons
 from src.events.queue import EventQueue
 
@@ -22,6 +22,7 @@ class EventLoop:
 
     def __init__(self) -> None:
         self.event_queue = EventQueue()
+        self.threaded_events: list[ThreadedEvent] = []
         self.repeating_events: list[RepeatingEvent] = []
         self.timer_events: list[TimerEvent] = []
         self.mouse_focused = False
@@ -29,6 +30,7 @@ class EventLoop:
     def run(self) -> None:
         current_time = time.time()
 
+        self.clear_threaded_events()
         self.event_queue.clear()
 
         mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -93,6 +95,19 @@ class EventLoop:
         for event in timers_to_remove:
             self.timer_events.remove(event)
 
+        for event in self.threaded_events:
+            event.registered = True
+            self.event_queue.add(event)
+
+    def clear_threaded_events(self) -> None:
+        to_remove = []
+        for event in self.threaded_events:
+            if event.registered:
+                to_remove.append(event)
+
+        for event in to_remove:
+            self.threaded_events.remove(event)
+
     def add_repeating_event(self, event: type, timer: float) -> None:
         if not issubclass(event, Event):
             return
@@ -113,6 +128,9 @@ class EventLoop:
             return
 
         self.event_queue.add(event)
+
+    def enqueue_threaded_event(self, event: ThreadedEvent) -> None:
+        self.threaded_events.append(event)
 
     def next(self) -> Event:
         return self.event_queue.get()

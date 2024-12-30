@@ -1,4 +1,3 @@
-import datetime
 from typing import Union, Callable
 
 import pygame
@@ -16,7 +15,7 @@ from src.ui.padding import Padding
 from src.ui.text_field import TextField
 from src.ui.ui_object import UIObject
 from src.utils.assets import Assets
-from src.utils.language_manager import LanguageManager
+from src.main.language_manager import LanguageManager
 from src.views.view import View
 
 
@@ -31,6 +30,11 @@ class SearchEvent(UIObject):
 
         self.ui_canvas = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
 
+        self.hovering = False
+        self.pressed = False
+
+        self.on_release = None
+
         self.description_label = Label(
             self.ui_canvas,
             (self.width // 2 - 35, self.height // 2),
@@ -38,7 +42,8 @@ class SearchEvent(UIObject):
             text=self.event.description,
             text_color=(210, 210, 210),
             font=Assets().font18,
-            horizontal_text_alignment=HorizontalAlignment.LEFT
+            horizontal_text_alignment=HorizontalAlignment.LEFT,
+            wrap_text=False
         )
 
         self.datetime_label = Label(
@@ -51,18 +56,54 @@ class SearchEvent(UIObject):
         )
 
     def register_event(self, event: Event) -> bool:
-        pass
+        if (
+                isinstance(event, MouseClickEvent) and
+                self.get_rect().collidepoint((event.x, event.y)) and
+                event.button is MouseButtons.LEFT_BUTTON
+        ):
+            self.pressed = True
+            return True
+        elif isinstance(event, MouseReleaseEvent) and self.pressed and event.button is MouseButtons.LEFT_BUTTON:
+            self.on_release()
+            self.pressed = False
+            return True
+        elif isinstance(event, MouseMotionEvent):
+            if self.get_rect().collidepoint((event.x, event.y)):
+                self.hovering = True
+            else:
+                self.hovering = False
+            return True
 
     def render(self) -> None:
         self.ui_canvas.fill((0, 0, 0, 0))
 
-        pygame.draw.rect(self.ui_canvas, Colors.BACKGROUND_GREY22, (0, 0, self.width, self.height), border_radius=4)
+        pygame.draw.rect(self.ui_canvas, (50, 50, 50) if self.hovering else Colors.BACKGROUND_GREY22, (0, 0, self.width, self.height), border_radius=4)
         pygame.draw.rect(self.ui_canvas, self.event.color, (0, 0, self.width, self.height), border_radius=4, width=1)
 
         self.description_label.render()
         self.datetime_label.render()
 
         self.canvas.blit(self.ui_canvas, (self.x - self.width // 2, self.y - self.height // 2))
+
+    def resize(self, width: int = None, height: int = None) -> None:
+        self.width = width or self.width
+        self.height = height or self.height
+
+        self.ui_canvas = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+
+        self.description_label.resize(width - 90, height)
+        self.description_label.x = self.width // 2 - 35
+        self.description_label.update_canvas(self.ui_canvas)
+
+        self.datetime_label.resize(80, height)
+        self.datetime_label.x = self.width - 40
+        self.datetime_label.update_canvas(self.ui_canvas)
+
+    def bind_on_release(self, on_release: Callable[[int], None]) -> None:
+        self.on_release = lambda event=self.event: on_release(event)
+
+    def get_rect(self) -> pygame.Rect:
+        return pygame.Rect(self.x - self.width // 2, self.y - self.height // 2, self.width, self.height)
 
 
 class SearchView(View):
@@ -89,13 +130,15 @@ class SearchView(View):
         self.on_mouse_motion = None
         self.on_scroll = None
 
+        self.on_search_event_release = None
+
         self.title_label = Label(
             self.canvas,
-            (self.width // 2, 35),
+            (self.width // 2, self.height // 2),
             (200, 50),
-            text=self.language_manager.get_string("search_events"),
-            text_color=(160, 160, 160),
-            font=Assets().font24
+            text=self.language_manager.get_string("event_appear_message"),
+            text_color=(100, 100, 100),
+            font=Assets().font18
         )
 
         self.search_bar = TextField(
@@ -109,7 +152,7 @@ class SearchView(View):
             border_color=Colors.GREY70,
             border_radius=6,
             max_length=100,
-            hint_text_color=(160, 160, 160),
+            hint_text_color=(100, 100, 100),
             oneline=True,
             padding=Padding(left=30, right=15)
         )
@@ -120,6 +163,17 @@ class SearchView(View):
             Assets().search_icon_large,
             size=(20, 20)
         )
+
+        # self.search_bar_button = Button(
+        #     self.canvas,
+        #     (self.width // 2 - self.search_bar.width // 2 + 20, 35),
+        #     (20, 20),
+        #     color=Colors.BACKGROUND_GREY22,
+        #     border_width=0,
+        #     image=Assets().search_icon_large,
+        #     hover_image=Assets().search_icon_large_hover,
+        #     apply_hover_effects=False
+        # )
 
         self.events = []
 
@@ -136,8 +190,8 @@ class SearchView(View):
         if self.search_bar.register_event(event):
             registered_events = True
 
-        for event in self.events:
-            if event.register_event(event):
+        for search_event in self.events:
+            if search_event.get_rect().top < self.height and search_event.register_event(event):
                 registered_events = True
 
         if isinstance(event, MouseClickEvent) and self.on_click and event.button is MouseButtons.LEFT_BUTTON:
@@ -152,12 +206,14 @@ class SearchView(View):
     def render(self) -> None:
         self.canvas.fill(Colors.BACKGROUND_GREY30)
 
-        # self.title_label.render()
+        if not self.events:
+            self.title_label.render()
         self.search_bar.render()
         self.search_bar_icon.render()
 
         for event in self.events:
-            event.render()
+            if event.get_rect().top < self.height:
+                event.render()
 
         pygame.draw.line(self.canvas, Colors.GREY70, (self.width - 1, 0), (self.width - 1, self.height))
 
@@ -187,12 +243,25 @@ class SearchView(View):
         self.search_bar_icon.update_canvas(self.canvas)
 
         for event in self.events:
-            event.update_canvas(self.canvas)
+            if event.get_rect().top < self.height:
+                event.update_canvas(self.canvas)
+                event.resize(self.width - 20)
+                event.x = self.width // 2
 
         self.title_label.x = self.width // 2
+        self.search_bar.x = self.width // 2
+        self.search_bar.resize(width=self.width - 20)
+        self.search_bar_icon.x = self.width // 2 - self.search_bar.width // 2 + 20
 
     def update_language(self) -> None:
         self.title_label.set_text(self.language_manager.get_string("search_events"))
+
+    def bind_search_event_methods(self) -> None:
+        for event in self.events:
+            event.bind_on_release(self.on_search_event_release)
+
+    def bind_on_search_event_release(self, on_search_event_release: Callable[[CalendarEvent], None]) -> None:
+        self.on_search_event_release = on_search_event_release
 
     def bind_on_click(self, on_click: Callable[[MouseClickEvent], None]) -> None:
         self.on_click = on_click
