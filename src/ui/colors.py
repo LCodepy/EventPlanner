@@ -22,7 +22,7 @@ class Colors:
     EVENT_BLUE204 = (0, 102, 204)
     EVENT_PURPLE204 = (84, 70, 204)
     EVENT_PINK204 = (204, 48, 204)
-    EVENT_RED204 = (204, 0, 100)
+    EVENT_RED204 = (204, 0, 50)
     EVENT_RED = (158, 0, 0)
     EVENT_ORANGE = (255, 84, 0)
     EVENT_YELLOW204 = (204, 170, 0)

@@ -4,9 +4,10 @@ from threading import Thread
 import pygame
 
 from src.events.event import MouseMotionEvent, MouseClickEvent, MouseReleaseEvent, ResizeViewEvent, OpenViewEvent, \
-    UserSignInEvent
+    UserSignInEvent, CalendarSyncEvent
 from src.events.event_loop import EventLoop
 from src.main.account_manager import AccountManager
+from src.main.calendar_sync_manager import CalendarSyncManager
 from src.utils.authentication import GoogleAuthentication, User
 from src.views.profile_view import ProfileView
 
@@ -24,7 +25,9 @@ class ProfileController:
         self.view.bind_on_release(self.on_release)
         self.view.bind_on_mouse_motion(self.on_mouse_motion)
 
-        self.view.sign_in_button.bind_on_click(self.sign_in)
+        self.view.sign_in_button.bind_on_click(self.on_sign_in)
+
+        self.view.sync_button.bind_on_click(self.on_sync)
 
     def on_click(self, event: MouseClickEvent) -> None:
         if self.view.width - 5 < event.x < self.view.width and 0 < event.y < self.view.height:
@@ -55,7 +58,7 @@ class ProfileController:
             )
             return True
 
-    def sign_in(self) -> None:
+    def on_sign_in(self) -> None:
         def authenticate(on_complete):
             on_complete(GoogleAuthentication.authenticate_new_user())
 
@@ -63,3 +66,13 @@ class ProfileController:
             self.event_loop.enqueue_threaded_event(UserSignInEvent(time.time(), user))
 
         Thread(target=authenticate, args=(callback, )).start()
+
+    def on_sync(self) -> None:
+        def sync(on_complete):
+            CalendarSyncManager().sync_calendars()
+            on_complete()
+
+        def callback():
+            self.event_loop.enqueue_threaded_event(CalendarSyncEvent(time.time()))
+
+        Thread(target=sync, args=(callback, )).start()

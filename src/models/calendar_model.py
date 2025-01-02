@@ -98,11 +98,18 @@ class CalendarModel:
         for event in self.default_events:
             self.add_event(event, default_event=True)
 
-    def add_event(self, event: CalendarEvent, default_event: bool = False) -> None:
+    def add_event(self, event: CalendarEvent, default_event: bool = False, threaded: bool = False) -> None:
         current_recurring_id = event.recurrence_id if default_event else self.current_recurring_id
 
-        with self.conn:
-            self.cursor.execute(
+        if threaded:
+            conn = sqlite3.connect(Assets().calendar_database_path)
+            cursor = conn.cursor()
+        else:
+            conn = self.conn
+            cursor = self.cursor
+
+        with conn:
+            cursor.execute(
                 f"""
                 INSERT INTO {self.database_name} (year, month, day, hour, minute, second, description, color, recurring,
                 recurrence_id)
@@ -111,7 +118,7 @@ class CalendarModel:
                       int(event.time.second), event.description, get_hex_color(event.color),
                       pickle.dumps(event.recurring), current_recurring_id)
             )
-            self.conn.commit()
+            conn.commit()
 
         if default_event:
             return
@@ -283,6 +290,37 @@ class CalendarModel:
 
             return events
 
+    def get_upcoming_events(self, date: datetime.date, threaded: bool = False) -> list[CalendarEvent]:
+        if threaded:
+            conn = sqlite3.connect(Assets().calendar_database_path)
+            cursor = conn.cursor()
+        else:
+            conn = self.conn
+            cursor = self.cursor
+
+        with conn:
+            cursor.execute(
+                f"""
+                SELECT year, month, day, hour, minute, second, description, color, recurring, recurrence_id
+                FROM {self.database_name}
+                WHERE (recurring != ? OR year > ? OR (year = ? AND month > ?) OR (year = ? AND month = ? AND day >= ?))
+                AND recurrence_id >= ?
+                """,
+                (pickle.dumps(EventRecurring.NEVER), date.year, date.year, date.month, date.year, date.month, date.day, 0)
+            )
+
+            events = list(
+                map(
+                    lambda t: CalendarEvent(
+                        datetime.date(t[0], t[1], t[2]), datetime.time(t[3], t[4], t[5]), t[6], get_rgb_color(t[7]),
+                        pickle.loads(t[8]), t[9]
+                    ),
+                    cursor.fetchall()
+                )
+            )
+
+        return events
+
     def remove_event(self, event: CalendarEvent) -> None:
         with self.conn:
             if event.recurring is not EventRecurring.NEVER:
@@ -336,3 +374,9 @@ class CalendarModel:
                     self.cursor.fetchall()
                 )
             )
+
+    def compare_events(self, event1: CalendarEvent, event2: CalendarEvent) -> bool:
+        return(
+            event1.description == event2.description and event1.date == event2.date and
+            event1.time == event2.time and event1.recurring == event2.recurring
+        )

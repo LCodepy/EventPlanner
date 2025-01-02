@@ -3,6 +3,8 @@ import os
 import time
 from typing import Optional
 
+from google.auth.exceptions import RefreshError
+
 from src.events.event import Event, UserSignInEvent
 from src.utils.assets import Assets
 from src.utils.authentication import User, GoogleAuthentication
@@ -43,8 +45,13 @@ class AccountManager(metaclass=Singleton):
         if not fjson["current_user_email"]:
             return
 
-        self.current_account = GoogleAuthentication.authenticate_user_with_token(fjson["current_user_email"])
-        Assets().user_profile_picture = download_image(self.current_account.uri) or Assets().profile_picture_icon_400x400
+        try:
+            self.current_account = GoogleAuthentication.authenticate_user_with_token(fjson["current_user_email"])
+            if self.current_account is None:
+                return
+            Assets().user_profile_picture = download_image(self.current_account.uri) or Assets().profile_picture_icon_400x400
+        except RefreshError:
+            print("Error loading current account.")
 
     def save_current_account(self) -> None:
         if not self.current_account:

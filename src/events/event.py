@@ -1,5 +1,5 @@
 import datetime
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Callable
 
 from src.events.mouse_buttons import MouseButtons
@@ -18,16 +18,13 @@ class Event:
 @dataclass
 class ThreadedEvent(Event):
 
-    exec_time: float
-
-    def __init__(self):
-        self.registered = False
+    def __init__(self, registered: bool = False):
+        self.registered = registered
 
 
 @dataclass
 class MouseClickEvent(Event):
 
-    exec_time: float
     x: int
     y: int
     button: MouseButtons
@@ -36,7 +33,6 @@ class MouseClickEvent(Event):
 @dataclass
 class MouseReleaseEvent(Event):
 
-    exec_time: float
     x: int
     y: int
     button: MouseButtons
@@ -45,7 +41,6 @@ class MouseReleaseEvent(Event):
 @dataclass
 class MouseWheelUpEvent(Event):
 
-    exec_time: float
     x: int
     y: int
 
@@ -53,7 +48,6 @@ class MouseWheelUpEvent(Event):
 @dataclass
 class MouseWheelDownEvent(Event):
 
-    exec_time: float
     x: int
     y: int
 
@@ -61,7 +55,6 @@ class MouseWheelDownEvent(Event):
 @dataclass
 class MouseMotionEvent(Event):
 
-    exec_time: float
     start_x: int
     start_y: int
     x: int
@@ -75,7 +68,6 @@ class MouseMotionEvent(Event):
 @dataclass
 class KeyPressEvent(Event):
 
-    exec_time: float
     keycode: int
     unicode: str
 
@@ -83,7 +75,6 @@ class KeyPressEvent(Event):
 @dataclass
 class KeyReleaseEvent(Event):
 
-    exec_time: float
     keycode: int
     unicode: str
 
@@ -91,26 +82,24 @@ class KeyReleaseEvent(Event):
 @dataclass
 class RenderCursorEvent(Event):
 
-    exec_time: float
+    pass
 
 
 @dataclass
 class DeleteCharacterEvent(Event):
 
-    exec_time: float
+    pass
 
 
 @dataclass
 class MouseFocusChangedEvent(Event):
 
-    exec_time: float
     focused: bool
 
 
 @dataclass
 class WindowResizeEvent(Event):
 
-    exec_time: float
     width: int
     height: int
 
@@ -118,7 +107,6 @@ class WindowResizeEvent(Event):
 @dataclass
 class WindowMoveEvent(Event):
 
-    exec_time: float
     x: int
     y: int
 
@@ -126,25 +114,24 @@ class WindowMoveEvent(Event):
 @dataclass
 class WindowMinimizedEvent(Event):
 
-    exec_time: float
+    pass
 
 
 @dataclass
 class WindowUnminimizedEvent(Event):
 
-    exec_time: float
+    pass
 
 
 @dataclass
 class CloseWindowEvent(Event):
 
-    exec_time: float
+    pass
 
 
 @dataclass
 class OpenViewEvent(Event):
 
-    exec_time: float
     view: Any
     is_popup: bool
 
@@ -152,14 +139,12 @@ class OpenViewEvent(Event):
 @dataclass
 class CloseViewEvent(Event):
 
-    exec_time: float
     view: Any
 
 
 @dataclass
 class ResizeViewEvent(Event):
 
-    exec_time: float
     view: Any
     width: int = None
     height: int = None
@@ -168,20 +153,18 @@ class ResizeViewEvent(Event):
 @dataclass
 class ShowIndependentLabelEvent(Event):
 
-    exec_time: float
     label: Any
 
 
 @dataclass
 class HideIndependentLabelEvent(Event):
 
-    exec_time: float
+    pass
 
 
 @dataclass
 class AddTaskEvent(Event):
 
-    exec_time: float
     description: str
     importance: TaskImportance
 
@@ -189,14 +172,12 @@ class AddTaskEvent(Event):
 @dataclass
 class DeleteTaskEvent(Event):
 
-    exec_time: float
     id_: int
 
 
 @dataclass
 class EditTaskEvent(Event):
 
-    exec_time: float
     id_: int
     description: str
     importance: TaskImportance
@@ -205,14 +186,12 @@ class EditTaskEvent(Event):
 @dataclass
 class OpenEditTaskEvent(Event):
 
-    exec_time: float
     id_: int
 
 
 @dataclass
 class AddCalendarEventEvent(Event):
 
-    exec_time: float
     time: datetime.time
     description: str
     color: Color
@@ -222,14 +201,12 @@ class AddCalendarEventEvent(Event):
 @dataclass
 class DeleteCalendarEventEvent(Event):
 
-    exec_time: float
     event: CalendarEvent
 
 
 @dataclass
 class EditCalendarEventEvent(Event):
 
-    exec_time: float
     event: CalendarEvent
     time: datetime.time
     description: str
@@ -240,26 +217,24 @@ class EditCalendarEventEvent(Event):
 @dataclass
 class OpenEditCalendarEventEvent(Event):
 
-    exec_time: float
     event: CalendarEvent
 
 
 @dataclass
 class UpdateCalendarEvent(Event):
 
-    exec_time: float
+    pass
 
 
 @dataclass
 class LanguageChangedEvent(Event):
 
-    exec_time: float
+    pass
 
 
 @dataclass
 class TimerEvent(Event):
 
-    exec_time: float
     duration: float
     callback: Callable
 
@@ -267,9 +242,20 @@ class TimerEvent(Event):
 @dataclass
 class UserSignInEvent(ThreadedEvent):
 
-    exec_time: float
-    user: User
-    registered: bool = False
+    def __init__(self, exec_time: float, user: User, registered: bool = False):
+        super().__init__(registered)
+        self.exec_time = exec_time
+        self.user = user
+        self.registered = registered
+
+
+@dataclass
+class CalendarSyncEvent(ThreadedEvent):
+
+    def __init__(self, exec_time: float, registered: bool = False):
+        super().__init__(registered)
+        self.exec_time = exec_time
+        self.registered = registered
 
 
 class EventFactory:

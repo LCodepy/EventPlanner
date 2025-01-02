@@ -5,7 +5,7 @@ from typing import Union, Callable
 import pygame
 
 from src.events.event import MouseClickEvent, MouseReleaseEvent, Event, MouseWheelUpEvent, MouseWheelDownEvent, \
-    UpdateCalendarEvent, LanguageChangedEvent
+    UpdateCalendarEvent, LanguageChangedEvent, CalendarSyncEvent
 from src.models.calendar_model import CalendarModel, CalendarEvent
 from src.ui.alignment import VerticalAlignment
 from src.ui.button import Button
@@ -154,7 +154,7 @@ class CalendarView(View):
             if obj.register_event(event):
                 registered_events = True
 
-        if isinstance(event, UpdateCalendarEvent):
+        if isinstance(event, (UpdateCalendarEvent, CalendarSyncEvent, )):
             self.create_day_buttons()
             self.calendar_binding()
 

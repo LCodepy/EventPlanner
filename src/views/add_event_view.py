@@ -40,8 +40,8 @@ class AddEventView(View):
         self.event_to_edit = None
 
         self.colors = [
-            Colors.EVENT_GREEN204, Colors.EVENT_GREEN, Colors.EVENT_BLUE, Colors.EVENT_BLUE204, Colors.EVENT_PURPLE204,
-            Colors.EVENT_PINK204, Colors.EVENT_RED, Colors.EVENT_RED204, Colors.EVENT_ORANGE, Colors.EVENT_YELLOW204
+            Colors.EVENT_PINK204, Colors.EVENT_BLUE204, Colors.EVENT_GREEN204, Colors.EVENT_ORANGE, Colors.EVENT_RED204,
+            Colors.EVENT_PURPLE204, Colors.EVENT_BLUE, Colors.EVENT_GREEN, Colors.EVENT_YELLOW204, Colors.EVENT_RED
         ]
         self.color_buttons: list[Button] = []
         self.create_color_buttons()

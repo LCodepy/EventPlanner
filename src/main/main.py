@@ -9,6 +9,7 @@ from src.events.event import CloseWindowEvent, WindowResizeEvent, MouseFocusChan
     DeleteCharacterEvent, RenderCursorEvent
 from src.events.event_loop import EventLoop
 from src.main.account_manager import AccountManager
+from src.main.calendar_sync_manager import CalendarSyncManager
 from src.main.config import Config
 from src.main.window_manager import WindowManager
 from src.models.appbar_model import AppbarModel
@@ -51,6 +52,7 @@ class Main:
 
         LanguageManager(self.event_loop)
         self.account_manager = AccountManager()
+        CalendarSyncManager(CalendarModel())
 
         self.appbar_model = AppbarModel()
         self.appbar_view = AppbarView(self.win, self.appbar_model, self.win.get_width(), 30, 0, 0)

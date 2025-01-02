@@ -75,9 +75,34 @@ class ProfileView(View):
             font=Assets().font18
         )
 
-        self.sync_button = Label(
+        self.sync_button = Button(
             self.canvas,
-            (self.width // 2)
+            (self.width // 2, 340),
+            (200, 40),
+            label=Label(text="Sync", text_color=(200, 200, 200), font=Assets().font18),
+            color=Colors.BACKGROUND_GREY22,
+            border_width=0,
+            border_radius=4
+        )
+
+        self.switch_account_button = Button(
+            self.canvas,
+            (self.width // 2, 400),
+            (200, 40),
+            label=Label(text="Switch", text_color=(200, 200, 200), font=Assets().font18),
+            color=Colors.BACKGROUND_GREY22,
+            border_width=0,
+            border_radius=4
+        )
+
+        self.sign_out_button = Button(
+            self.canvas,
+            (self.width // 2, 460),
+            (200, 40),
+            label=Label(text="Sign out", text_color=(200, 200, 200), font=Assets().font18),
+            color=Colors.BACKGROUND_GREY22,
+            border_width=0,
+            border_radius=4
         )
 
     def register_event(self, event: Event) -> bool:
@@ -94,6 +119,13 @@ class ProfileView(View):
 
         if self.get_state() == 0 and self.sign_in_button.register_event(event):
             registered_events = True
+        elif self.get_state() == 1:
+            if self.sync_button.register_event(event):
+                registered_events = True
+            if self.switch_account_button.register_event(event):
+                registered_events = True
+            if self.sign_out_button.register_event(event):
+                registered_events = True
 
         if isinstance(event, MouseClickEvent) and self.on_click and event.button is MouseButtons.LEFT_BUTTON:
             self.on_click(event)
@@ -113,6 +145,9 @@ class ProfileView(View):
             self.profile_picture.render()
             self.name_label.render()
             self.email_label.render()
+            self.sync_button.render()
+            self.switch_account_button.render()
+            self.sign_out_button.render()
 
         pygame.draw.line(self.canvas, Colors.GREY70, (self.width - 1, 0), (self.width - 1, self.height))
 
@@ -131,6 +166,9 @@ class ProfileView(View):
         self.profile_picture.x = self.width // 2
         self.name_label.x = self.width // 2
         self.email_label.x = self.width // 2
+        self.sync_button.update_position(self.width // 2)
+        self.switch_account_button.update_position(self.width // 2)
+        self.sign_out_button.update_position(self.width // 2)
 
     def update_language(self) -> None:
         pass
