@@ -14,6 +14,7 @@ from src.views.event_list_view import EventListView
 from src.views.options_view import OptionsView
 from src.views.profile_view import ProfileView
 from src.views.search_view import SearchView
+from src.views.switch_accounts_view import SwitchAccountsView
 from src.views.todo_list_view import TodoListView
 from src.views.view import View
 
@@ -100,7 +101,7 @@ class ViewManager:
             self.screen_fog_animation.start([0], [150])
             self.opened_top_view_last_frame = True
             self.event_loop.enqueue_event(MouseFocusChangedEvent(time.time(), False))
-        elif isinstance(event.view, (OptionsView, )):
+        elif isinstance(event.view, (OptionsView, SwitchAccountsView, )):
             self.options_view = event.view
         elif isinstance(event.view, self.side_view_classes):
             if self.side_view:

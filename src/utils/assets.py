@@ -111,10 +111,11 @@ class Assets(metaclass=Singleton):
         self.google_credentials_file_path = os.path.join(self.GOOGLE_PATH, "credentials.json")
         self.google_tokens_path = os.path.join(self.GOOGLE_PATH, "tokens")
 
-        self.user_profile_picture = self.profile_picture_icon_large
+        self.user_profile_pictures = {None: self.profile_picture_icon_large}
 
         # Fonts
         self.font = "roboto"
+        self.font12 = pygame.font.SysFont(self.font, 12)
         self.font14 = pygame.font.SysFont(self.font, 14)
         self.font18 = pygame.font.SysFont(self.font, 18)
         self.font20 = pygame.font.SysFont(self.font, 20)

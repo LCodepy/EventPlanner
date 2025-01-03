@@ -3,6 +3,7 @@ from threading import Thread
 
 import pygame
 
+from src.controllers.switch_accounts_controller import SwitchAccountsController
 from src.events.event import MouseMotionEvent, MouseClickEvent, MouseReleaseEvent, ResizeViewEvent, OpenViewEvent, \
     UserSignInEvent, CalendarSyncEvent
 from src.events.event_loop import EventLoop
@@ -10,6 +11,7 @@ from src.main.account_manager import AccountManager
 from src.main.calendar_sync_manager import CalendarSyncManager
 from src.utils.authentication import GoogleAuthentication, User
 from src.views.profile_view import ProfileView
+from src.views.switch_accounts_view import SwitchAccountsView
 
 
 class ProfileController:
@@ -28,6 +30,8 @@ class ProfileController:
         self.view.sign_in_button.bind_on_click(self.on_sign_in)
 
         self.view.sync_button.bind_on_click(self.on_sync)
+        self.view.switch_account_button.bind_on_click(self.on_switch_accounts)
+        self.view.sign_out_button.bind_on_click(self.on_sign_out)
 
     def on_click(self, event: MouseClickEvent) -> None:
         if self.view.width - 5 < event.x < self.view.width and 0 < event.y < self.view.height:
@@ -59,20 +63,18 @@ class ProfileController:
             return True
 
     def on_sign_in(self) -> None:
-        def authenticate(on_complete):
-            on_complete(GoogleAuthentication.authenticate_new_user())
+        AccountManager().sing_in_new_user()
 
-        def callback(user: User) -> None:
-            self.event_loop.enqueue_threaded_event(UserSignInEvent(time.time(), user))
-
-        Thread(target=authenticate, args=(callback, )).start()
+    def on_sign_out(self) -> None:
+        AccountManager().sign_out_current_user()
 
     def on_sync(self) -> None:
-        def sync(on_complete):
-            CalendarSyncManager().sync_calendars()
-            on_complete()
+        CalendarSyncManager().sync_calendars_threaded()
 
-        def callback():
-            self.event_loop.enqueue_threaded_event(CalendarSyncEvent(time.time()))
-
-        Thread(target=sync, args=(callback, )).start()
+    def on_switch_accounts(self) -> None:
+        view = SwitchAccountsView(
+            self.view.display, self.event_loop, 250, 400, self.view.x + self.view.width // 2 - 125,
+            self.view.height // 2 - 130
+        )
+        SwitchAccountsController(view, self.event_loop)
+        self.event_loop.enqueue_event(OpenViewEvent(time.time(), view, False))

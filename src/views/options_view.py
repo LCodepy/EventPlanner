@@ -114,8 +114,8 @@ class OptionsView(View):
         self.display.blit(self.canvas, (self.x, self.y))
 
     def resize(self, width: int = None, height: int = None) -> None:
-        self.width = width
-        self.height = height
+        self.width = width or self.width
+        self.height = height or self.height
 
         self.canvas = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
 

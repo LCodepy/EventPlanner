@@ -52,7 +52,7 @@ class ProfileView(View):
         self.profile_picture = Image(
             self.canvas,
             (self.width // 2, 100),
-            Assets().user_profile_picture,
+            AccountManager().get_current_profile_picture(),
             size=(96, 96),
             border_radius=48
         )
@@ -89,7 +89,7 @@ class ProfileView(View):
             self.canvas,
             (self.width // 2, 400),
             (200, 40),
-            label=Label(text="Switch", text_color=(200, 200, 200), font=Assets().font18),
+            label=Label(text="Switch Account", text_color=(200, 200, 200), font=Assets().font18),
             color=Colors.BACKGROUND_GREY22,
             border_width=0,
             border_radius=4
@@ -111,7 +111,7 @@ class ProfileView(View):
         if isinstance(event, LanguageChangedEvent):
             self.update_language()
         elif isinstance(event, UserSignInEvent):
-            self.profile_picture.set_image(Assets().user_profile_picture)
+            self.profile_picture.set_image(AccountManager().get_current_profile_picture())
             self.name_label.set_text(AccountManager().current_account.name)
             self.email_label.set_text(AccountManager().current_account.email)
 

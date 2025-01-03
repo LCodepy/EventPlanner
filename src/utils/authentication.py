@@ -30,9 +30,12 @@ class User:
 class GoogleAuthentication:
 
     @staticmethod
-    def authenticate_new_user() -> User:
+    def authenticate_new_user() -> Optional[User]:
         flow = InstalledAppFlow.from_client_secrets_file(Assets().google_credentials_file_path, scopes=SCOPES)
-        flow.run_local_server(port=8080)
+        try:
+            flow.run_local_server(port=8080)
+        except Warning:
+            return
 
         service = build("oauth2", "v2", credentials=flow.credentials)
         user_info = service.userinfo().get().execute()

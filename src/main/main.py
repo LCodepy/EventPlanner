@@ -51,8 +51,8 @@ class Main:
         self.render_all = False
 
         LanguageManager(self.event_loop)
-        self.account_manager = AccountManager()
-        CalendarSyncManager(CalendarModel())
+        self.account_manager = AccountManager(self.event_loop)
+        CalendarSyncManager(CalendarModel(), self.event_loop)
 
         self.appbar_model = AppbarModel()
         self.appbar_view = AppbarView(self.win, self.appbar_model, self.win.get_width(), 30, 0, 0)

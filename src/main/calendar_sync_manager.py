@@ -1,9 +1,13 @@
 import datetime
 import inspect
+import time
+from threading import Thread
 
 import pytz as pytz
 from googleapiclient.discovery import Resource
 
+from src.events.event import CalendarSyncEvent
+from src.events.event_loop import EventLoop
 from src.main.account_manager import AccountManager
 from src.models.calendar_model import CalendarModel, CalendarEvent, EventRecurring
 from src.ui.colors import Colors, Color
@@ -13,8 +17,9 @@ from src.utils.singleton import Singleton
 
 class CalendarSyncManager(metaclass=Singleton):
 
-    def __init__(self, model: CalendarModel = None) -> None:
+    def __init__(self, model: CalendarModel = None, event_loop: EventLoop = None) -> None:
         self.model = model
+        self.event_loop = event_loop
 
     def fetch_events(self, dt: datetime.datetime) -> (Resource, list[dict]):
         if not AccountManager().current_account:
@@ -92,6 +97,16 @@ class CalendarSyncManager(metaclass=Singleton):
 
         for event in add_to_local:
             self.model.add_event(event, threaded=True)
+
+    def sync_calendars_threaded(self) -> None:
+        def sync(on_complete):
+            CalendarSyncManager().sync_calendars()
+            on_complete()
+
+        def callback():
+            self.event_loop.enqueue_threaded_event(CalendarSyncEvent(time.time()))
+
+        Thread(target=sync, args=(callback, )).start()
 
     def add_event_to_google(self, service: Resource, event: CalendarEvent) -> None:
         summary = event.description
