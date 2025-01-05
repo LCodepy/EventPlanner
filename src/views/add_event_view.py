@@ -6,7 +6,7 @@ import pygame
 from src.events.event import Event, MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, \
     MouseWheelDownEvent, KeyReleaseEvent, LanguageChangedEvent
 from src.events.event_loop import EventLoop
-from src.models.calendar_model import CalendarEvent, EventRecurring
+from src.models.calendar_model import CalendarEvent, EventRecurrence
 from src.ui.button import Button
 from src.ui.colors import Colors
 from src.ui.dropdown import DropDown
@@ -238,24 +238,24 @@ class AddEventView(View):
     def get_time(self) -> datetime.time:
         return datetime.time(int(self.hours_input.text or "00"), int(self.minutes_input.text or "00"))
 
-    def get_event_recurring(self) -> EventRecurring:
+    def get_event_recurring(self) -> EventRecurrence:
         options = self.language_manager.get_string("event_dropdown_options")
 
         if self.dropdown.get_selected_option() == options[3]:
-            return EventRecurring.NEVER
+            return EventRecurrence.NEVER
         elif self.dropdown.get_selected_option() == options[0]:
-            return EventRecurring.WEEKLY
+            return EventRecurrence.WEEKLY
         elif self.dropdown.get_selected_option() == options[1]:
-            return EventRecurring.MONTHLY
+            return EventRecurrence.MONTHLY
         elif self.dropdown.get_selected_option() == options[2]:
-            return EventRecurring.YEARLY
+            return EventRecurrence.YEARLY
 
-    def get_dropdown_option(self, option: EventRecurring) -> int:
-        if option == EventRecurring.NEVER:
+    def get_dropdown_option(self, option: EventRecurrence) -> int:
+        if option == EventRecurrence.NEVER:
             return 3
-        elif option == EventRecurring.WEEKLY:
+        elif option == EventRecurrence.WEEKLY:
             return 0
-        elif option == EventRecurring.MONTHLY:
+        elif option == EventRecurrence.MONTHLY:
             return 1
         return 2
 
@@ -274,7 +274,7 @@ class AddEventView(View):
         self.description_text_field.set_text(event.description)
         self.hours_input.set_text(str(event.time)[:2])
         self.minutes_input.set_text(str(event.time)[3:5])
-        self.dropdown.set_option(self.get_dropdown_option(event.recurring))
+        self.dropdown.set_option(self.get_dropdown_option(event.recurrence))
         self.add_event_button.label.set_text(self.language_manager.get_string("apply"))
 
         for btn in self.color_buttons:

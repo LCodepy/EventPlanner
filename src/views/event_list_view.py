@@ -35,7 +35,7 @@ class EventListEvent(UIObject):
         self.event_loop = event_loop
         self.padding = padding
 
-        self.editable = self.event.recurrence_id >= 0
+        self.editable = not self.event.is_default
 
         self.start_pos = (self.x, self.y)
         self.pressed = False
@@ -47,7 +47,7 @@ class EventListEvent(UIObject):
         self.open_edit_calendar_event = None
 
         self.highlight_animation = ChangeValuesAnimation(
-            "HighlightAnimation" + str(self.event.recurrence_id), self.event_loop, 0.3
+            "HighlightAnimation" + str(self.event.id), self.event_loop, 0.3
         )
         self.highlight_animation.bind_on_stop(lambda: self.highlight(1))
 

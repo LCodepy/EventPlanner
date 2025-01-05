@@ -63,7 +63,15 @@ class ProfileController:
             return True
 
     def on_sign_in(self) -> None:
-        AccountManager().sing_in_new_user()
+        if AccountManager().accounts:
+            view = SwitchAccountsView(
+                self.view.display, self.event_loop, 250, 400, self.view.x + self.view.width // 2 - 125,
+                self.view.height // 2 - 130
+            )
+            SwitchAccountsController(view, self.event_loop)
+            self.event_loop.enqueue_event(OpenViewEvent(time.time(), view, False))
+        else:
+            AccountManager().sing_in_new_user()
 
     def on_sign_out(self) -> None:
         AccountManager().sign_out_current_user()

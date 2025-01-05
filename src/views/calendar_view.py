@@ -157,6 +157,7 @@ class CalendarView(View):
         if isinstance(event, (UpdateCalendarEvent, CalendarSyncEvent, )):
             self.create_day_buttons()
             self.calendar_binding()
+            registered_events = True
 
         for button in self.day_buttons:
             if button.register_event(event):

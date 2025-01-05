@@ -1,4 +1,5 @@
 import pygame
+import pygame.gfxdraw
 
 from src.events.event import Event, MouseMotionEvent, MouseFocusChangedEvent, MouseClickEvent, MouseReleaseEvent, \
     WindowMinimizedEvent, WindowUnminimizedEvent
@@ -70,14 +71,15 @@ class Image(UIObject):
                 self.hover_image.set_colorkey((0, 0, 0))
                 masked_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
                 masked_surface.blit(self.hover_image, (0, 0))
-                masked_surface.blit(mask, (0, 0), special_flags=pygame.BLEND_RGBA_MIN)
+                masked_surface.blit(mask, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
                 self.canvas.blit(masked_surface, self.get_rect().topleft)
             else:
                 self.image.set_colorkey((0, 0, 0))
                 masked_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
                 masked_surface.blit(self.image, (0, 0))
-                masked_surface.blit(mask, (0, 0), special_flags=pygame.BLEND_RGBA_MIN)
+                masked_surface.blit(mask, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
                 self.canvas.blit(masked_surface, self.get_rect().topleft)
+
         elif self.hover_image and self.hovering:
             self.canvas.blit(self.hover_image, self.get_rect().topleft)
         else:

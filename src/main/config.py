@@ -19,3 +19,7 @@ class Config:
     @property
     def fps(self) -> int:
         return 60
+
+    @property
+    def time_zone(self) -> str:
+        return "Europe/Belgrade"

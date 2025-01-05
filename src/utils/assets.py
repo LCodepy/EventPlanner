@@ -10,6 +10,7 @@ class Assets(metaclass=Singleton):
     IMAGES_PATH = os.getcwd() + "\\assets\\images"
     DATA_PATH = os.getcwd() + "\\assets\\data"
     GOOGLE_PATH = os.getcwd() + "\\assets\\google"
+    SETTINGS_PATH = os.getcwd() + "\\assets\\settings"
 
     def __init__(self) -> None:
         # App Bar icons
@@ -87,8 +88,6 @@ class Assets(metaclass=Singleton):
             os.path.join(self.IMAGES_PATH, "edit_icon_large_hover.png")
         ).convert_alpha()
 
-        self.todo_list_database_path = os.path.join(self.DATA_PATH, "todo_list.db")
-
         # Calendar icons
         self.right_arrow_icon_large = pygame.image.load(
             os.path.join(self.IMAGES_PATH, "right_arrow_icon_large.png")
@@ -104,9 +103,9 @@ class Assets(metaclass=Singleton):
             os.path.join(self.IMAGES_PATH, "left_arrow_icon_large_hover.png")
         ).convert_alpha()
 
-        self.calendar_database_path = os.path.join(self.DATA_PATH, "calendar.db")
-
-        self.settings_database_path = os.path.join(self.DATA_PATH, "settings.json")
+        self.todo_list_database_path = os.path.join(self.DATA_PATH, "todo_lists")
+        self.calendar_database_path = os.path.join(self.DATA_PATH, "calendars")
+        self.settings_database_path = os.path.join(self.SETTINGS_PATH, "settings.json")
 
         self.google_credentials_file_path = os.path.join(self.GOOGLE_PATH, "credentials.json")
         self.google_tokens_path = os.path.join(self.GOOGLE_PATH, "tokens")

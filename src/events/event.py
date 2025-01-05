@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from typing import Any, Callable
 
 from src.events.mouse_buttons import MouseButtons
-from src.models.calendar_model import CalendarEvent, EventRecurring
+from src.models.calendar_model import CalendarEvent, EventRecurrence
 from src.models.todo_list_model import TaskImportance
 from src.ui.colors import Color
 from src.utils.authentication import User
@@ -195,7 +195,7 @@ class AddCalendarEventEvent(Event):
     time: datetime.time
     description: str
     color: Color
-    recurring: EventRecurring
+    recurrence: EventRecurrence
 
 
 @dataclass
@@ -211,7 +211,12 @@ class EditCalendarEventEvent(Event):
     time: datetime.time
     description: str
     color: Color
-    recurring: EventRecurring
+    recurrence: EventRecurrence
+
+@dataclass
+class DeleteCalendarEventEvent(Event):
+
+    event: CalendarEvent
 
 
 @dataclass
@@ -237,6 +242,12 @@ class TimerEvent(Event):
 
     duration: float
     callback: Callable
+
+
+@dataclass
+class UserSignOutEvent(Event):
+
+    user: User
 
 
 @dataclass

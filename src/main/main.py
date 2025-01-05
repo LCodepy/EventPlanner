@@ -51,8 +51,8 @@ class Main:
         self.render_all = False
 
         LanguageManager(self.event_loop)
-        self.account_manager = AccountManager(self.event_loop)
-        CalendarSyncManager(CalendarModel(), self.event_loop)
+        self.account_manager = AccountManager(self.win, self.event_loop)
+        self.calendar_sync_manager = CalendarSyncManager(self.event_loop)
 
         self.appbar_model = AppbarModel()
         self.appbar_view = AppbarView(self.win, self.appbar_model, self.win.get_width(), 30, 0, 0)
@@ -62,7 +62,7 @@ class Main:
         self.taskbar_view = TaskbarView(self.win, self.taskbar_model, 60, self.win.get_height() - 30, 0, 30)
         self.taskbar_controller = TaskbarController(self.taskbar_model, self.taskbar_view, self.event_loop)
 
-        self.calendar_model = CalendarModel()
+        self.calendar_model = CalendarModel(database_name=self.account_manager.get_current_database_name())
         self.calendar_view = CalendarView(self.win, self.calendar_model, self.win.get_width() - self.taskbar_view.width,
                                           self.win.get_height() - self.appbar_view.height, self.taskbar_view.width,
                                           self.appbar_view.height)
@@ -105,10 +105,11 @@ class Main:
                 self.update_display = True
                 Log.i("Registered window move event: " + str(event))
 
+            self.account_manager.register_event(event)
+            self.calendar_sync_manager.register_event(event)
+
             if self.window_manager.register_event(event):
                 event = MouseFocusChangedEvent(time.time(), False)
-            if self.account_manager.register_event(event):
-                pass
             if self.view_manager.register_events(event):
                 self.update_display = True
 

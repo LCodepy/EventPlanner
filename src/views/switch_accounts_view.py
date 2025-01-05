@@ -116,6 +116,8 @@ class SwitchAccountsView(View):
             registered_events = True
             if pygame.mouse.get_cursor() != pygame.SYSTEM_CURSOR_ARROW:
                 pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+        elif isinstance(event, (MouseClickEvent, MouseReleaseEvent, )) and self.is_focused(event):
+            registered_events = True
         elif isinstance(event, LanguageChangedEvent):
             self.update_language()
         elif isinstance(event, UserSignInEvent):
@@ -139,7 +141,7 @@ class SwitchAccountsView(View):
         pygame.draw.rect(self.canvas, Colors.GREY70, [0, 0, self.width, self.height], width=1, border_radius=4)
 
         self.title_label.render()
-        if len(AccountManager().accounts) <= 1:
+        if len(self.accounts) < 1:
             self.no_accounts_label.render()
         self.add_account_button.render()
 

@@ -31,7 +31,7 @@ class AddEventController:
         self.event_loop.enqueue_event(CloseViewEvent(time.time(), self.view))
 
     def add_task(self) -> None:
-        color = Colors.BLUE220
+        color = Colors.EVENT_BLUE204
         for btn in self.view.color_buttons:
             if btn.border_width != 0:
                 color = btn.color

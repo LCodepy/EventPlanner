@@ -99,7 +99,7 @@ class ProfileView(View):
             self.canvas,
             (self.width // 2, 460),
             (200, 40),
-            label=Label(text="Sign out", text_color=(200, 200, 200), font=Assets().font18),
+            label=Label(text="Sign Out", text_color=(200, 200, 200), font=Assets().font18),
             color=Colors.BACKGROUND_GREY22,
             border_width=0,
             border_radius=4

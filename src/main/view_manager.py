@@ -10,6 +10,7 @@ from src.events.event_loop import EventLoop
 from src.ui.colors import Colors
 from src.ui.independent_label import IndependentLabel
 from src.utils.animations import ChangeValuesAnimation
+from src.views.calendar_view import CalendarView
 from src.views.event_list_view import EventListView
 from src.views.options_view import OptionsView
 from src.views.profile_view import ProfileView
@@ -123,6 +124,12 @@ class ViewManager:
             self.side_view = None
             self.main_view.resize(width=pygame.display.get_window_size()[0] - self.side_bar_view.width)
             self.main_view.x = self.side_bar_view.width
+        elif isinstance(event.view, CalendarView):
+            w, h = self.main_view.width, self.main_view.height
+            x = self.main_view.x
+            self.main_view = event.view
+            self.main_view.resize(w, h)
+            self.main_view.x = x
         return True
 
     def close_view(self, event: CloseViewEvent) -> bool:

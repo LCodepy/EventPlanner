@@ -7,7 +7,7 @@ from src.controllers.add_event_controller import AddEventController
 from src.controllers.options_controller import OptionsController
 from src.events.event import MouseClickEvent, MouseReleaseEvent, MouseMotionEvent, ResizeViewEvent, MouseWheelUpEvent, \
     MouseWheelDownEvent, OpenViewEvent, AddCalendarEventEvent, CloseViewEvent, UpdateCalendarEvent, \
-    EditCalendarEventEvent
+    EditCalendarEventEvent, DeleteCalendarEventEvent
 from src.events.event_loop import EventLoop
 from src.models.calendar_model import CalendarModel, CalendarEvent
 from src.views.add_event_view import AddEventView
@@ -89,6 +89,7 @@ class EventListController:
 
     def delete_event(self, event: CalendarEvent) -> None:
         self.model.remove_event(event)
+
         for events in self.view.time_table.values():
             r = False
             for i in range(len(events)):
@@ -101,9 +102,10 @@ class EventListController:
         self.view.create_time_table()
         self.bind_view_methods()
         self.event_loop.enqueue_event(UpdateCalendarEvent(time.time()))
+        self.event_loop.enqueue_event(DeleteCalendarEventEvent(time.time(), event))
 
     def open_options(self, event: CalendarEvent) -> None:
-        if event.recurrence_id < 0:
+        if event.is_default:
             return
         options = OptionsView(self.view.display, self.event_loop, 120, 70, *pygame.mouse.get_pos())
         options.set_mode(1)
@@ -134,7 +136,7 @@ class EventListController:
         )
 
     def add_event(self, ev: AddCalendarEventEvent) -> None:
-        event = CalendarEvent(self.view.date, ev.time, ev.description, ev.color, ev.recurring, 0)
+        event = CalendarEvent(0, self.view.date, ev.time, ev.description, ev.color, ev.recurrence)
         self.model.add_event(event)
         self.view.create_time_table()
         self.bind_view_methods()
@@ -142,7 +144,10 @@ class EventListController:
         self.event_loop.enqueue_event(UpdateCalendarEvent(time.time()))
 
     def edit_event(self, event: EditCalendarEventEvent) -> None:
-        self.model.update_event(self.add_event_view.event_to_edit, event.event.date, event.time, event.description, event.color, event.recurring)
+        self.model.update_event(
+            event.event, d=event.event.date, t=event.time,
+            description=event.description, color=event.color, recurrence=event.recurrence
+        )
         self.event_loop.enqueue_event(CloseViewEvent(time.time(), self.add_event_view))
         self.event_loop.enqueue_event(UpdateCalendarEvent(time.time()))
 

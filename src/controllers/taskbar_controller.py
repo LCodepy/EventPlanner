@@ -7,6 +7,7 @@ from src.controllers.todo_list_controller import TodoListController
 from src.events.event import OpenViewEvent, CloseViewEvent, ShowIndependentLabelEvent, HideIndependentLabelEvent, \
     TimerEvent
 from src.events.event_loop import EventLoop
+from src.main.account_manager import AccountManager
 from src.models.calendar_model import CalendarModel
 from src.models.taskbar_model import TaskbarModel
 from src.models.todo_list_model import TodoListModel
@@ -99,7 +100,10 @@ class TaskbarController:
         if self.todo_list_opened:
             self.event_loop.enqueue_event(CloseViewEvent(time.time(), self.todo_list_view))
         else:
-            model = TodoListModel()
+            if AccountManager().is_signed_in():
+                model = TodoListModel(database_name=f"todo_list_{AccountManager().current_account.email}")
+            else:
+                model = TodoListModel()
             self.todo_list_view = TodoListView(
                 self.view.display, model, self.event_loop, 300, self.view.display.get_height() - 30, 0, 0
             )
