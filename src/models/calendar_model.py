@@ -348,7 +348,7 @@ class CalendarModel:
 
     def update_event(self, event: CalendarEvent, updated_event: CalendarEvent = None, d: datetime.date = None,
                      t: datetime.time = None, description: str = None, color: Color = None,
-                     recurrence: EventRecurrence = EventRecurrence.NEVER, google_id: str = None,
+                     recurrence: EventRecurrence = None, google_id: str = None,
                      threaded: bool = False) -> None:
         new_event = updated_event or CalendarEvent(
             event.id, d or event.date, t or event.time, description or event.description, color or event.color,

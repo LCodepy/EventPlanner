@@ -1,9 +1,11 @@
 import time
+from typing import Union
 
 import pygame
 
 from src.controllers.event_list_controller import EventListController
-from src.events.event import MouseMotionEvent, MouseClickEvent, MouseReleaseEvent, ResizeViewEvent, OpenViewEvent
+from src.events.event import MouseMotionEvent, MouseClickEvent, MouseReleaseEvent, ResizeViewEvent, OpenViewEvent, \
+    MouseWheelUpEvent, MouseWheelDownEvent
 from src.events.event_loop import EventLoop
 from src.models.calendar_model import CalendarModel, CalendarEvent
 from src.views.event_list_view import EventListView
@@ -19,10 +21,12 @@ class SearchController:
 
         self.pressed = False
         self.last_frame_interacted = False
+        self.scroll_value = 15
 
         self.view.bind_on_click(self.on_click)
         self.view.bind_on_release(self.on_release)
         self.view.bind_on_mouse_motion(self.on_mouse_motion)
+        self.view.bind_on_scroll(self.on_scroll)
 
         self.view.search_bar.bind_on_key(self.on_search_bar_typed)
         self.view.bind_on_search_event_release(self.on_search_event_release)
@@ -57,6 +61,21 @@ class SearchController:
             self.view.search_bar.set_focus(False)
             return True
 
+    def on_scroll(self, event: Union[MouseWheelUpEvent, MouseWheelDownEvent]) -> bool:
+        if event.x < 0 or event.x > self.view.width or event.y < 0 or event.y > self.view.height or not self.view.events:
+            return False
+
+        if isinstance(event, MouseWheelUpEvent) and self.view.events[0].get_rect().centery < self.view.event_list_start_pos[1]:
+            self.scroll_events(self.scroll_value)
+            return True
+        elif isinstance(event, MouseWheelDownEvent) and self.view.events[-1].get_rect().bottom > self.view.height - 30:
+            self.scroll_events(-self.scroll_value)
+            return True
+
+    def scroll_events(self, scroll: int = 0) -> None:
+        for event in self.view.events:
+            event.update_position(y=event.y + scroll)
+
     def on_search_bar_typed(self) -> None:
         query = self.view.search_bar.text
 
@@ -74,4 +93,3 @@ class SearchController:
         EventListController(self.view.model, view, self.event_loop)
         view.event_to_highlight = event
         self.event_loop.enqueue_event(OpenViewEvent(time.time(), view, False))
-

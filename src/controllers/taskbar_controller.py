@@ -86,7 +86,10 @@ class TaskbarController:
         if self.search_opened:
             self.event_loop.enqueue_event(CloseViewEvent(time.time(), self.search_view))
         else:
-            model = CalendarModel()
+            if AccountManager().is_signed_in():
+                model = CalendarModel(database_name=f"calendar_{AccountManager().current_account.email}")
+            else:
+                model = CalendarModel()
             self.search_view = SearchView(
                 self.view.display, model, self.event_loop, 300, self.view.display.get_height() - 30, 0, 0
             )

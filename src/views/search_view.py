@@ -99,6 +99,10 @@ class SearchEvent(UIObject):
         self.datetime_label.x = self.width - 40
         self.datetime_label.update_canvas(self.ui_canvas)
 
+    def update_position(self, x: int = None, y: int = None) -> None:
+        self.x = x or self.x
+        self.y = y or self.y
+
     def bind_on_release(self, on_release: Callable[[int], None]) -> None:
         self.on_release = lambda event=self.event: on_release(event)
 
@@ -131,6 +135,8 @@ class SearchView(View):
         self.on_scroll = None
 
         self.on_search_event_release = None
+
+        self.event_list_start_pos = (self.width // 2, 100)
 
         self.title_label = Label(
             self.canvas,
@@ -200,24 +206,40 @@ class SearchView(View):
             self.on_release(event)
         elif isinstance(event, MouseMotionEvent) and self.on_mouse_motion(event):
             return True
+        elif isinstance(event, (MouseWheelUpEvent, MouseWheelDownEvent)):
+            self.on_scroll(event)
 
         return registered_events
 
     def render(self) -> None:
         self.canvas.fill(Colors.BACKGROUND_GREY30)
 
+        for event in self.events:
+            if event.get_rect().top < self.height:
+                event.render()
+
+        self.render_shadow()
+
         if not self.events:
             self.title_label.render()
         self.search_bar.render()
         self.search_bar_icon.render()
 
-        for event in self.events:
-            if event.get_rect().top < self.height:
-                event.render()
-
         pygame.draw.line(self.canvas, Colors.GREY70, (self.width - 1, 0), (self.width - 1, self.height))
 
         self.display.blit(self.canvas, (self.x, self.y))
+
+    def render_shadow(self) -> None:
+        pygame.draw.rect(self.canvas, Colors.BACKGROUND_GREY30, [0, 0, self.width, 60])
+        pygame.draw.rect(self.canvas, Colors.BACKGROUND_GREY30, (0, self.height - 10, self.width, 10))
+        c = pygame.Surface(self.canvas.get_size(), pygame.SRCALPHA)
+        for i in range(22):
+            y = self.event_list_start_pos[1] - 40 + i
+            pygame.draw.line(c, (30, 30, 30, 255 - i * 12), (0, y), (self.width, y))
+        for i in range(22):
+            y = self.height - 10 - i
+            pygame.draw.line(c, (30, 30, 30, 255 - i * 12), (0, y), (self.width, y))
+        self.canvas.blit(c, (0, 0))
 
     def create_search_events(self, events: [CalendarEvent]) -> None:
         self.events = []
@@ -226,7 +248,7 @@ class SearchView(View):
             self.events.append(
                 SearchEvent(
                     self.canvas,
-                    (self.width // 2, 100 + (i * 60)),
+                    (self.width // 2, self.event_list_start_pos[1] + (i * 60)),
                     (self.width - 20, 50),
                     event
                 )

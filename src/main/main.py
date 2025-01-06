@@ -1,3 +1,4 @@
+import threading
 import time
 
 import pygame
@@ -114,6 +115,7 @@ class Main:
                 self.update_display = True
 
             if isinstance(event, CloseWindowEvent):
+                self.calendar_sync_manager.sync_all_calendars_threaded()
                 self.running = False
                 break
 

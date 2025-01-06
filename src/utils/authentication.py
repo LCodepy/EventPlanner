@@ -7,6 +7,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build, Resource
+from httplib2.error import ServerNotFoundError
 
 from src.utils.assets import Assets
 
@@ -17,6 +18,9 @@ SCOPES = [
     "https://www.googleapis.com/auth/userinfo.profile",
     "https://www.googleapis.com/auth/calendar"
 ]
+
+PORTS = [i for i in range(8080, 8100)]
+USED_PORTS = []
 
 
 @dataclass
@@ -33,8 +37,9 @@ class GoogleAuthentication:
     def authenticate_new_user() -> Optional[User]:
         flow = InstalledAppFlow.from_client_secrets_file(Assets().google_credentials_file_path, scopes=SCOPES)
         try:
-            flow.run_local_server(port=8080)
-        except Warning:
+            flow.run_local_server(port=GoogleAuthentication.get_available_port())
+        except Warning as e:
+            print(e)
             return
 
         service = build("oauth2", "v2", credentials=flow.credentials)
@@ -60,7 +65,12 @@ class GoogleAuthentication:
             return
 
         service = build("oauth2", "v2", credentials=creds)
-        user_info = service.userinfo().get().execute()
+        try:
+            user_info = service.userinfo().get().execute()
+        except ServerNotFoundError as e:
+            print(e)
+            return
+
         email = user_info["email"]
         uri = user_info["picture"]
         name = ""
@@ -87,10 +97,17 @@ class GoogleAuthentication:
                 creds.refresh(Request())
             else:
                 flow = InstalledAppFlow.from_client_secrets_file(Assets().google_credentials_file_path, SCOPES)
-                creds = flow.run_local_server(port=0)
+                creds = flow.run_local_server(port=GoogleAuthentication.get_available_port())
 
                 with open(token_file, "w") as token:
                     token.write(creds.to_json())
 
         return build("calendar", "v3", credentials=creds)
+
+    @staticmethod
+    def get_available_port() -> int:
+        for port in PORTS:
+            if port not in USED_PORTS:
+                USED_PORTS.append(port)
+                return port
 

@@ -6,6 +6,7 @@ from typing import Optional
 
 import pygame
 from google.auth.exceptions import RefreshError
+from httplib2 import ServerNotFoundError
 
 from src.controllers.calendar_controller import CalendarController
 from src.events.event import Event, UserSignInEvent, OpenViewEvent, UserSignOutEvent
@@ -81,7 +82,10 @@ class AccountManager(metaclass=Singleton):
 
     def sign_in_user(self, email: str) -> None:
         def authenticate(on_complete):
-            on_complete(GoogleAuthentication.authenticate_user_with_token(email))
+            try:
+                on_complete(GoogleAuthentication.authenticate_user_with_token(email))
+            except ServerNotFoundError as e:
+                print(e)
 
         def callback(user: User) -> None:
             if user is None:

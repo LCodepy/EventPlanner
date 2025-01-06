@@ -6,6 +6,7 @@ from threading import Thread
 import pytz as pytz
 from googleapiclient.discovery import Resource
 from googleapiclient.errors import HttpError
+from httplib2 import ServerNotFoundError
 
 from src.events.event import CalendarSyncEvent, Event, UserSignInEvent, EditCalendarEventEvent, \
     DeleteCalendarEventEvent, UserSignOutEvent
@@ -33,6 +34,10 @@ class CalendarSyncManager(metaclass=Singleton):
         self.events_to_delete = {user.email: [] for user in AccountManager().accounts}
         self.events_to_edit = {user.email: [] for user in AccountManager().accounts}
 
+        self.sync_finished = True
+        self.last_synced = 0
+        self.sync_time = 6
+
     def register_event(self, event: Event) -> None:
         if isinstance(event, UserSignInEvent):
             if event.user.email not in self.events_to_delete:
@@ -51,39 +56,70 @@ class CalendarSyncManager(metaclass=Singleton):
             )
         elif isinstance(event, DeleteCalendarEventEvent):
             self.remove_event(event.event)
+            print("DELETED")
+        elif isinstance(event, CalendarSyncEvent):
+            self.sync_finished = True
 
-    def fetch_events(self, dt: datetime.datetime) -> (Resource, list[dict]):
+        if time.time() - self.last_synced > self.sync_time and self.sync_finished:
+            self.last_synced = time.time()
+            # self.sync_calendars_threaded()
+            self.sync_all_calendars_threaded()
+
+    def fetch_events(self, dt: datetime.datetime, email: str = None) -> (Resource, list[dict]):
         if not AccountManager().current_account:
             return []
 
-        service = GoogleAuthentication.initialize_service(AccountManager().current_account.email)
+        service = GoogleAuthentication.initialize_service(email or AccountManager().current_account.email)
 
         now = dt.isoformat() + "Z"
 
-        events_result = service.events().list(
-            calendarId="primary",
-            timeMin=now
-        ).execute()
+        try:
+            events_result = service.events().list(
+                calendarId="primary",
+                timeMin=now
+            ).execute()
+        except ServerNotFoundError as e:
+            print(e)
+            return None, None
 
         events = events_result.get("items", [])
 
         return service, events
 
-    def sync_calendars(self) -> None:
+    def sync_calendars(self, email: str = None) -> None:
         if not AccountManager().is_signed_in():
             return
 
         now = datetime.datetime.utcnow()
 
-        service, _ = self.fetch_events(now)
+        service, _ = self.fetch_events(now, email=email)
 
-        self.sync_deleted_events(service)
-        self.sync_updated_events(service)
+        if not service:
+            return
 
-        service, google_events = self.fetch_events(now)
+        print("\n")
+        print("Syncing calendars for user: ", email or AccountManager().current_account.email)
+        print("To delete:")
+        for e in self.events_to_delete.values():
+            print(e)
+        print("To edit:")
+        for e in self.events_to_edit.values():
+            print(e)
+
+        self.sync_finished = False
+
+        self.sync_deleted_events(service, email=email)
+        self.sync_updated_events(service, email=email)
+
+        service, google_events = self.fetch_events(now, email=email)
+
+        if email:
+            model = CalendarModel(database_name=f"calendar_{email}")
+        else:
+            model = self.model
 
         google_calendar_events = self.get_google_event_list(google_events)
-        local_calendar_events = self.model.get_upcoming_events(now, threaded=True)
+        local_calendar_events = model.get_upcoming_events(now, threaded=True)
 
         local_synced = {}
         local_not_synced = []
@@ -116,23 +152,45 @@ class CalendarSyncManager(metaclass=Singleton):
 
         self.event_loop.enqueue_threaded_event(CalendarSyncEvent(time.time()))
 
-    def sync_deleted_events(self, service: Resource) -> None:
-        for event in self.events_to_delete[AccountManager().current_account.email]:
+        print("Local not synced:")
+        for e in local_not_synced:
+            print(e)
+        print("Google not synced:")
+        for e in google_not_synced:
+            print(e)
+        print("Local synced:")
+        for e in local_synced.values():
+            print(e)
+        print("Google synced:")
+        for e in google_synced.values():
+            print(e)
+
+    def sync_deleted_events(self, service: Resource, email: str = None) -> None:
+        for event in self.events_to_delete[email or AccountManager().current_account.email]:
             try:
                 service.events().delete(calendarId="primary", eventId=event.google_id).execute()
             except HttpError as e:
                 print(e)
 
-        self.events_to_delete[AccountManager().current_account.email].clear()
+        self.events_to_delete[email or AccountManager().current_account.email].clear()
 
-    def sync_updated_events(self, service: Resource) -> None:
-        for event in self.events_to_edit[AccountManager().current_account.email]:
+    def sync_updated_events(self, service: Resource, email: str = None) -> None:
+        for event in self.events_to_edit[email or AccountManager().current_account.email]:
             try:
                 google_event = service.events().get(calendarId="primary", eventId=event.google_id).execute()
 
                 google_event["summary"] = event.description
                 if self.get_id_by_color(event.color) != 0:
                     google_event["colorId"] = str(self.get_id_by_color(event.color))
+
+                google_event["start"] = {
+                    "dateTime": event.date.strftime("%Y-%m-%d") + "T" + event.time.strftime("%H:%M") + ":00",
+                    "timeZone": Config().time_zone
+                }
+                google_event["end"] = {
+                    "dateTime": event.date.strftime("%Y-%m-%d") + "T" + event.time.strftime("%H:%M") + ":00",
+                    "timeZone": Config().time_zone
+                }
 
                 if event.recurrence is EventRecurrence.MONTHLY:
                     google_event["recurrence"] = ["RRULE:FREQ=MONTHLY"]
@@ -141,13 +199,15 @@ class CalendarSyncManager(metaclass=Singleton):
                 elif event.recurrence is EventRecurrence.WEEKLY:
                     day = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"][event.date.weekday()]
                     google_event["recurrence"] = ["RRULE:FREQ=WEEKLY;BYDAY=" + day]
+                elif event.recurrence is EventRecurrence.NEVER and "recurrence" in google_event:
+                    google_event.pop("recurrence")
 
                 service.events().update(calendarId="primary", eventId=event.google_id, body=google_event).execute()
 
             except HttpError as e:
                 print(e)
 
-        self.events_to_delete[AccountManager().current_account.email].clear()
+        self.events_to_edit[email or AccountManager().current_account.email].clear()
 
     def get_google_event_list(self, events: list[dict]) -> list[CalendarEvent]:
         ret = []
@@ -185,10 +245,26 @@ class CalendarSyncManager(metaclass=Singleton):
             ret.append(calendar_event)
         return ret
 
-    def sync_calendars_threaded(self) -> None:
+    def sync_calendars_threaded(self, email: str = None) -> None:
         def sync(on_complete):
-            CalendarSyncManager().sync_calendars()
+            CalendarSyncManager().sync_calendars(email)
             on_complete()
+
+        def callback():
+            self.event_loop.enqueue_threaded_event(CalendarSyncEvent(time.time()))
+
+        Thread(target=sync, args=(callback, )).start()
+
+    def sync_all_calendars_threaded(self) -> None:
+        def sync(on_complete):
+            try:
+                for user in AccountManager().accounts:
+                    try:
+                        CalendarSyncManager().sync_calendars_threaded(email=user.email)
+                    except Exception as e:
+                        print(e)
+            finally:
+                on_complete()
 
         def callback():
             self.event_loop.enqueue_threaded_event(CalendarSyncEvent(time.time()))
