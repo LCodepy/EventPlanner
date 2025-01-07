@@ -213,6 +213,7 @@ class EditCalendarEventEvent(Event):
     color: Color
     recurrence: EventRecurrence
 
+
 @dataclass
 class DeleteCalendarEventEvent(Event):
 
@@ -229,6 +230,12 @@ class OpenEditCalendarEventEvent(Event):
 class UpdateCalendarEvent(Event):
 
     pass
+
+
+@dataclass
+class ChangeMonthEvent(Event):
+
+    month: int
 
 
 @dataclass

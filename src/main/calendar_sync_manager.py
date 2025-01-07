@@ -97,15 +97,6 @@ class CalendarSyncManager(metaclass=Singleton):
         if not service:
             return
 
-        print("\n")
-        print("Syncing calendars for user: ", email or AccountManager().current_account.email)
-        print("To delete:")
-        for e in self.events_to_delete.values():
-            print(e)
-        print("To edit:")
-        for e in self.events_to_edit.values():
-            print(e)
-
         self.sync_finished = False
 
         self.sync_deleted_events(service, email=email)
@@ -151,19 +142,6 @@ class CalendarSyncManager(metaclass=Singleton):
                 self.model.update_event(event, updated_event=google_synced[g_id], threaded=True)
 
         self.event_loop.enqueue_threaded_event(CalendarSyncEvent(time.time()))
-
-        print("Local not synced:")
-        for e in local_not_synced:
-            print(e)
-        print("Google not synced:")
-        for e in google_not_synced:
-            print(e)
-        print("Local synced:")
-        for e in local_synced.values():
-            print(e)
-        print("Google synced:")
-        for e in google_synced.values():
-            print(e)
 
     def sync_deleted_events(self, service: Resource, email: str = None) -> None:
         for event in self.events_to_delete[email or AccountManager().current_account.email]:

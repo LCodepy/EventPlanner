@@ -35,7 +35,7 @@ class TextField(UIObject):
         self.border_color = border_color
         self.border_radius = border_radius
         self.border_width = border_width
-        self.max_length = max_length
+        self.max_length = max_length or float("inf")
         self.allowed_char_set = allowed_char_set or self.create_allowed_charset()
         self.underline = underline
         self.oneline = oneline
@@ -59,6 +59,7 @@ class TextField(UIObject):
         self.on_enter = lambda: None
         self.on_exit = lambda: None
         self.on_key = lambda: None
+        self.on_focus_changed = lambda _: None
 
         self.render_cursor = False
         self.cursor_pos = -1
@@ -343,6 +344,8 @@ class TextField(UIObject):
                 self.label.set_text(self.hint)
                 self.label.text_color = self.hint_text_color
 
+        self.on_focus_changed(self.focused)
+
     def bind_on_enter(self, on_enter: Callable) -> None:
         self.on_enter = on_enter
 
@@ -351,6 +354,9 @@ class TextField(UIObject):
 
     def bind_on_key(self, on_key: Callable) -> None:
         self.on_key = on_key
+
+    def bind_on_focus_changed(self, on_focus_changed: Callable) -> None:
+        self.on_focus_changed = on_focus_changed
 
     def is_hovering(self, mouse_pos) -> bool:
         return self.get_rect().collidepoint(*mouse_pos)

@@ -5,13 +5,14 @@ from typing import Union, Callable
 import pygame
 
 from src.events.event import MouseClickEvent, MouseReleaseEvent, Event, MouseWheelUpEvent, MouseWheelDownEvent, \
-    UpdateCalendarEvent, LanguageChangedEvent, CalendarSyncEvent
+    UpdateCalendarEvent, LanguageChangedEvent, CalendarSyncEvent, KeyPressEvent, ChangeMonthEvent
 from src.models.calendar_model import CalendarModel, CalendarEvent
 from src.ui.alignment import VerticalAlignment
 from src.ui.button import Button
 from src.ui.colors import Colors, Color
 from src.ui.label import Label
 from src.ui.padding import Padding
+from src.ui.text_field import TextField
 from src.utils.assets import Assets
 from src.utils.calendar_functions import get_month_length, get_month_starting_day
 from src.main.language_manager import LanguageManager
@@ -48,22 +49,29 @@ class CalendarView(View):
 
         self.today = datetime.datetime.today()
 
-        self.year_label = Label(
+        self.year_input = TextField(
             self.canvas,
             (self.width // 2, 40),
             (80, 40),
-            text=str(self.year),
-            text_color=(170, 170, 170),
-            font=Assets().font32
+            label=Label(text_color=(170, 170, 170), font=Assets().font32),
+            border_width=0,
+            underline=(170, 170, 170),
+            color=(10, 10, 10),
+            max_length=4,
+            oneline=True,
+            allowed_char_set=set("0123456789")
         )
+        self.year_input.set_text(str(self.year))
 
-        self.month_label = Label(
+        self.month_button = Button(
             self.canvas,
             (self.width // 2, 100),
             (200, 50),
-            text=str(self.get_month_name(self.month).upper()),
-            text_color=(200, 200, 200),
-            font=Assets().font36
+            label=Label(text=self.get_month_name(self.month).upper(), text_color=(200, 200, 200), font=Assets().font36),
+            border_width=0,
+            border_radius=4,
+            color=(10, 10, 10),
+            hover_color=(30, 30, 30)
         )
 
         self.previous_month_button = Button(
@@ -147,6 +155,14 @@ class CalendarView(View):
 
         if isinstance(event, LanguageChangedEvent):
             self.update_language()
+        elif isinstance(event, KeyPressEvent) and event.keycode == pygame.K_RETURN and self.year_input.focused:
+            self.set_year()
+            registered_events = True
+        elif isinstance(event, ChangeMonthEvent):
+            self.month = event.month
+            self.month_button.label.set_text(self.get_month_name(self.month).upper())
+            self.create_day_buttons()
+            self.calendar_binding()
 
         event = self.get_event(event)
 
@@ -168,8 +184,8 @@ class CalendarView(View):
     def render(self) -> None:
         self.canvas.fill((10, 10, 10))
 
-        self.year_label.render()
-        self.month_label.render()
+        self.year_input.render()
+        self.month_button.render()
         self.previous_month_button.render()
         self.next_month_button.render()
         for label in self.weekday_labels:
@@ -232,12 +248,23 @@ class CalendarView(View):
         self.create_weekday_labels()
         self.create_day_buttons()
 
-        self.year_label.x = self.width // 2
-        self.month_label.x = self.width // 2
+        self.year_input.x = self.width // 2
+        self.year_input.label.x = self.width // 2
+        self.month_button.update_position(self.width // 2)
         self.previous_month_button.x = self.width // 2 - 150
         self.next_month_button.x = self.width // 2 + 150
 
         self.bind_buttons()
+
+    def set_year(self) -> None:
+        self.year_input.set_focus(False)
+        if self.year_input.text and int(self.year_input.text) > 0:
+            self.year = int(self.year_input.text)
+        else:
+            self.year = datetime.datetime.now().year
+            self.year_input.set_text(str(self.year))
+        self.create_day_buttons()
+        self.calendar_binding()
 
     def update_language(self) -> None:
         self.create_day_buttons()

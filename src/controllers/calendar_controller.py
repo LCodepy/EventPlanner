@@ -1,11 +1,13 @@
 import datetime
 import time
 
+from src.controllers.choose_month_controller import ChooseMonthController
 from src.controllers.event_list_controller import EventListController
 from src.events.event import OpenViewEvent
 from src.events.event_loop import EventLoop
 from src.models.calendar_model import CalendarModel
 from src.views.calendar_view import CalendarView
+from src.views.choose_month_view import ChooseMonthView
 from src.views.event_list_view import EventListView
 
 
@@ -16,11 +18,22 @@ class CalendarController:
         self.view = view
         self.event_loop = event_loop
 
+        self.view.year_input.bind_on_focus_changed(lambda f: self.view.set_year() if not f else None)
+        self.view.month_button.bind_on_click(self.on_month_button_click)
         self.view.previous_month_button.bind_on_click(self.change_to_previous_month)
         self.view.next_month_button.bind_on_click(self.change_to_next_month)
         self.view.bind_buttons = self.bind_calendar_buttons
         self.bind_calendar_buttons()
         self.view.bind_calendar_binding(self.bind_calendar_buttons)
+
+    def on_month_button_click(self) -> None:
+        view = ChooseMonthView(
+            self.view.display, self.event_loop, self.view.month, 240, 390,
+            self.view.x + self.view.width // 2 - 120,
+            self.view.y + self.view.month_button.y + 30
+        )
+        ChooseMonthController(view, self.event_loop)
+        self.event_loop.enqueue_event(OpenViewEvent(time.time(), view, False))
 
     def change_to_previous_month(self) -> None:
         self.view.month -= 1
@@ -31,8 +44,8 @@ class CalendarController:
         self.view.create_weekday_labels()
         self.view.create_day_buttons()
 
-        self.view.month_label.set_text(self.view.get_month_name(self.view.month).upper())
-        self.view.year_label.set_text(str(self.view.year))
+        self.view.month_button.label.set_text(self.view.get_month_name(self.view.month).upper())
+        self.view.year_input.set_text(str(self.view.year))
 
         self.bind_calendar_buttons()
 
@@ -45,8 +58,8 @@ class CalendarController:
         self.view.create_weekday_labels()
         self.view.create_day_buttons()
 
-        self.view.month_label.set_text(self.view.get_month_name(self.view.month).upper())
-        self.view.year_label.set_text(str(self.view.year))
+        self.view.month_button.label.set_text(self.view.get_month_name(self.view.month).upper())
+        self.view.year_input.set_text(str(self.view.year))
 
         self.bind_calendar_buttons()
 
@@ -60,4 +73,3 @@ class CalendarController:
         for btn in self.view.day_buttons:
             day = int(btn.label.text)
             btn.bind_on_click(lambda d=day: self.on_day_button_click(d))
-

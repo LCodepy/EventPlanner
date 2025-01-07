@@ -201,7 +201,3 @@ class SwitchAccountsView(View):
 
     def get_min_size(self) -> (int, int):
         return self.width, self.height
-
-
-
-

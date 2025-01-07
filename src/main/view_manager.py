@@ -11,6 +11,7 @@ from src.ui.colors import Colors
 from src.ui.independent_label import IndependentLabel
 from src.utils.animations import ChangeValuesAnimation
 from src.views.calendar_view import CalendarView
+from src.views.choose_month_view import ChooseMonthView
 from src.views.event_list_view import EventListView
 from src.views.options_view import OptionsView
 from src.views.profile_view import ProfileView
@@ -87,6 +88,9 @@ class ViewManager:
 
         if self.options_view is not None and self.options_view.register_event(event):
             self.options_view.set_rendering(True)
+            for view in self.get_views():
+                if view:
+                    view.register_event(MouseFocusChangedEvent(time.time(), False))
             return True
 
         for view in self.get_views():
@@ -102,7 +106,7 @@ class ViewManager:
             self.screen_fog_animation.start([0], [150])
             self.opened_top_view_last_frame = True
             self.event_loop.enqueue_event(MouseFocusChangedEvent(time.time(), False))
-        elif isinstance(event.view, (OptionsView, SwitchAccountsView, )):
+        elif isinstance(event.view, (OptionsView, SwitchAccountsView, ChooseMonthView, )):
             self.options_view = event.view
         elif isinstance(event.view, self.side_view_classes):
             if self.side_view:
