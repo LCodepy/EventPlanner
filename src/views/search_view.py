@@ -6,6 +6,7 @@ from src.events.event import MouseClickEvent, MouseReleaseEvent, MouseWheelUpEve
     MouseMotionEvent, LanguageChangedEvent
 from src.events.event_loop import EventLoop
 from src.events.mouse_buttons import MouseButtons
+from src.main.config import Config
 from src.models.calendar_model import CalendarModel, CalendarEvent
 from src.ui.alignment import HorizontalAlignment
 from src.ui.colors import Colors
@@ -37,8 +38,8 @@ class SearchEvent(UIObject):
 
         self.description_label = Label(
             self.ui_canvas,
-            (self.width // 2 - 35, self.height // 2),
-            (self.width - 90, self.height),
+            (self.width // 2 - 40, self.height // 2),
+            (self.width - 100, self.height),
             text=self.event.description,
             text_color=(210, 210, 210),
             font=Assets().font18,
@@ -48,7 +49,7 @@ class SearchEvent(UIObject):
 
         self.datetime_label = Label(
             self.ui_canvas,
-            (self.width - 40, self.height // 2),
+            (self.width - 50, self.height // 2),
             (80, self.height),
             text=str(self.event.date).replace("-", "/") + "\n" + str(self.event.time)[:-3],
             text_color=(210, 210, 210),
@@ -91,12 +92,12 @@ class SearchEvent(UIObject):
 
         self.ui_canvas = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
 
-        self.description_label.resize(width - 90, height)
-        self.description_label.x = self.width // 2 - 35
+        self.description_label.resize(width - 100, height)
+        self.description_label.x = self.width // 2 - 40
         self.description_label.update_canvas(self.ui_canvas)
 
         self.datetime_label.resize(80, height)
-        self.datetime_label.x = self.width - 40
+        self.datetime_label.x = self.width - 50
         self.datetime_label.update_canvas(self.ui_canvas)
 
     def update_position(self, x: int = None, y: int = None) -> None:
@@ -170,17 +171,6 @@ class SearchView(View):
             size=(20, 20)
         )
 
-        # self.search_bar_button = Button(
-        #     self.canvas,
-        #     (self.width // 2 - self.search_bar.width // 2 + 20, 35),
-        #     (20, 20),
-        #     color=Colors.BACKGROUND_GREY22,
-        #     border_width=0,
-        #     image=Assets().search_icon_large,
-        #     hover_image=Assets().search_icon_large_hover,
-        #     apply_hover_effects=False
-        # )
-
         self.events = []
 
     def register_event(self, event: Event) -> bool:
@@ -206,8 +196,8 @@ class SearchView(View):
             self.on_release(event)
         elif isinstance(event, MouseMotionEvent) and self.on_mouse_motion(event):
             return True
-        elif isinstance(event, (MouseWheelUpEvent, MouseWheelDownEvent)):
-            self.on_scroll(event)
+        elif isinstance(event, (MouseWheelUpEvent, MouseWheelDownEvent)) and self.on_scroll(event):
+            return True
 
         return registered_events
 
@@ -307,5 +297,5 @@ class SearchView(View):
         pass
 
     def get_min_size(self) -> (int, int):
-        return 150, 170
+        return Config.side_view_min_size
 

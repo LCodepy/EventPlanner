@@ -1,4 +1,3 @@
-import threading
 import time
 
 import pygame
@@ -12,15 +11,15 @@ from src.events.event_loop import EventLoop
 from src.main.account_manager import AccountManager
 from src.main.calendar_sync_manager import CalendarSyncManager
 from src.main.config import Config
+from src.main.settings import Settings
 from src.main.window_manager import WindowManager
-from src.models.appbar_model import AppbarModel
 from src.models.calendar_model import CalendarModel
-from src.models.taskbar_model import TaskbarModel
 from src.ui.colors import Colors
 from src.utils.assets import Assets
 from src.main.language_manager import LanguageManager
 from src.utils.logging import Log
 from src.utils.pygame_utils import set_window_pos
+from src.utils.ui_debugger import UIDebugger
 from src.views.appbar_view import AppbarView
 from src.views.calendar_view import CalendarView
 from src.views.taskbar_view import TaskbarView
@@ -32,11 +31,9 @@ class Main:
     def __init__(self) -> None:
         pygame.init()
 
-        self.config = Config()
-
-        self.win = pygame.display.set_mode(self.config.window_size, pygame.NOFRAME | pygame.SRCALPHA)
-        self.window_width, self.window_height = self.config.window_size
-        pygame.display.set_caption(self.config.window_title)
+        self.win = pygame.display.set_mode(Config.window_size, pygame.NOFRAME | pygame.SRCALPHA)
+        self.window_width, self.window_height = Config.window_size
+        pygame.display.set_caption(Config.window_title)
         pygame.display.set_icon(Assets().app_icon)
         pygame.font.init()
 
@@ -51,26 +48,30 @@ class Main:
         self.update_display = False
         self.render_all = False
 
+        Settings(Assets().settings_database_path)
         LanguageManager(self.event_loop)
         self.account_manager = AccountManager(self.win, self.event_loop)
         self.calendar_sync_manager = CalendarSyncManager(self.event_loop)
 
-        self.appbar_model = AppbarModel()
-        self.appbar_view = AppbarView(self.win, self.appbar_model, self.win.get_width(), 30, 0, 0)
-        AppbarController(self.appbar_model, self.appbar_view, self.event_loop)
+        self.appbar_view = AppbarView(self.win, self.win.get_width(), Config.appbar_height, 0, 0)
+        AppbarController(self.appbar_view, self.event_loop)
 
-        self.taskbar_model = TaskbarModel()
-        self.taskbar_view = TaskbarView(self.win, self.taskbar_model, 60, self.win.get_height() - 30, 0, 30)
-        self.taskbar_controller = TaskbarController(self.taskbar_model, self.taskbar_view, self.event_loop)
+        self.taskbar_view = TaskbarView(
+            self.win, Config.taskbar_width, self.win.get_height() - Config.appbar_height, 0, Config.appbar_height
+        )
+        self.taskbar_controller = TaskbarController(self.taskbar_view, self.event_loop)
 
         self.calendar_model = CalendarModel(database_name=self.account_manager.get_current_database_name())
-        self.calendar_view = CalendarView(self.win, self.calendar_model, self.win.get_width() - self.taskbar_view.width,
-                                          self.win.get_height() - self.appbar_view.height, self.taskbar_view.width,
-                                          self.appbar_view.height)
+        self.calendar_view = CalendarView(
+            self.win, self.calendar_model, self.win.get_width() - self.taskbar_view.width,
+            self.win.get_height() - self.appbar_view.height, self.taskbar_view.width, self.appbar_view.height
+        )
         self.calendar_controller = CalendarController(self.calendar_model, self.calendar_view, self.event_loop)
 
         self.window_manager = WindowManager(self.event_loop, 5)
-        self.view_manager = ViewManager(self.win, self.event_loop, self.appbar_view, self.taskbar_view, self.calendar_view)
+        self.view_manager = ViewManager(
+            self.win, self.event_loop, self.appbar_view, self.taskbar_view, self.calendar_view
+        )
 
     def start(self) -> None:
         self.running = True
@@ -78,11 +79,14 @@ class Main:
         self.render_start()
 
         while self.running:
+            Log.i("-" * 20 + "New Frame" + "-" * 20)
+
             self.event_loop.run()
             self.register_events()
             self.render()
 
-            time.sleep(1 / self.config.fps)
+            Log.i("")
+            time.sleep(1 / Config.fps)
 
         pygame.quit()
 
@@ -93,18 +97,17 @@ class Main:
         self.render_all = False
         new_window_size = None
         new_window_pos = None
+
         while self.event_loop.has_events():
             event = self.event_loop.next()
-            # Log.i("New event: " + str(event))
+            Log.i("Event registered: " + str(event))
 
             if isinstance(event, WindowResizeEvent):
                 new_window_size = (event.width, event.height)
                 self.update_display = True
-                Log.i("Registered window resize event: " + str(event))
             if isinstance(event, WindowMoveEvent):
                 new_window_pos = (event.x, event.y)
                 self.update_display = True
-                Log.i("Registered window move event: " + str(event))
 
             self.account_manager.register_event(event)
             self.calendar_sync_manager.register_event(event)

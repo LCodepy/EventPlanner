@@ -6,6 +6,7 @@ import sqlite3
 from dataclasses import dataclass
 from enum import Enum, auto
 
+from src.main.settings import Settings
 from src.ui.colors import Color, Colors, get_rgb_color, get_hex_color
 from src.utils.assets import Assets
 from src.utils.calendar_functions import get_month_length, calculate_easter
@@ -68,37 +69,34 @@ class CalendarModel:
         self.load_default_events()
 
     def load_default_events(self) -> None:
-        with open(Assets().settings_database_path, "r", encoding="utf-16") as file:
-            fjson = json.load(file)
+        settings = Settings().get_settings()
 
-            self.default_event_color = fjson["default_event_color"]
-            self.catholic_event_color = fjson["catholic_event_color"]
+        self.default_event_color = settings["default_event_color"]
+        self.catholic_event_color = settings["catholic_event_color"]
 
-            for i, event in enumerate(fjson["default_events"]):
-                if not event["date"]:
-                    continue
-                month, day = event["date"].split("-")
-                date = datetime.date(datetime.datetime.now().year, int(month), int(day))
+        for i, event in enumerate(settings["default_events"]):
+            if not event["date"]:
+                continue
+            month, day = event["date"].split("-")
+            date = datetime.date(datetime.datetime.now().year, int(month), int(day))
 
-                self.default_events.append(
-                    CalendarEvent(
-                        i, date, datetime.time(0, 0), event["description"],
-                        get_rgb_color(self.default_event_color), EventRecurrence.YEARLY, is_default=True
-                    )
+            self.default_events.append(
+                CalendarEvent(
+                    i, date, datetime.time(0, 0), event["description"],
+                    get_rgb_color(self.default_event_color), EventRecurrence.YEARLY, is_default=True
                 )
+            )
 
-            self.current_id = max(self.current_id, len(self.default_events))
+        self.current_id = max(self.current_id, len(self.default_events))
 
     def load_current_id(self) -> None:
-        with open(Assets().settings_database_path, "r", encoding="utf-16") as file:
-            data = json.load(file)
-            if self.database_name not in data["current_id"]:
-                data["current_id"][self.database_name] = 0
+        settings = Settings().get_settings()
 
-            self.current_id = data["current_id"][self.database_name]
+        if self.database_name not in settings["current_id"]:
+            settings["current_id"][self.database_name] = 0
+            Settings().save_settings(settings)
 
-        with open(Assets().settings_database_path, "w", encoding="utf-16") as file:
-            json.dump(data, file)
+        self.current_id = settings["current_id"][self.database_name]
 
     def add_event(self, event: CalendarEvent, threaded: bool = False) -> None:
         self.load_current_id()
@@ -124,13 +122,7 @@ class CalendarModel:
 
         self.current_id += 1
 
-        with open(Assets().settings_database_path, "r", encoding="utf-16") as file:
-            data = json.load(file)
-
-        data["current_id"][self.database_name] = self.current_id
-
-        with open(Assets().settings_database_path, "w", encoding="utf-16") as file:
-            json.dump(data, file)
+        Settings().update_settings(["current_id", self.database_name], self.current_id)
 
     def get_events_for_date(self, date: datetime.date) -> list[CalendarEvent]:
         with self.conn:
@@ -273,27 +265,26 @@ class CalendarModel:
         return easter_events
 
     def get_catholic_events(self) -> list[CalendarEvent]:
-        with open(Assets().settings_database_path, "r", encoding="utf-16") as file:
-            fjson = json.load(file)
+        settings = Settings().get_settings()
 
-            if not fjson["show_catholic_events"]:
-                return []
+        if not settings["show_catholic_events"]:
+            return []
 
-            events = []
-            for i, event in enumerate(fjson["catholic_events"]):
-                if not event["date"]:
-                    continue
-                month, day = event["date"].split("-")
-                date = datetime.date(datetime.datetime.now().year, int(month), int(day))
+        events = []
+        for i, event in enumerate(settings["catholic_events"]):
+            if not event["date"]:
+                continue
+            month, day = event["date"].split("-")
+            date = datetime.date(datetime.datetime.now().year, int(month), int(day))
 
-                events.append(
-                    CalendarEvent(
-                        -(i + 100), date, datetime.time(0, 0), event["description"],
-                        get_rgb_color(self.catholic_event_color), EventRecurrence.NEVER, is_default=True
-                    )
+            events.append(
+                CalendarEvent(
+                    -(i + 100), date, datetime.time(0, 0), event["description"],
+                    get_rgb_color(self.catholic_event_color), EventRecurrence.NEVER, is_default=True
                 )
+            )
 
-            return events
+        return events
 
     def get_upcoming_events(self, date: datetime.date, threaded: bool = False) -> list[CalendarEvent]:
         if threaded:

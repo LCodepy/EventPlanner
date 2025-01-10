@@ -163,11 +163,11 @@ class CalendarSyncManager(metaclass=Singleton):
 
                 google_event["start"] = {
                     "dateTime": event.date.strftime("%Y-%m-%d") + "T" + event.time.strftime("%H:%M") + ":00",
-                    "timeZone": Config().time_zone
+                    "timeZone": Config.time_zone
                 }
                 google_event["end"] = {
                     "dateTime": event.date.strftime("%Y-%m-%d") + "T" + event.time.strftime("%H:%M") + ":00",
-                    "timeZone": Config().time_zone
+                    "timeZone": Config.time_zone
                 }
 
                 if event.recurrence is EventRecurrence.MONTHLY:
@@ -257,11 +257,11 @@ class CalendarSyncManager(metaclass=Singleton):
             "summary": summary,
             "start": {
                 "dateTime": dt,
-                "timeZone": Config().time_zone
+                "timeZone": Config.time_zone
             },
             "end": {
                 "dateTime": dt,
-                "timeZone": Config().time_zone
+                "timeZone": Config.time_zone
             }
         }
 

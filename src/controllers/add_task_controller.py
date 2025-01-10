@@ -27,7 +27,9 @@ class AddTaskController:
     def add_task(self) -> None:
         if self.view.editing_state:
             self.event_loop.enqueue_event(
-                EditTaskEvent(time.time(), self.view.task_to_edit, self.view.description_text_field.text, self.importance)
+                EditTaskEvent(
+                    time.time(), self.view.task_to_edit, self.view.description_text_field.text, self.importance
+                )
             )
         else:
             self.event_loop.enqueue_event(

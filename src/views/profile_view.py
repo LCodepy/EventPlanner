@@ -7,6 +7,7 @@ from src.events.event import MouseClickEvent, MouseReleaseEvent, MouseWheelUpEve
 from src.events.event_loop import EventLoop
 from src.events.mouse_buttons import MouseButtons
 from src.main.account_manager import AccountManager
+from src.main.config import Config
 from src.ui.button import Button
 from src.ui.colors import Colors
 from src.ui.image import Image
@@ -79,7 +80,8 @@ class ProfileView(View):
             self.canvas,
             (self.width // 2, 340),
             (200, 40),
-            label=Label(text="Sync", text_color=(200, 200, 200), font=Assets().font18),
+            label=Label(text=self.language_manager.get_string("sync"), text_color=(200, 200, 200),
+                        font=Assets().font18),
             color=Colors.BACKGROUND_GREY22,
             border_width=0,
             border_radius=4
@@ -89,7 +91,8 @@ class ProfileView(View):
             self.canvas,
             (self.width // 2, 400),
             (200, 40),
-            label=Label(text="Switch Account", text_color=(200, 200, 200), font=Assets().font18),
+            label=Label(text=self.language_manager.get_string("switch_account"), text_color=(200, 200, 200),
+                        font=Assets().font18),
             color=Colors.BACKGROUND_GREY22,
             border_width=0,
             border_radius=4
@@ -99,7 +102,8 @@ class ProfileView(View):
             self.canvas,
             (self.width // 2, 460),
             (200, 40),
-            label=Label(text="Sign Out", text_color=(200, 200, 200), font=Assets().font18),
+            label=Label(text=self.language_manager.get_string("sign_out"), text_color=(200, 200, 200),
+                        font=Assets().font18),
             color=Colors.BACKGROUND_GREY22,
             border_width=0,
             border_radius=4
@@ -197,4 +201,4 @@ class ProfileView(View):
         return 1
 
     def get_min_size(self) -> (int, int):
-        return 150, 170
+        return Config.side_view_min_size

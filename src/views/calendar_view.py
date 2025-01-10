@@ -6,6 +6,7 @@ import pygame
 
 from src.events.event import MouseClickEvent, MouseReleaseEvent, Event, MouseWheelUpEvent, MouseWheelDownEvent, \
     UpdateCalendarEvent, LanguageChangedEvent, CalendarSyncEvent, KeyPressEvent, ChangeMonthEvent
+from src.main.config import Config
 from src.models.calendar_model import CalendarModel, CalendarEvent
 from src.ui.alignment import VerticalAlignment
 from src.ui.button import Button
@@ -258,13 +259,16 @@ class CalendarView(View):
 
     def set_year(self) -> None:
         self.year_input.set_focus(False)
+        year = self.year
         if self.year_input.text and int(self.year_input.text) > 0:
             self.year = int(self.year_input.text)
         else:
             self.year = datetime.datetime.now().year
             self.year_input.set_text(str(self.year))
-        self.create_day_buttons()
-        self.calendar_binding()
+
+        if self.year != year:
+            self.create_day_buttons()
+            self.calendar_binding()
 
     def update_language(self) -> None:
         self.create_day_buttons()
@@ -293,5 +297,5 @@ class CalendarView(View):
         pass
 
     def get_min_size(self) -> (int, int):
-        return 350, 500
+        return Config.main_view_min_size
 

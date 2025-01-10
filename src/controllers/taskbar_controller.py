@@ -3,13 +3,14 @@ from typing import Callable
 
 from src.controllers.profile_controller import ProfileController
 from src.controllers.search_controller import SearchController
+from src.controllers.settings_controller import SettingsController
 from src.controllers.todo_list_controller import TodoListController
 from src.events.event import OpenViewEvent, CloseViewEvent, ShowIndependentLabelEvent, HideIndependentLabelEvent, \
     TimerEvent
 from src.events.event_loop import EventLoop
 from src.main.account_manager import AccountManager
+from src.main.config import Config
 from src.models.calendar_model import CalendarModel
-from src.models.taskbar_model import TaskbarModel
 from src.models.todo_list_model import TodoListModel
 from src.ui.alignment import HorizontalAlignment
 from src.ui.button import Button
@@ -20,6 +21,7 @@ from src.utils.assets import Assets
 from src.views.calendar_view import CalendarView
 from src.views.profile_view import ProfileView
 from src.views.search_view import SearchView
+from src.views.settings_view import SettingsView
 from src.views.taskbar_view import TaskbarView
 from src.views.todo_list_view import TodoListView
 from src.views.view import View
@@ -27,17 +29,18 @@ from src.views.view import View
 
 class TaskbarController:
 
-    def __init__(self, model: TaskbarModel, view: TaskbarView, event_loop: EventLoop) -> None:
-        self.model = model
+    def __init__(self, view: TaskbarView, event_loop: EventLoop) -> None:
         self.view = view
         self.event_loop = event_loop
 
         self.todo_list_opened = False
         self.search_opened = False
         self.profile_opened = False
+        self.settings_opened = False
         self.todo_list_view = None
         self.search_view = None
         self.profile_view = None
+        self.settings_view = None
 
         self.showing_labels = False
         self.in_show_mode = False
@@ -66,6 +69,7 @@ class TaskbarController:
         self.view.todo_list_button.bind_on_enter(self.show_todo_list_label)
         self.view.todo_list_button.bind_on_exit(self.hide_label)
 
+        self.view.settings_button.bind_on_click(self.open_settings)
         self.view.settings_button.bind_on_enter(self.show_settings_label)
         self.view.settings_button.bind_on_exit(self.hide_label)
 
@@ -74,7 +78,8 @@ class TaskbarController:
             self.event_loop.enqueue_event(CloseViewEvent(time.time(), self.profile_view))
         else:
             self.profile_view = ProfileView(
-                self.view.display, self.event_loop, 300, self.view.display.get_height() - 30, 0, 0
+                self.view.display, self.event_loop, Config.side_view_width,
+                self.view.display.get_height() - Config.appbar_height, 0, 0
             )
             ProfileController(self.profile_view, self.event_loop)
             self.event_loop.enqueue_event(OpenViewEvent(time.time(), self.profile_view, False))
@@ -91,7 +96,8 @@ class TaskbarController:
             else:
                 model = CalendarModel()
             self.search_view = SearchView(
-                self.view.display, model, self.event_loop, 300, self.view.display.get_height() - 30, 0, 0
+                self.view.display, model, self.event_loop, Config.side_view_width,
+                self.view.display.get_height() - Config.appbar_height, 0, 0
             )
             SearchController(model, self.search_view, self.event_loop)
             self.event_loop.enqueue_event(OpenViewEvent(time.time(), self.search_view, False))
@@ -108,7 +114,8 @@ class TaskbarController:
             else:
                 model = TodoListModel()
             self.todo_list_view = TodoListView(
-                self.view.display, model, self.event_loop, 300, self.view.display.get_height() - 30, 0, 0
+                self.view.display, model, self.event_loop, Config.side_view_width,
+                self.view.display.get_height() - Config.appbar_height, 0, 0
             )
             TodoListController(model, self.todo_list_view, self.event_loop)
             self.event_loop.enqueue_event(OpenViewEvent(time.time(), self.todo_list_view, False))
@@ -121,8 +128,24 @@ class TaskbarController:
             self.event_loop.enqueue_event(CloseViewEvent(time.time(), self.todo_list_view))
         elif self.search_opened:
             self.event_loop.enqueue_event(CloseViewEvent(time.time(), self.search_view))
+        elif self.settings_opened:
+            self.event_loop.enqueue_event(CloseViewEvent(time.time(), self.settings_view))
         else:
             self.event_loop.enqueue_event(OpenViewEvent(time.time(), CalendarView, False))
+        self.hide_label()
+
+    def open_settings(self) -> None:
+        if self.settings_opened:
+            self.event_loop.enqueue_event(CloseViewEvent(time.time(), self.settings_view))
+        else:
+            self.settings_view = SettingsView(
+                self.view.display, Config.side_view_width, self.view.display.get_height() - Config.appbar_height,
+                0, 0
+            )
+            SettingsController(self.settings_view, self.event_loop)
+            self.event_loop.enqueue_event(OpenViewEvent(time.time(), self.settings_view, False))
+
+        self.settings_opened = not self.settings_opened
         self.hide_label()
 
     def on_close(self, view: View) -> None:
@@ -132,6 +155,8 @@ class TaskbarController:
             self.search_opened = False
         elif view == self.profile_view:
             self.profile_opened = False
+        elif view == self.settings_view:
+            self.settings_opened = False
 
     def hide_label(self) -> None:
         self.event_loop.enqueue_event(HideIndependentLabelEvent(time.time()))

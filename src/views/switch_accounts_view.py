@@ -80,7 +80,7 @@ class SwitchAccountsView(View):
             self.canvas,
             (self.width // 2, 40),
             (self.width, 30),
-            text="Choose Account",
+            text=self.language_manager.get_string("choose_account"),
             text_color=(200, 200, 200),
             font=Assets().font24
         )
@@ -89,7 +89,7 @@ class SwitchAccountsView(View):
             self.canvas,
             (self.width // 2, self.height // 2),
             (self.width, 20),
-            text="No accounts to show.",
+            text=self.language_manager.get_string("no_accounts"),
             text_color=Colors.GREY140,
             font=Assets().font18
         )
@@ -98,7 +98,8 @@ class SwitchAccountsView(View):
             self.canvas,
             (self.width // 2, self.height - 40),
             (self.width // 2 + 30, 40),
-            label=Label(text="Add Account", text_color=(200, 200, 200), font=Assets().font18),
+            label=Label(text=self.language_manager.get_string("add_account"), text_color=(200, 200, 200),
+                        font=Assets().font18),
             border_width=1,
             border_radius=20,
             color=Colors.BACKGROUND_GREY30,
@@ -188,7 +189,9 @@ class SwitchAccountsView(View):
         self.on_create_accounts = callback
 
     def update_language(self) -> None:
-        pass
+        self.title_label.set_text(self.language_manager.get_string("choose_account"))
+        self.no_accounts_label.set_text(self.language_manager.get_string("no_accounts"))
+        self.add_account_button.label.set_text(self.language_manager.get_string("add_account"))
 
     def set_rendering(self, b: bool) -> None:
         self.rendering = b

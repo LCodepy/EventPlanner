@@ -1,3 +1,4 @@
+import ctypes
 import time
 from typing import Optional
 
@@ -7,6 +8,7 @@ from src.events.event import Event, OpenViewEvent, CloseViewEvent, ResizeViewEve
     MouseFocusChangedEvent, AddTaskEvent, AddCalendarEventEvent, MouseMotionEvent, EditTaskEvent, \
     EditCalendarEventEvent, ShowIndependentLabelEvent, HideIndependentLabelEvent, TimerEvent
 from src.events.event_loop import EventLoop
+from src.main.config import Config
 from src.ui.colors import Colors
 from src.ui.independent_label import IndependentLabel
 from src.utils.animations import ChangeValuesAnimation
@@ -16,6 +18,7 @@ from src.views.event_list_view import EventListView
 from src.views.options_view import OptionsView
 from src.views.profile_view import ProfileView
 from src.views.search_view import SearchView
+from src.views.settings_view import SettingsView
 from src.views.switch_accounts_view import SwitchAccountsView
 from src.views.todo_list_view import TodoListView
 from src.views.view import View
@@ -34,7 +37,7 @@ class ViewManager:
         self.options_view: Optional[View] = None
         self.independent_label: Optional[IndependentLabel] = None
 
-        self.side_view_classes = (ProfileView, SearchView, TodoListView, EventListView, )
+        self.side_view_classes = (ProfileView, SearchView, TodoListView, EventListView, SettingsView)
 
         self.opened_top_view_last_frame = False
 
@@ -195,7 +198,12 @@ class ViewManager:
 
         if self.top_view:
             self.top_view.x = window_size[0] // 2 - self.top_view.width // 2
-            self.top_view.y = window_size[1] // 2 - self.top_view.height // 2
+            self.top_view.y = window_size[1] // 2 - self.top_view.height // 2 + Config.appbar_height // 2
+
+        if isinstance(self.options_view, SwitchAccountsView):
+            self.options_view.y = self.side_view.height // 2 - self.options_view.height // 2 + Config.appbar_height + 50
+        elif isinstance(self.options_view, ChooseMonthView):
+            self.options_view.x = self.main_view.x + self.main_view.width // 2 - self.options_view.width // 2
 
         self.screen_fog = pygame.Surface(window_size, pygame.SRCALPHA)
 
@@ -218,7 +226,7 @@ class ViewManager:
         return [self.top_bar_view, self.side_bar_view, self.main_view, self.side_view]
 
     def get_min_size(self) -> (int, int):
-        side_view_width = self.side_view.width if self.side_view else 130
+        side_view_width = self.side_view.width if self.side_view else Config.side_view_width
         min_view_height = max(self.main_view.get_min_size()[1] if self.main_view else 0,
                               self.side_view.get_min_size()[1] if self.side_view else 0)
         return self.side_bar_view.get_min_size()[0] + side_view_width + self.main_view.get_min_size()[0], \

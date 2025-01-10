@@ -9,7 +9,6 @@ from src.events.event import Event, MouseMotionEvent, MouseClickEvent, MouseRele
     MouseWheelDownEvent
 from src.events.mouse_buttons import MouseButtons
 from src.main.config import Config
-from src.models.appbar_model import AppbarModel
 from src.ui.button import Button
 from src.ui.colors import Colors
 from src.ui.image import Image
@@ -20,10 +19,9 @@ from src.views.view import View
 
 class AppbarView(View):
 
-    def __init__(self, display: pygame.Surface, model: AppbarModel, width: int, height: int, x: int, y: int) -> None:
+    def __init__(self, display: pygame.Surface, width: int, height: int, x: int, y: int) -> None:
         super().__init__(width, height, x, y)
         self.display = display
-        self.model = model
         self.width = width
         self.height = height
         self.x = x
@@ -81,7 +79,7 @@ class AppbarView(View):
             self.canvas,
             (80, 15),
             (90, 30),
-            text=Config().window_title,
+            text=Config.window_title,
             text_color=(180, 180, 180),
             font=Assets().font14
         )

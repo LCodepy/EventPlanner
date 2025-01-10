@@ -4,7 +4,7 @@ import pygame
 
 from src.events.event import Event, MouseWheelUpEvent, MouseWheelDownEvent, MouseReleaseEvent, MouseClickEvent, \
     CloseViewEvent
-from src.models.taskbar_model import TaskbarModel
+from src.main.config import Config
 from src.ui.button import Button
 from src.ui.colors import Colors
 from src.utils.assets import Assets
@@ -14,10 +14,9 @@ from src.views.view import View
 
 class TaskbarView(View):
 
-    def __init__(self, display: pygame.Surface, model: TaskbarModel, width: int, height: int, x: int, y: int) -> None:
+    def __init__(self, display: pygame.Surface, width: int, height: int, x: int, y: int) -> None:
         super().__init__(width, height, x, y)
         self.display = display
-        self.model = model
         self.width = width
         self.height = height
         self.x = x
@@ -144,4 +143,4 @@ class TaskbarView(View):
         pass
 
     def get_min_size(self) -> (int, int):
-        return self.width, 170
+        return self.width, Config.side_view_min_size[1]

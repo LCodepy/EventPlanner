@@ -9,6 +9,7 @@ from src.events.event import MouseMotionEvent, MouseClickEvent, MouseReleaseEven
 from src.events.event_loop import EventLoop
 from src.main.account_manager import AccountManager
 from src.main.calendar_sync_manager import CalendarSyncManager
+from src.main.config import Config
 from src.utils.authentication import GoogleAuthentication, User
 from src.views.profile_view import ProfileView
 from src.views.switch_accounts_view import SwitchAccountsView
@@ -58,15 +59,18 @@ class ProfileController:
 
         if self.pressed:
             self.event_loop.enqueue_event(
-                ResizeViewEvent(time.time(), self.view, min(max(event.x, self.view.get_min_size()[0]), 550))
+                ResizeViewEvent(
+                    time.time(), self.view, min(max(event.x, self.view.get_min_size()[0]), Config.side_view_max_width)
+                )
             )
             return True
 
     def on_sign_in(self) -> None:
         if AccountManager().accounts:
             view = SwitchAccountsView(
-                self.view.display, self.event_loop, 250, 400, self.view.x + self.view.width // 2 - 125,
-                self.view.height // 2 - 130
+                self.view.display, self.event_loop, *Config.switch_account_view_size,
+                self.view.x + self.view.width // 2 - Config.switch_account_view_size[0] // 2,
+                self.view.height // 2 - Config.switch_account_view_size[1] // 2
             )
             SwitchAccountsController(view, self.event_loop)
             self.event_loop.enqueue_event(OpenViewEvent(time.time(), view, False))
@@ -81,8 +85,9 @@ class ProfileController:
 
     def on_switch_accounts(self) -> None:
         view = SwitchAccountsView(
-            self.view.display, self.event_loop, 250, 400, self.view.x + self.view.width // 2 - 125,
-            self.view.height // 2 - 130
+            self.view.display, self.event_loop, *Config.switch_account_view_size,
+            self.view.x + self.view.width // 2 - Config.switch_account_view_size[0] // 2,
+            self.view.height // 2 - Config.switch_account_view_size[1] // 2 + Config.appbar_height + 50
         )
         SwitchAccountsController(view, self.event_loop)
         self.event_loop.enqueue_event(OpenViewEvent(time.time(), view, False))

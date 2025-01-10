@@ -11,6 +11,7 @@ from httplib2 import ServerNotFoundError
 from src.controllers.calendar_controller import CalendarController
 from src.events.event import Event, UserSignInEvent, OpenViewEvent, UserSignOutEvent
 from src.events.event_loop import EventLoop
+from src.main.settings import Settings
 from src.models.calendar_model import CalendarModel
 from src.utils.assets import Assets
 from src.utils.authentication import User, GoogleAuthentication
@@ -54,14 +55,13 @@ class AccountManager(metaclass=Singleton):
                 Assets().user_profile_pictures[user.email] = download_image(user.uri) or Assets().profile_picture_icon_400x400
 
     def load_current_account(self) -> None:
-        with open(Assets().settings_database_path, "r", encoding="utf-16") as file:
-            fjson = json.load(file)
+        settings = Settings().get_settings()
 
-        if not fjson["current_user_email"]:
+        if not settings["current_user_email"]:
             return
 
         try:
-            self.current_account = GoogleAuthentication.authenticate_user_with_token(fjson["current_user_email"])
+            self.current_account = GoogleAuthentication.authenticate_user_with_token(settings["current_user_email"])
             if self.current_account is None:
                 return
             Assets().user_profile_pictures[self.current_account.email] = download_image(self.current_account.uri) or Assets().profile_picture_icon_400x400
@@ -72,13 +72,7 @@ class AccountManager(metaclass=Singleton):
         if not self.current_account:
             return
 
-        with open(Assets().settings_database_path, "r", encoding="utf-16") as file:
-            fjson = json.load(file)
-
-        fjson["current_user_email"] = self.current_account.email
-
-        with open(Assets().settings_database_path, "w", encoding="utf-16") as file:
-            json.dump(fjson, file)
+        Settings().update_settings(["current_user_email"], self.current_account.email)
 
     def sign_in_user(self, email: str) -> None:
         def authenticate(on_complete):
@@ -118,13 +112,9 @@ class AccountManager(metaclass=Singleton):
         if os.path.exists(token_path):
             os.remove(token_path)
 
-        with open(Assets().settings_database_path, "r", encoding="utf-16") as file:
-            data = json.load(file)
-
-        data["current_id"].pop(f"calendar_{self.current_account.email}")
-
-        with open(Assets().settings_database_path, "w", encoding="utf-16") as file:
-            json.dump(data, file)
+        settings = Settings().get_settings()
+        settings["current_id"].pop(f"calendar_{self.current_account.email}")
+        Settings().save_settings(settings)
 
         self.event_loop.enqueue_event(UserSignOutEvent(time.time(), self.current_account))
 

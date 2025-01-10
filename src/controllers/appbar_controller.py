@@ -10,15 +10,13 @@ import pygame.display
 from src.events.event import CloseWindowEvent, WindowResizeEvent, MouseClickEvent, MouseReleaseEvent, \
     MouseMotionEvent, WindowMinimizedEvent, WindowMoveEvent
 from src.events.event_loop import EventLoop
-from src.models.appbar_model import AppbarModel
 from src.utils.pygame_utils import get_window_pos, get_window_size
 from src.views.appbar_view import AppbarView
 
 
 class AppbarController:
 
-    def __init__(self, model: AppbarModel, view: AppbarView, event_loop: EventLoop) -> None:
-        self.model = model
+    def __init__(self, view: AppbarView, event_loop: EventLoop) -> None:
         self.view = view
         self.event_loop = event_loop
 

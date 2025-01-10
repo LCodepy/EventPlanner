@@ -24,5 +24,11 @@
   "search": "Search",
   "search_events": "Search Events",
   "event_appear_message": "Events will appear here...",
-  "sign_in": "Sign in"
+  "sign_in": "Sign in",
+  "sync": "Sync",
+  "choose_account": "Choose Account",
+  "no_accounts": "No accounts to show.",
+  "add_account": "Add Account",
+  "switch_account": "Switch Account",
+  "sign_out": "Sign Out"
 }

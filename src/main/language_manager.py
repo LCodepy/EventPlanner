@@ -6,6 +6,7 @@ from typing import Union
 
 from src.events.event import LanguageChangedEvent
 from src.events.event_loop import EventLoop
+from src.main.settings import Settings
 from src.utils.assets import Assets
 from src.utils.singleton import Singleton
 
@@ -29,11 +30,7 @@ class LanguageManager(metaclass=Singleton):
         self.set_language(self.language)
 
     def load_data(self) -> None:
-        if not os.path.exists(Assets().settings_database_path):
-            return
-
-        with open(Assets().settings_database_path, encoding="utf-16") as file:
-            self.language = json.load(file)["language"]
+        self.language = Settings().get_settings()["language"]
 
     def set_language(self, language: Union[Language, str]) -> None:
         if isinstance(language, Language):

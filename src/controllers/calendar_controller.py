@@ -5,6 +5,7 @@ from src.controllers.choose_month_controller import ChooseMonthController
 from src.controllers.event_list_controller import EventListController
 from src.events.event import OpenViewEvent
 from src.events.event_loop import EventLoop
+from src.main.config import Config
 from src.models.calendar_model import CalendarModel
 from src.views.calendar_view import CalendarView
 from src.views.choose_month_view import ChooseMonthView
@@ -28,9 +29,9 @@ class CalendarController:
 
     def on_month_button_click(self) -> None:
         view = ChooseMonthView(
-            self.view.display, self.event_loop, self.view.month, 240, 390,
-            self.view.x + self.view.width // 2 - 120,
-            self.view.y + self.view.month_button.y + 30
+            self.view.display, self.event_loop, self.view.month, *Config.choose_month_view_size,
+            self.view.x + self.view.width // 2 - Config.choose_month_view_size[0] // 2,
+            self.view.y + self.view.month_button.y + Config.appbar_height
         )
         ChooseMonthController(view, self.event_loop)
         self.event_loop.enqueue_event(OpenViewEvent(time.time(), view, False))
@@ -64,8 +65,11 @@ class CalendarController:
         self.bind_calendar_buttons()
 
     def on_day_button_click(self, day: int) -> None:
-        view = EventListView(self.view.display, self.model, self.event_loop, 300, self.view.display.get_height() - 30,
-                             0, 0, datetime.date(self.view.year, self.view.month, day))
+        view = EventListView(
+            self.view.display, self.model, self.event_loop, Config.side_view_width,
+            self.view.display.get_height() - Config.appbar_height, 0, 0,
+            datetime.date(self.view.year, self.view.month, day)
+        )
         EventListController(self.view.model, view, self.event_loop)
         self.event_loop.enqueue_event(OpenViewEvent(time.time(), view, False))
 

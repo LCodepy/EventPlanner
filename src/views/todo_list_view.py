@@ -8,6 +8,7 @@ from src.events.event import Event, MouseClickEvent, MouseReleaseEvent, MouseWhe
     LanguageChangedEvent
 from src.events.event_loop import EventLoop
 from src.events.mouse_buttons import MouseButtons
+from src.main.config import Config
 from src.models.todo_list_model import TodoListModel, Task, TaskImportance
 from src.ui.alignment import HorizontalAlignment
 from src.ui.button import Button
@@ -499,7 +500,7 @@ class TodoListView(View):
         return [self.tasks[k] for k in self.tasks if k != i] + [self.tasks[i]]
 
     def get_min_size(self) -> (int, int):
-        return 150, 170
+        return Config.side_view_min_size
 
     @property
     def task_list_bottom(self) -> (int, int):

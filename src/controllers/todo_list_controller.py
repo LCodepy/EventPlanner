@@ -8,6 +8,7 @@ from src.controllers.options_controller import OptionsController
 from src.events.event import OpenViewEvent, Event, MouseClickEvent, MouseReleaseEvent, MouseMotionEvent, \
     ResizeViewEvent, MouseWheelUpEvent, MouseWheelDownEvent
 from src.events.event_loop import EventLoop
+from src.main.config import Config
 from src.models.todo_list_model import TodoListModel
 from src.views.add_task_view import AddTaskView
 from src.views.options_view import OptionsView
@@ -156,13 +157,17 @@ class TodoListController:
             todo_task.update_position(y=new_y, set_start_pos=True)
 
     def open_options(self, id_: int) -> None:
-        options = OptionsView(self.view.display, self.event_loop, 120, 70, *pygame.mouse.get_pos())
+        options = OptionsView(self.view.display, self.event_loop, *Config.options_view_size, *pygame.mouse.get_pos())
         OptionsController(options, self.event_loop, task_id=id_)
         self.event_loop.enqueue_event(OpenViewEvent(time.time(), options, False))
 
     def open_edit_task_view(self, id_: int) -> None:
         win_width, win_height = pygame.display.get_window_size()
-        view = AddTaskView(self.view.display, self.event_loop, 400, 500, win_width // 2 - 200, win_height // 2 - 250)
+        view = AddTaskView(
+            self.view.display, self.event_loop, *Config.top_view_size,
+            win_width // 2 - Config.top_view_size[0] // 2,
+            win_height // 2 - Config.top_view_size[1] // 2 + Config.appbar_height // 2
+        )
         task = self.view.tasks[id_].task
         AddTaskController(view, self.event_loop)
         view.set_edit_state(id_, task.description, task.importance)
@@ -170,7 +175,11 @@ class TodoListController:
 
     def open_add_task_view(self) -> None:
         win_width, win_height = pygame.display.get_window_size()
-        view = AddTaskView(self.view.display, self.event_loop, 400, 500, win_width // 2 - 200, win_height // 2 - 250)
+        view = AddTaskView(
+            self.view.display, self.event_loop, *Config.top_view_size,
+            win_width // 2 - Config.top_view_size[0] // 2,
+            win_height // 2 - Config.top_view_size[1] // 2 + Config.appbar_height // 2
+        )
         AddTaskController(view, self.event_loop)
         self.event_loop.enqueue_event(OpenViewEvent(time.time(), view, True))
 
@@ -199,7 +208,9 @@ class TodoListController:
 
         if self.pressed:
             self.event_loop.enqueue_event(
-                ResizeViewEvent(time.time(), self.view, min(max(event.x, self.view.get_min_size()[0]), 550))
+                ResizeViewEvent(
+                    time.time(), self.view, min(max(event.x, self.view.get_min_size()[0]), Config.side_view_max_width)
+                )
             )
             return True
 
@@ -210,7 +221,7 @@ class TodoListController:
         if isinstance(event, MouseWheelUpEvent) and self.view.get_sorted_tasks()[0].get_rect().top < self.view.task_list_top[1]:
             self.scroll_tasks(self.scroll_value)
             return True
-        elif isinstance(event, MouseWheelDownEvent) and self.view.get_sorted_tasks()[-1].get_rect().bottom > self.view.task_list_bottom[1] - 30:
+        elif isinstance(event, MouseWheelDownEvent) and self.view.get_sorted_tasks()[-1].get_rect().bottom > self.view.task_list_bottom[1] - Config.appbar_height:
             self.scroll_tasks(-self.scroll_value)
             return True
 

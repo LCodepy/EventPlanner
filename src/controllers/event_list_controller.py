@@ -9,6 +9,7 @@ from src.events.event import MouseClickEvent, MouseReleaseEvent, MouseMotionEven
     MouseWheelDownEvent, OpenViewEvent, AddCalendarEventEvent, CloseViewEvent, UpdateCalendarEvent, \
     EditCalendarEventEvent, DeleteCalendarEventEvent
 from src.events.event_loop import EventLoop
+from src.main.config import Config
 from src.models.calendar_model import CalendarModel, CalendarEvent
 from src.views.add_event_view import AddEventView
 from src.views.event_list_view import EventListView
@@ -62,7 +63,9 @@ class EventListController:
 
         if self.pressed:
             self.event_loop.enqueue_event(
-                ResizeViewEvent(time.time(), self.view, min(max(event.x, self.view.get_min_size()[0]), 550))
+                ResizeViewEvent(
+                    time.time(), self.view, min(max(event.x, self.view.get_min_size()[0]), Config.side_view_max_width)
+                )
             )
             return True
 
@@ -76,7 +79,7 @@ class EventListController:
 
         if isinstance(event, MouseWheelUpEvent) and min(map(lambda l: l.y, self.view.time_labels)) < self.view.events_pos[1]:
             self.view.scroll_offset += self.scroll_value
-        elif isinstance(event, MouseWheelDownEvent) and max_event_y > self.view.task_list_bottom[1] - 30:
+        elif isinstance(event, MouseWheelDownEvent) and max_event_y > self.view.task_list_bottom[1] - Config.appbar_height:
             self.view.scroll_offset -= self.scroll_value
 
         self.view.create_time_table()
@@ -107,15 +110,16 @@ class EventListController:
     def open_options(self, event: CalendarEvent) -> None:
         if event.is_default:
             return
-        options = OptionsView(self.view.display, self.event_loop, 120, 70, *pygame.mouse.get_pos())
+        options = OptionsView(self.view.display, self.event_loop, *Config.options_view_size, *pygame.mouse.get_pos())
         options.set_mode(1)
         OptionsController(options, self.event_loop, event=event)
         self.event_loop.enqueue_event(OpenViewEvent(time.time(), options, False))
 
     def open_edit_calendar_event(self, event: CalendarEvent) -> None:
         self.add_event_view = AddEventView(
-            self.view.display, self.event_loop, 400, 500,
-            self.view.display.get_width() // 2 - 200, self.view.display.get_height() // 2 - 250
+            self.view.display, self.event_loop, *Config.top_view_size,
+            self.view.display.get_width() // 2 - Config.top_view_size[0] // 2,
+            self.view.display.get_height() // 2 - Config.top_view_size[1] // 2 + Config.appbar_height // 2
         )
         self.add_event_view.set_edit_state(event)
         AddEventController(self.add_event_view, self.event_loop)
@@ -126,8 +130,9 @@ class EventListController:
 
     def open_add_event_view(self) -> None:
         self.add_event_view = AddEventView(
-            self.view.display, self.event_loop, 400, 500,
-            self.view.display.get_width() // 2 - 200, self.view.display.get_height() // 2 - 250
+            self.view.display, self.event_loop, *Config.top_view_size,
+            self.view.display.get_width() // 2 - Config.top_view_size[0] // 2,
+            self.view.display.get_height() // 2 - Config.top_view_size[1] // 2 + Config.appbar_height // 2
         )
         AddEventController(self.add_event_view, self.event_loop)
 
