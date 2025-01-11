@@ -261,7 +261,7 @@ class TodoListView(View):
             (self.width // 2, 35),
             (self.width, 50),
             text=self.language_manager.get_string("todo_list"),
-            text_color=(160, 160, 160),
+            text_color=Colors.TEXT_GREY,
             font=Assets().font24
         )
 
@@ -271,7 +271,7 @@ class TodoListView(View):
             (120, 40),
             label=Label(
                 text=self.language_manager.get_string("add_task"),
-                text_color=(160, 160, 160),
+                text_color=Colors.TEXT_LIGHT_GREY,
                 font=Assets().font18
             ),
             color=Colors.BLACK,

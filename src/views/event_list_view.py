@@ -241,7 +241,7 @@ class EventListView(View):
             (self.width // 2, 35),
             (150, 50),
             text=f"{self.date.day} / {self.date.month} / {self.date.year}",
-            text_color=(160, 160, 160),
+            text_color=Colors.TEXT_GREY,
             font=Assets().font24
         )
 
@@ -251,7 +251,7 @@ class EventListView(View):
             (120, 40),
             label=Label(
                 text=self.language_manager.get_string("add_event"),
-                text_color=(160, 160, 160),
+                text_color=Colors.TEXT_LIGHT_GREY,
                 font=Assets().font18
             ),
             color=Colors.BLACK,

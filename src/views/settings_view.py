@@ -8,6 +8,7 @@ from src.events.mouse_buttons import MouseButtons
 from src.main.config import Config
 from src.main.language_manager import LanguageManager
 from src.ui.alignment import HorizontalAlignment
+from src.ui.button import Button
 from src.ui.colors import Colors
 from src.ui.label import Label
 from src.utils.assets import Assets
@@ -38,16 +39,16 @@ class SettingsView(View):
             (self.width // 2, 50),
             (self.width, 50),
             text="Settings",
-            text_color=(200, 200, 200),
+            text_color=Colors.TEXT_LIGHT_GREY,
             font=Assets().font32
         )
 
         self.general_label = Label(
             self.canvas,
-            (110, 142),
+            (110, 140),
             (200, 40),
             text="General",
-            text_color=(180, 180, 180),
+            text_color=Colors.TEXT_LIGHT_GREY,
             font=Assets().font24,
             horizontal_text_alignment=HorizontalAlignment.LEFT
         )
@@ -70,6 +71,46 @@ class SettingsView(View):
             text_color=(160, 160, 160),
             font=Assets().font18,
             horizontal_text_alignment=HorizontalAlignment.LEFT
+        )
+
+        self.account_label = Label(
+            self.canvas,
+            (110, 350),
+            (200, 40),
+            text="Account",
+            text_color=Colors.TEXT_LIGHT_GREY,
+            font=Assets().font24,
+            horizontal_text_alignment=HorizontalAlignment.LEFT
+        )
+
+        self.auto_sync_label = Label(
+            self.canvas,
+            (120, 410),
+            (200, 40),
+            text="Auto sync:",
+            text_color=Colors.TEXT_GREY,
+            font=Assets().font18,
+            horizontal_text_alignment=HorizontalAlignment.LEFT
+        )
+
+        self.sync_button = Button(
+            self.canvas,
+            (130, 460),
+            (220, 40),
+            label=Label(text="Sync Calendars", text_color=Colors.TEXT_GREY, font=Assets().font18),
+            color=Colors.BACKGROUND_GREY22,
+            border_radius=4,
+            border_width=0
+        )
+
+        self.sign_out_button = Button(
+            self.canvas,
+            (130, 520),
+            (220, 40),
+            label=Label(text="Sign Out Of All Accounts", text_color=Colors.TEXT_GREY, font=Assets().font18),
+            color=Colors.BACKGROUND_GREY22,
+            border_radius=4,
+            border_width=0
         )
 
     def register_event(self, event: Event) -> bool:
@@ -100,8 +141,19 @@ class SettingsView(View):
         self.general_label.render()
         self.language_label.render()
         self.show_catholic_events_label.render()
+        self.account_label.render()
+        self.auto_sync_label.render()
+        self.sync_button.render()
+        self.sign_out_button.render()
 
-        pygame.draw.line(self.canvas, Colors.GREY70, (10, 160), (self.width - 10, 160))
+        pygame.draw.line(
+            self.canvas, Colors.TEXT_DARK_GREY, (10, self.general_label.y + 18),
+            (self.width - 10, self.general_label.y + 18)
+        )
+        pygame.draw.line(
+            self.canvas, Colors.TEXT_DARK_GREY, (10, self.account_label.y + 18),
+            (self.width - 10, self.account_label.y + 18)
+        )
 
         pygame.draw.line(self.canvas, Colors.GREY70, (self.width - 1, 0), (self.width - 1, self.height))
 

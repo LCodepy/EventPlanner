@@ -53,7 +53,7 @@ class AddTaskView(View):
             (self.width // 2, 40),
             (150, 50),
             text=self.language_manager.get_string("add_task"),
-            text_color=(160, 160, 160),
+            text_color=Colors.TEXT_GREY,
             font=Assets().font24
         )
 
@@ -61,9 +61,9 @@ class AddTaskView(View):
             self.canvas,
             (self.width // 2, 210),
             (self.width - 40, 180),
-            label=Label(text_color=(160, 160, 160), font=Assets().font18),
+            label=Label(text_color=Colors.TEXT_GREY, font=Assets().font18),
             hint=self.language_manager.get_string("task_description"),
-            hint_text_color=(100, 100, 100),
+            hint_text_color=Colors.TEXT_DARK_GREY,
             color=Colors.BACKGROUND_GREY22,
             border_width=0,
             max_length=200
@@ -74,7 +74,7 @@ class AddTaskView(View):
             (self.width // 2, 345),
             (150, 30),
             text=self.language_manager.get_string("importance_level"),
-            text_color=(160, 160, 160),
+            text_color=Colors.TEXT_GREY,
             font=Assets().font18
         )
 

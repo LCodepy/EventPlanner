@@ -144,7 +144,7 @@ class SearchView(View):
             (self.width // 2, self.height // 2),
             (200, 50),
             text=self.language_manager.get_string("event_appear_message"),
-            text_color=(100, 100, 100),
+            text_color=Colors.TEXT_DARK_GREY,
             font=Assets().font18
         )
 
@@ -153,13 +153,13 @@ class SearchView(View):
             (self.width // 2, 35),
             (self.width - 20, 36),
             hint=self.language_manager.get_string("search_events") + "...",
-            label=Label(text_color=(160, 160, 160), font=Assets().font18,
+            label=Label(text_color=Colors.TEXT_GREY, font=Assets().font18,
                         horizontal_text_alignment=HorizontalAlignment.LEFT),
             color=Colors.BACKGROUND_GREY22,
             border_color=Colors.GREY70,
             border_radius=6,
             max_length=100,
-            hint_text_color=(100, 100, 100),
+            hint_text_color=Colors.TEXT_DARK_GREY,
             oneline=True,
             padding=Padding(left=30, right=15)
         )

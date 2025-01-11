@@ -44,7 +44,7 @@ class ProfileView(View):
             (self.width // 2, self.height // 2),
             (self.width - 100, 40),
             label=Label(text=self.language_manager.get_string("sign_in"),
-                        text_color=(160, 160, 160), font=Assets().font18),
+                        text_color=Colors.TEXT_GREY, font=Assets().font18),
             color=Colors.BACKGROUND_GREY22,
             border_width=0,
             border_radius=4
@@ -63,7 +63,7 @@ class ProfileView(View):
             (self.width // 2, 180),
             (self.width, 40),
             text=AccountManager().current_account.name if AccountManager().current_account else "",
-            text_color=(200, 200, 200),
+            text_color=Colors.TEXT_LIGHT_GREY,
             font=Assets().font24
         )
 
@@ -72,7 +72,7 @@ class ProfileView(View):
             (self.width // 2, 220),
             (self.width, 30),
             text=AccountManager().current_account.email if AccountManager().current_account else "",
-            text_color=(160, 160, 160),
+            text_color=Colors.TEXT_GREY,
             font=Assets().font18
         )
 
@@ -80,7 +80,7 @@ class ProfileView(View):
             self.canvas,
             (self.width // 2, 340),
             (200, 40),
-            label=Label(text=self.language_manager.get_string("sync"), text_color=(200, 200, 200),
+            label=Label(text=self.language_manager.get_string("sync"), text_color=Colors.TEXT_LIGHT_GREY,
                         font=Assets().font18),
             color=Colors.BACKGROUND_GREY22,
             border_width=0,
@@ -91,7 +91,7 @@ class ProfileView(View):
             self.canvas,
             (self.width // 2, 400),
             (200, 40),
-            label=Label(text=self.language_manager.get_string("switch_account"), text_color=(200, 200, 200),
+            label=Label(text=self.language_manager.get_string("switch_account"), text_color=Colors.TEXT_LIGHT_GREY,
                         font=Assets().font18),
             color=Colors.BACKGROUND_GREY22,
             border_width=0,
@@ -102,7 +102,7 @@ class ProfileView(View):
             self.canvas,
             (self.width // 2, 460),
             (200, 40),
-            label=Label(text=self.language_manager.get_string("sign_out"), text_color=(200, 200, 200),
+            label=Label(text=self.language_manager.get_string("sign_out"), text_color=Colors.TEXT_LIGHT_GREY,
                         font=Assets().font18),
             color=Colors.BACKGROUND_GREY22,
             border_width=0,

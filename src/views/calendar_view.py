@@ -54,10 +54,10 @@ class CalendarView(View):
             self.canvas,
             (self.width // 2, 40),
             (80, 40),
-            label=Label(text_color=(170, 170, 170), font=Assets().font32),
+            label=Label(text_color=Colors.TEXT_GREY, font=Assets().font32),
             border_width=0,
-            underline=(170, 170, 170),
-            color=(10, 10, 10),
+            underline=Colors.TEXT_GREY,
+            color=Colors.BACKGROUND_GREY10,
             max_length=4,
             oneline=True,
             allowed_char_set=set("0123456789")
@@ -68,20 +68,21 @@ class CalendarView(View):
             self.canvas,
             (self.width // 2, 100),
             (200, 50),
-            label=Label(text=self.get_month_name(self.month).upper(), text_color=(200, 200, 200), font=Assets().font36),
+            label=Label(text=self.get_month_name(self.month).upper(), text_color=Colors.TEXT_LIGHT_GREY,
+                        font=Assets().font36),
             border_width=0,
             border_radius=4,
-            color=(10, 10, 10),
-            hover_color=(30, 30, 30)
+            color=Colors.BACKGROUND_GREY10,
+            hover_color=Colors.BACKGROUND_GREY30
         )
 
         self.previous_month_button = Button(
             self.canvas,
             (self.width // 2 - 150, 100),
             (Assets().left_arrow_icon_large.get_width(), Assets().left_arrow_icon_large.get_height()),
-            color=(10, 10, 10),
-            hover_color=(10, 10, 10),
-            click_color=(10, 10, 10),
+            color=Colors.BACKGROUND_GREY10,
+            hover_color=Colors.BACKGROUND_GREY10,
+            click_color=Colors.BACKGROUND_GREY10,
             border_width=0,
             image=Assets().left_arrow_icon_large,
             hover_image=Assets().left_arrow_icon_large_hover
@@ -91,9 +92,9 @@ class CalendarView(View):
             self.canvas,
             (self.width // 2 + 150, 100),
             (Assets().right_arrow_icon_large.get_width(), Assets().right_arrow_icon_large.get_height()),
-            color=(10, 10, 10),
-            hover_color=(10, 10, 10),
-            click_color=(10, 10, 10),
+            color=Colors.BACKGROUND_GREY10,
+            hover_color=Colors.BACKGROUND_GREY10,
+            click_color=Colors.BACKGROUND_GREY10,
             border_width=0,
             image=Assets().right_arrow_icon_large,
             hover_image=Assets().right_arrow_icon_large_hover
@@ -114,7 +115,7 @@ class CalendarView(View):
         self.weekday_labels = [
             Label(
                 self.canvas, (self.width * i // 8, 170), (50, 30),
-                text=self.get_weekday_name(i), text_color=(170, 170, 170), font=Assets().font24
+                text=self.get_weekday_name(i), text_color=Colors.TEXT_GREY, font=Assets().font24
             ) for i in range(1, 8)
         ]
 
@@ -129,7 +130,7 @@ class CalendarView(View):
                 (max(self.width // 8 - 10, 10), max(btn_height, 5)),
                 label=Label(text=str(i - starting_day + 1), font=Assets().font18, text_color=(220, 220, 220),
                             vertical_text_alignment=VerticalAlignment.TOP),
-                color=(10, 10, 10), border_color=self.get_day_button_color(i, starting_day), border_width=1,
+                color=Colors.BACKGROUND_GREY10, border_color=self.get_day_button_color(i, starting_day), border_width=1,
                 border_radius=10, padding=Padding(top=5)
             ) for i in range(starting_day, starting_day + month_length)
         ]
@@ -145,7 +146,7 @@ class CalendarView(View):
                         Label(
                             self.canvas, (self.day_buttons[i].x,
                                           self.day_buttons[i].y + 26 * j - self.day_buttons[i].height // 2 + 45),
-                            (self.width // 8 - 30, 22), text=event.description, text_color=(200, 200, 200),
+                            (self.width // 8 - 30, 22), text=event.description, text_color=Colors.TEXT_LIGHT_GREY,
                             font=Assets().font14, wrap_text=False
                         )
                     )
@@ -183,7 +184,7 @@ class CalendarView(View):
         return registered_events
 
     def render(self) -> None:
-        self.canvas.fill((10, 10, 10))
+        self.canvas.fill(Colors.BACKGROUND_GREY10)
 
         self.year_input.render()
         self.month_button.render()

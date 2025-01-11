@@ -24,9 +24,9 @@ class Image(UIObject):
         self.width, self.height = size or self.image.get_rect().size
 
         if self.image:
-            self.image = pygame.transform.scale(self.image, (self.width, self.height))
+            self.image = pygame.transform.smoothscale(self.image, (self.width, self.height))
         if self.hover_image:
-            self.hover_image = pygame.transform.scale(self.hover_image, (self.width, self.height))
+            self.hover_image = pygame.transform.smoothscale(self.hover_image, (self.width, self.height))
 
         self.hovering = False
         self.pressed = False
@@ -63,9 +63,13 @@ class Image(UIObject):
 
     def render(self) -> None:
         if self.border_radius:
-            mask = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+            mask = pygame.Surface((self.width * 10, self.height * 10), pygame.SRCALPHA)
             mask.fill((0, 0, 0, 0))
-            pygame.draw.rect(mask, (255, 255, 255, 255), [0, 0, self.width, self.height], border_radius=self.border_radius)
+            pygame.draw.rect(
+                mask, (255, 255, 255, 255), [0, 0, self.width * 10, self.height * 10],
+                border_radius=self.border_radius * 10
+            )
+            mask = pygame.transform.smoothscale(mask, (self.width, self.height))
 
             if self.hover_image and self.hovering:
                 self.hover_image.set_colorkey((0, 0, 0))

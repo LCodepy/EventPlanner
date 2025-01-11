@@ -79,8 +79,8 @@ class ChooseMonthView(View):
         self.buttons = [
             Button(
                 self.canvas, (self.width // 2, 20 + i * 32), (self.width - 10, 30),
-                label=Label(text=self.language_manager.get_string("months")[i].upper(), text_color=(200, 200, 200),
-                            font=Assets().font24),
+                label=Label(text=self.language_manager.get_string("months")[i].upper(),
+                            text_color=Colors.TEXT_LIGHT_GREY, font=Assets().font24),
                 color=Colors.BACKGROUND_GREY22,
                 border_width=0,
                 border_radius=4

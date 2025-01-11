@@ -81,7 +81,7 @@ class SwitchAccountsView(View):
             (self.width // 2, 40),
             (self.width, 30),
             text=self.language_manager.get_string("choose_account"),
-            text_color=(200, 200, 200),
+            text_color=Colors.TEXT_LIGHT_GREY,
             font=Assets().font24
         )
 
@@ -146,9 +146,11 @@ class SwitchAccountsView(View):
             self.no_accounts_label.render()
         self.add_account_button.render()
 
-        pygame.draw.line(self.canvas, (200, 200, 200), (self.add_account_button.get_rect().left + 12, self.add_account_button.y),
+        pygame.draw.line(self.canvas, Colors.TEXT_LIGHT_GREY,
+                         (self.add_account_button.get_rect().left + 12, self.add_account_button.y),
                          (self.add_account_button.get_rect().left + 26, self.add_account_button.y))
-        pygame.draw.line(self.canvas, (200, 200, 200), (self.add_account_button.get_rect().left + 19, self.add_account_button.y - 7),
+        pygame.draw.line(self.canvas, Colors.TEXT_LIGHT_GREY,
+                         (self.add_account_button.get_rect().left + 19, self.add_account_button.y - 7),
                          (self.add_account_button.get_rect().left + 19, self.add_account_button.y + 7))
 
         for acc in self.accounts:

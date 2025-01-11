@@ -62,7 +62,7 @@ class AddEventView(View):
             (self.width // 2, 40),
             (self.width, 50),
             text=self.language_manager.get_string("add_event"),
-            text_color=(160, 160, 160),
+            text_color=Colors.TEXT_GREY,
             font=Assets().font24
         )
 
@@ -70,9 +70,9 @@ class AddEventView(View):
             self.canvas,
             (self.width // 2, 170),
             (self.width - 80, 140),
-            label=Label(text_color=(160, 160, 160), font=Assets().font18),
+            label=Label(text_color=Colors.TEXT_GREY, font=Assets().font18),
             hint=self.language_manager.get_string("event_description"),
-            hint_text_color=(100, 100, 100),
+            hint_text_color=Colors.TEXT_DARK_GREY,
             color=Colors.BACKGROUND_GREY22,
             border_width=0,
             max_length=200
@@ -82,28 +82,28 @@ class AddEventView(View):
             self.canvas,
             (self.width // 4 - 25, 380),
             (40, 40),
-            label=Label(text_color=(160, 160, 160), font=Assets().font24),
+            label=Label(text_color=Colors.TEXT_GREY, font=Assets().font24),
             hint="00",
-            hint_text_color=(100, 100, 100),
+            hint_text_color=Colors.TEXT_DARK_GREY,
             color=Colors.BACKGROUND_GREY30,
             border_width=0,
             max_length=2,
             allowed_char_set=set("0123456789"),
-            underline=(160, 160, 160)
+            underline=Colors.TEXT_GREY
         )
 
         self.minutes_input = TextField(
             self.canvas,
             (self.width // 4 + 25, 380),
             (40, 40),
-            label=Label(text_color=(160, 160, 160), font=Assets().font24),
+            label=Label(text_color=Colors.TEXT_GREY, font=Assets().font24),
             hint="00",
-            hint_text_color=(100, 100, 100),
+            hint_text_color=Colors.TEXT_DARK_GREY,
             color=Colors.BACKGROUND_GREY30,
             border_width=0,
             max_length=2,
             allowed_char_set=set("0123456789"),
-            underline=(160, 160, 160)
+            underline=Colors.TEXT_GREY
         )
 
         self.recurring_label = Label(
@@ -111,7 +111,7 @@ class AddEventView(View):
             (self.width // 2 + 30, 380),
             (100, 40),
             text=self.language_manager.get_string("recurring"),
-            text_color=(100, 100, 100),
+            text_color=Colors.TEXT_DARK_GREY,
             font=Assets().font20
         )
 
@@ -121,8 +121,8 @@ class AddEventView(View):
             (86, 34),
             self.language_manager.get_string("event_dropdown_options"),
             color=Colors.BACKGROUND_GREY22,
-            border_color=(100, 100, 100),
-            text_color=(160, 160, 160),
+            border_color=Colors.TEXT_DARK_GREY,
+            text_color=Colors.TEXT_GREY,
             font=Assets().font20,
             selected_option=3
         )
