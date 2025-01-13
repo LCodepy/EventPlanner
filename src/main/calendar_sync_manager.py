@@ -56,7 +56,6 @@ class CalendarSyncManager(metaclass=Singleton):
             )
         elif isinstance(event, DeleteCalendarEventEvent):
             self.remove_event(event.event)
-            print("DELETED")
         elif isinstance(event, CalendarSyncEvent):
             self.sync_finished = True
 
@@ -64,6 +63,7 @@ class CalendarSyncManager(metaclass=Singleton):
             self.last_synced = time.time()
             # self.sync_calendars_threaded()
             self.sync_all_calendars_threaded()
+            print("syncing")
 
     def fetch_events(self, dt: datetime.datetime, email: str = None) -> (Resource, list[dict]):
         if not AccountManager().current_account:
@@ -86,7 +86,7 @@ class CalendarSyncManager(metaclass=Singleton):
 
         return service, events
 
-    def sync_calendars(self, email: str = None) -> None:
+    def sync_calendars(self, email: str = None, send_event: bool = True) -> None:
         if not AccountManager().is_signed_in():
             return
 
@@ -141,7 +141,8 @@ class CalendarSyncManager(metaclass=Singleton):
             elif not self.model.compare_events(event, google_synced[g_id]):
                 self.model.update_event(event, updated_event=google_synced[g_id], threaded=True)
 
-        self.event_loop.enqueue_threaded_event(CalendarSyncEvent(time.time()))
+        if send_event:
+            self.event_loop.enqueue_threaded_event(CalendarSyncEvent(time.time()))
 
     def sync_deleted_events(self, service: Resource, email: str = None) -> None:
         for event in self.events_to_delete[email or AccountManager().current_account.email]:
@@ -223,13 +224,15 @@ class CalendarSyncManager(metaclass=Singleton):
             ret.append(calendar_event)
         return ret
 
-    def sync_calendars_threaded(self, email: str = None) -> None:
+    def sync_calendars_threaded(self, email: str = None, send_event: bool = True) -> None:
         def sync(on_complete):
-            CalendarSyncManager().sync_calendars(email)
+            CalendarSyncManager().sync_calendars(email, send_event=False)
             on_complete()
 
         def callback():
-            self.event_loop.enqueue_threaded_event(CalendarSyncEvent(time.time()))
+            if send_event:
+                self.event_loop.enqueue_threaded_event(CalendarSyncEvent(time.time()))
+            self.sync_finished = True
 
         Thread(target=sync, args=(callback, )).start()
 
@@ -238,7 +241,7 @@ class CalendarSyncManager(metaclass=Singleton):
             try:
                 for user in AccountManager().accounts:
                     try:
-                        CalendarSyncManager().sync_calendars_threaded(email=user.email)
+                        CalendarSyncManager().sync_calendars_threaded(email=user.email, send_event=False)
                     except Exception as e:
                         print(e)
             finally:
@@ -246,6 +249,7 @@ class CalendarSyncManager(metaclass=Singleton):
 
         def callback():
             self.event_loop.enqueue_threaded_event(CalendarSyncEvent(time.time()))
+            self.sync_finished = True
 
         Thread(target=sync, args=(callback, )).start()
 

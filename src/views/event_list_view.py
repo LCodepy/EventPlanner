@@ -20,6 +20,7 @@ from src.ui.ui_object import UIObject
 from src.utils.animations import ChangeValuesAnimation
 from src.utils.assets import Assets
 from src.main.language_manager import LanguageManager
+from src.utils.rendering import render_rounded_rect
 from src.views.view import View
 
 
@@ -116,7 +117,8 @@ class EventListEvent(UIObject):
             return True
 
     def render(self) -> None:
-        pygame.draw.rect(self.canvas, self.event.color, self.get_rect(), 2, 6)
+        # pygame.draw.rect(self.canvas, self.event.color, self.get_rect(), 2, 6)
+        render_rounded_rect(self.canvas, self.event.color, self.get_rect(), 6)
         if self.highlight_animation.active and self.highlight_animation.values:
             c2 = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
             pygame.draw.rect(c2, (255, 255, 255), [0, 0, self.width, self.height], 2, 6)

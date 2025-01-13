@@ -5,6 +5,7 @@ import pygame
 from src.events.event import Event, MouseMotionEvent, MouseReleaseEvent, MouseClickEvent, MouseFocusChangedEvent, \
     WindowMinimizedEvent, WindowUnminimizedEvent
 from src.events.mouse_buttons import MouseButtons
+from src.ui.alignment import HorizontalAlignment
 from src.ui.button import Button
 from src.ui.colors import Color, Colors, brighten
 from src.ui.label import Label
@@ -18,7 +19,9 @@ class DropDown(UIObject):
     def __init__(self, canvas: pygame.Surface, pos: (int, int), size: (int, int), options: list[str],
                  color: Color = Colors.WHITE, border_color: Color = Colors.BLACK, text_color: Color = Colors.WHITE,
                  border_radius: int = 0,  border_width: int = 1,  hover_color: Color = None, click_color: Color = None,
-                 selected_option: int = 0, font: pygame.font.Font = None, padding: Padding = None) -> None:
+                 selected_option: int = 0, font: pygame.font.Font = None,
+                 horizontal_text_alignment: HorizontalAlignment = HorizontalAlignment.CENTER,
+                 padding: Padding = None) -> None:
         super().__init__(canvas, pos, padding)
         self.canvas = canvas
         self.x, self.y = pos
@@ -46,7 +49,8 @@ class DropDown(UIObject):
             (self.width, self.height),
             text=self.options[self.selected_option],
             text_color=self.text_color,
-            font=self.font
+            font=self.font,
+            horizontal_text_alignment=horizontal_text_alignment
         )
 
         self.buttons: list[Button] = []

@@ -110,7 +110,10 @@ class EventListController:
     def open_options(self, event: CalendarEvent) -> None:
         if event.is_default:
             return
-        options = OptionsView(self.view.display, self.event_loop, *Config.options_view_size, *pygame.mouse.get_pos())
+        x, y = pygame.mouse.get_pos()
+        if y > self.view.height - Config.options_view_size[1] * 2:
+            y -= Config.options_view_size[1]
+        options = OptionsView(self.view.display, self.event_loop, *Config.options_view_size, x, y)
         options.set_mode(1)
         OptionsController(options, self.event_loop, event=event)
         self.event_loop.enqueue_event(OpenViewEvent(time.time(), options, False))

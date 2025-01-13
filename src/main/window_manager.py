@@ -40,6 +40,8 @@ class WindowManager:
 
     def register_event(self, event: Event) -> bool:
         if pygame.display.get_window_size() == get_window_size():
+            if isinstance(event, MouseClickEvent) and event.button is MouseButtons.LEFT_BUTTON:
+                self.mouse_pressed = True
             return False
         if isinstance(event, MouseClickEvent) and event.button is MouseButtons.LEFT_BUTTON:
             if self.on_click(event):

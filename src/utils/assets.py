@@ -103,6 +103,10 @@ class Assets(metaclass=Singleton):
             os.path.join(self.IMAGES_PATH, "left_arrow_icon_large_hover.png")
         ).convert_alpha()
 
+        self.checkmark_icon = pygame.image.load(
+            os.path.join(self.IMAGES_PATH, "checkmark_icon_large.png")
+        ).convert_alpha()
+
         self.todo_list_database_path = os.path.join(self.DATA_PATH, "todo_lists")
         self.calendar_database_path = os.path.join(self.DATA_PATH, "calendars")
         self.settings_database_path = os.path.join(self.SETTINGS_PATH, "settings.json")

@@ -3,6 +3,7 @@ import os
 from dataclasses import dataclass
 from typing import Optional
 
+from google.auth.exceptions import RefreshError
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
@@ -63,6 +64,12 @@ class GoogleAuthentication:
             creds = Credentials.from_authorized_user_file(token_file, scopes=SCOPES)
         except FileNotFoundError:
             return
+
+        if not creds.valid and creds.expired and creds.refresh_token:
+            try:
+                creds.refresh(Request())
+            except RefreshError:
+                return
 
         service = build("oauth2", "v2", credentials=creds)
         try:

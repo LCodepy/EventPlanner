@@ -157,7 +157,10 @@ class TodoListController:
             todo_task.update_position(y=new_y, set_start_pos=True)
 
     def open_options(self, id_: int) -> None:
-        options = OptionsView(self.view.display, self.event_loop, *Config.options_view_size, *pygame.mouse.get_pos())
+        x, y = pygame.mouse.get_pos()
+        if y > self.view.height - Config.options_view_size[1] * 2:
+            y -= Config.options_view_size[1]
+        options = OptionsView(self.view.display, self.event_loop, *Config.options_view_size, x, y)
         OptionsController(options, self.event_loop, task_id=id_)
         self.event_loop.enqueue_event(OpenViewEvent(time.time(), options, False))
 

@@ -9,7 +9,9 @@ from src.main.config import Config
 from src.main.language_manager import LanguageManager
 from src.ui.alignment import HorizontalAlignment
 from src.ui.button import Button
+from src.ui.check_box import CheckBox
 from src.ui.colors import Colors
+from src.ui.dropdown import DropDown
 from src.ui.label import Label
 from src.utils.assets import Assets
 from src.views.view import View
@@ -57,20 +59,53 @@ class SettingsView(View):
             self.canvas,
             (120, 200),
             (200, 40),
-            text="Choose a language:",
-            text_color=(160, 160, 160),
+            text="Language",
+            text_color=Colors.TEXT_LIGHT_GREY,
             font=Assets().font18,
             horizontal_text_alignment=HorizontalAlignment.LEFT
         )
 
+        self.language_label2 = Label(
+            self.canvas,
+            (170, 225),
+            (300, 20),
+            text="Select display language",
+            text_color=Colors.TEXT_GREY,
+            font=Assets().font14,
+            horizontal_text_alignment=HorizontalAlignment.LEFT
+        )
+
+        self.language_dropdown = DropDown(
+            self.canvas,
+            (170, 250),
+            (300, 40),
+            ["ENG", "HRV"],
+            color=Colors.BACKGROUND_GREY22,
+            border_color=Colors.GREY70,
+            text_color=Colors.TEXT_LIGHT_GREY,
+            border_radius=4,
+            border_width=1,
+            font=Assets().font18
+        )
+
         self.show_catholic_events_label = Label(
             self.canvas,
-            (170, 240),
+            (170, 350),
             (300, 40),
-            text="Show catholic events:",
-            text_color=(160, 160, 160),
+            text="Show catholic events",
+            text_color=Colors.TEXT_LIGHT_GREY,
             font=Assets().font18,
             horizontal_text_alignment=HorizontalAlignment.LEFT
+        )
+
+        self.show_catholic_events_checkbox = CheckBox(
+            self.canvas,
+            (220, 350),
+            20,
+            color=Colors.BACKGROUND_GREY22,
+            border_color=Colors.GREY70,
+            border_radius=4,
+            border_width=1
         )
 
         self.account_label = Label(
@@ -91,6 +126,16 @@ class SettingsView(View):
             text_color=Colors.TEXT_GREY,
             font=Assets().font18,
             horizontal_text_alignment=HorizontalAlignment.LEFT
+        )
+
+        self.auto_sync_checkbox = CheckBox(
+            self.canvas,
+            (130, 410),
+            20,
+            color=Colors.BACKGROUND_GREY22,
+            border_color=Colors.GREY70,
+            border_radius=4,
+            border_width=1
         )
 
         self.sync_button = Button(
@@ -137,14 +182,8 @@ class SettingsView(View):
     def render(self) -> None:
         self.canvas.fill(Colors.BACKGROUND_GREY30)
 
-        self.title_label.render()
-        self.general_label.render()
-        self.language_label.render()
-        self.show_catholic_events_label.render()
-        self.account_label.render()
-        self.auto_sync_label.render()
-        self.sync_button.render()
-        self.sign_out_button.render()
+        for obj in self.get_ui_elements():
+            obj.render()
 
         pygame.draw.line(
             self.canvas, Colors.TEXT_DARK_GREY, (10, self.general_label.y + 18),
