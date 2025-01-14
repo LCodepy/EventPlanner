@@ -6,6 +6,7 @@ import pygame
 from src.events.event import Event, MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, \
     MouseWheelDownEvent, KeyReleaseEvent, LanguageChangedEvent
 from src.events.event_loop import EventLoop
+from src.main.settings import Settings
 from src.models.calendar_model import CalendarEvent, EventRecurrence
 from src.ui.button import Button
 from src.ui.colors import Colors
@@ -14,6 +15,7 @@ from src.ui.label import Label
 from src.ui.text_field import TextField
 from src.utils.assets import Assets
 from src.main.language_manager import LanguageManager
+from src.utils.rendering import render_rounded_rect
 from src.views.view import View
 
 
@@ -75,7 +77,8 @@ class AddEventView(View):
             hint_text_color=Colors.TEXT_DARK_GREY,
             color=Colors.BACKGROUND_GREY22,
             border_width=0,
-            max_length=200
+            max_length=200,
+            border_radius=10
         )
 
         self.hours_input = TextField(
@@ -124,7 +127,9 @@ class AddEventView(View):
             border_color=Colors.TEXT_DARK_GREY,
             text_color=Colors.TEXT_GREY,
             font=Assets().font20,
-            selected_option=3
+            selected_option=3,
+            underline=True,
+            border_radius=4
         )
 
         self.error_label = Label(
@@ -144,7 +149,7 @@ class AddEventView(View):
             click_color=(60, 60, 60),
             label=Label(text=self.language_manager.get_string("add"), text_color=(220, 220, 220), font=Assets().font18),
             border_width=0,
-            border_radius=3
+            border_radius=6
         )
 
     def register_event(self, event: Event) -> bool:
@@ -177,7 +182,12 @@ class AddEventView(View):
         return registered_events
 
     def render(self) -> None:
-        self.canvas.fill(Colors.BACKGROUND_GREY30)
+        self.canvas.fill((0, 0, 0, 0))
+
+        if Settings().get_settings()["high_quality_graphics"]:
+            render_rounded_rect(self.canvas, Colors.BACKGROUND_GREY30, pygame.Rect(0, 0, self.width, self.height), 20)
+        else:
+            pygame.draw.rect(self.canvas, Colors.BACKGROUND_GREY30, [0, 0, self.width, self.height], border_radius=20)
 
         for obj in self.get_ui_elements():
             obj.render()
@@ -199,7 +209,7 @@ class AddEventView(View):
             self.color_buttons.append(
                 Button(
                     self.canvas, (75 + (self.width - 150) // (n_cols + 1) * (i % n_cols + 1), 280 + (i >= n_cols) * 40),
-                    (30, 30), color=color, border_width=0
+                    (30, 30), color=color, border_width=0, border_radius=6
                 )
             )
 

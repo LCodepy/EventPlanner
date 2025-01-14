@@ -71,8 +71,8 @@ class CalendarModel:
     def load_default_events(self) -> None:
         settings = Settings().get_settings()
 
-        self.default_event_color = settings["default_event_color"]
-        self.catholic_event_color = settings["catholic_event_color"]
+        self.default_event_color = get_rgb_color(settings["default_event_color"])
+        self.catholic_event_color = get_rgb_color(settings["catholic_event_color"])
 
         for i, event in enumerate(settings["default_events"]):
             if not event["date"]:
@@ -83,7 +83,7 @@ class CalendarModel:
             self.default_events.append(
                 CalendarEvent(
                     i, date, datetime.time(0, 0), event["description"],
-                    get_rgb_color(self.default_event_color), EventRecurrence.YEARLY, is_default=True
+                    self.default_event_color, EventRecurrence.YEARLY, is_default=True
                 )
             )
 
@@ -280,7 +280,7 @@ class CalendarModel:
             events.append(
                 CalendarEvent(
                     -(i + 100), date, datetime.time(0, 0), event["description"],
-                    get_rgb_color(self.catholic_event_color), EventRecurrence.NEVER, is_default=True
+                    self.catholic_event_color, EventRecurrence.NEVER, is_default=True
                 )
             )
 

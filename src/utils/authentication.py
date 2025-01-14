@@ -38,8 +38,8 @@ class GoogleAuthentication:
     def authenticate_new_user() -> Optional[User]:
         flow = InstalledAppFlow.from_client_secrets_file(Assets().google_credentials_file_path, scopes=SCOPES)
         try:
-            flow.run_local_server(port=GoogleAuthentication.get_available_port())
-        except Warning as e:
+            flow.run_local_server(port=GoogleAuthentication.get_available_port(), timeout_seconds=300)
+        except (Warning, AttributeError) as e:
             print(e)
             return
 

@@ -120,6 +120,7 @@ class Assets(metaclass=Singleton):
         self.font = "roboto"
         self.font12 = pygame.font.SysFont(self.font, 12)
         self.font14 = pygame.font.SysFont(self.font, 14)
+        self.font16 = pygame.font.SysFont(self.font, 16)
         self.font18 = pygame.font.SysFont(self.font, 18)
         self.font20 = pygame.font.SysFont(self.font, 20)
         self.font24 = pygame.font.SysFont(self.font, 24)

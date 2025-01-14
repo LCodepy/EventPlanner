@@ -7,6 +7,7 @@ import pygame
 from src.events.event import MouseClickEvent, MouseReleaseEvent, Event, MouseWheelUpEvent, MouseWheelDownEvent, \
     UpdateCalendarEvent, LanguageChangedEvent, CalendarSyncEvent, KeyPressEvent, ChangeMonthEvent
 from src.main.config import Config
+from src.main.settings import Settings
 from src.models.calendar_model import CalendarModel, CalendarEvent
 from src.ui.alignment import VerticalAlignment
 from src.ui.button import Button
@@ -121,7 +122,6 @@ class CalendarView(View):
         ]
 
     def create_day_buttons(self) -> None:
-        print("Creating")
         month_length = get_month_length(self.month)
         starting_day = get_month_starting_day(self.year, self.month)
         n_rows = ((month_length + starting_day) / 7).__ceil__()
@@ -228,16 +228,26 @@ class CalendarView(View):
                     next_y += 8
                     collapsed = True
                 else:
-                    # pygame.draw.rect(self.canvas, event.event.color, [event.label.x - width // 2,
-                    #                                                   event.label.y - event.label.height // 2 - 1, width,
-                    #                                                   event.label.height], border_radius=5, width=2)
-                    render_rounded_rect(
-                        self.canvas, event.event.color,
-                        pygame.Rect(
-                            event.label.x - width // 2, event.label.y - event.label.height // 2 - 1, width,
-                            event.label.height
-                        ), 5
-                    )
+                    border_width = 1
+                    if Settings().get_settings()["render_filled_events"]:
+                        border_width = 0
+
+                    if Settings().get_settings()["high_quality_graphics"]:
+                        render_rounded_rect(
+                            self.canvas, event.event.color,
+                            pygame.Rect(
+                                event.label.x - width // 2, event.label.y - event.label.height // 2 - 1, width,
+                                event.label.height
+                            ), 5, width=border_width
+                        )
+                    else:
+                        pygame.draw.rect(
+                            self.canvas, event.event.color,
+                            [event.label.x - width // 2, event.label.y - event.label.height // 2 - 1, width,
+                             event.label.height],
+                            border_radius=5, width=border_width
+                        )
+
                     next_y = event.label.y + event.label.height // 2 + 4
 
                     event.label.render()

@@ -24,22 +24,25 @@ class LanguageManager(metaclass=Singleton):
     def __init__(self, event_loop: EventLoop = None, language: Language = Language.ENGLISH) -> None:
         self.event_loop = event_loop
         self.language = language
-        self.load_data()
+
+        self.language_names = {
+            "hrv": Language.CROATIAN,
+            "eng": Language.ENGLISH
+        }
+
+        self.languages = []
         self.strings = {}
+        self.load_data()
 
         self.set_language(self.language)
 
     def load_data(self) -> None:
-        self.language = Settings().get_settings()["language"]
+        self.language = self.language_names[Settings().get_settings()["language"]]
+        self.languages = sorted(list(map(lambda l: l.split(".")[0], os.listdir(self.LANGUAGES_PATH))))
 
     def set_language(self, language: Union[Language, str]) -> None:
         if isinstance(language, Language):
-            if language is Language.ENGLISH:
-                filename = "eng"
-            elif language is Language.CROATIAN:
-                filename = "hrv"
-            else:
-                raise ValueError(f"Language {language} is not supported.")
+            filename = self.get_language_name(language)
         else:
             filename = language
 
@@ -54,4 +57,12 @@ class LanguageManager(metaclass=Singleton):
 
     def get_string(self, key: str) -> Union[str, list[str]]:
         return self.strings[key]
+
+    def get_language_name(self, language: Language = None) -> str:
+        language = language or self.language
+        for name, lang in self.language_names.items():
+            if lang == language:
+                return name
+
+        raise ValueError(f"Language {language} is not supported")
 

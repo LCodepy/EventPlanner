@@ -22,7 +22,7 @@ class AddEventController:
             for btn in self.view.color_buttons:
                 if btn.color == color:
                     btn.border_color = Colors.WHITE
-                    btn.border_width = 2
+                    btn.border_width = 1
                 else:
                     btn.border_width = 0
         return apply_color

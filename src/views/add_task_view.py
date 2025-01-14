@@ -5,6 +5,7 @@ import pygame
 from src.events.event import Event, MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, \
     MouseWheelDownEvent, LanguageChangedEvent
 from src.events.event_loop import EventLoop
+from src.main.settings import Settings
 from src.models.todo_list_model import TaskImportance
 from src.ui.button import Button
 from src.ui.colors import Colors
@@ -13,6 +14,7 @@ from src.ui.padding import Padding
 from src.ui.text_field import TextField
 from src.utils.assets import Assets
 from src.main.language_manager import LanguageManager
+from src.utils.rendering import render_rounded_rect
 from src.views.view import View
 
 
@@ -59,19 +61,20 @@ class AddTaskView(View):
 
         self.description_text_field = TextField(
             self.canvas,
-            (self.width // 2, 210),
-            (self.width - 40, 180),
+            (self.width // 2, 190),
+            (self.width - 60, 180),
             label=Label(text_color=Colors.TEXT_GREY, font=Assets().font18),
             hint=self.language_manager.get_string("task_description"),
             hint_text_color=Colors.TEXT_DARK_GREY,
             color=Colors.BACKGROUND_GREY22,
             border_width=0,
-            max_length=200
+            max_length=200,
+            border_radius=10
         )
 
         self.importance_label = Label(
             self.canvas,
-            (self.width // 2, 345),
+            (self.width // 2, 320),
             (150, 30),
             text=self.language_manager.get_string("importance_level"),
             text_color=Colors.TEXT_GREY,
@@ -80,7 +83,7 @@ class AddTaskView(View):
 
         self.low_importance_button = Button(
             self.canvas,
-            (self.width // 4 - 20, 390),
+            (self.width // 4 - 20, 370),
             (70, 40),
             color=Colors.BACKGROUND_GREY30,
             label=Label(text=self.language_manager.get_string("low"), text_color=(220, 220, 220), font=Assets().font18),
@@ -92,7 +95,7 @@ class AddTaskView(View):
 
         self.medium_importance_button = Button(
             self.canvas,
-            (self.width // 2, 390),
+            (self.width // 2, 370),
             (70, 40),
             color=Colors.BACKGROUND_GREY30,
             label=Label(text=self.language_manager.get_string("mid"), text_color=(220, 220, 220), font=Assets().font18),
@@ -104,7 +107,7 @@ class AddTaskView(View):
 
         self.high_importance_button = Button(
             self.canvas,
-            (self.width // 4 * 3 + 20, 390),
+            (self.width // 4 * 3 + 20, 370),
             (70, 40),
             color=Colors.BACKGROUND_GREY30,
             label=Label(text=self.language_manager.get_string("high"), text_color=(220, 220, 220), font=Assets().font18),
@@ -123,7 +126,7 @@ class AddTaskView(View):
             click_color=(60, 60, 60),
             label=Label(text=self.language_manager.get_string("add"), text_color=(220, 220, 220), font=Assets().font18),
             border_width=0,
-            border_radius=3
+            border_radius=6
         )
 
     def register_event(self, event: Event) -> bool:
@@ -141,14 +144,24 @@ class AddTaskView(View):
         return registered_events
 
     def render(self) -> None:
-        self.canvas.fill(Colors.BACKGROUND_GREY30)
+        self.canvas.fill((0, 0, 0, 0))
+
+        if Settings().get_settings()["high_quality_graphics"]:
+            render_rounded_rect(self.canvas, Colors.BACKGROUND_GREY30, pygame.Rect(0, 0, self.width, self.height), 20)
+        else:
+            pygame.draw.rect(self.canvas, Colors.BACKGROUND_GREY30, [0, 0, self.width, self.height], border_radius=20)
 
         for obj in self.get_ui_elements():
             obj.render()
 
-        pygame.draw.rect(self.canvas, Colors.BLUE220, [self.width // 4 - 46, 384, 12, 12])
-        pygame.draw.rect(self.canvas, Colors.YELLOW220, [self.width // 2 - 26, 384, 12, 12])
-        pygame.draw.rect(self.canvas, Colors.RED, [self.width // 4 * 3 - 6, 384, 12, 12])
+        if Settings().get_settings()["high_quality_graphics"]:
+            render_rounded_rect(self.canvas, Colors.BLUE220, pygame.Rect(self.width // 4 - 46, 364, 12, 12), 2)
+            render_rounded_rect(self.canvas, Colors.YELLOW220, pygame.Rect(self.width // 2 - 26, 364, 12, 12), 2)
+            render_rounded_rect(self.canvas, Colors.RED, pygame.Rect(self.width // 4 * 3 - 6, 364, 12, 12), 2)
+        else:
+            pygame.draw.rect(self.canvas, Colors.BLUE220, [self.width // 4 - 46, 364, 12, 12], border_radius=2)
+            pygame.draw.rect(self.canvas, Colors.YELLOW220, [self.width // 2 - 26, 364, 12, 12], border_radius=2)
+            pygame.draw.rect(self.canvas, Colors.RED, [self.width // 4 * 3 - 6, 364, 12, 12], border_radius=2)
 
         pygame.draw.line(self.canvas, Colors.GREY70, (20, 70), (self.width - 20, 70))
 

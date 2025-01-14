@@ -10,6 +10,7 @@ from src.events.event import MouseClickEvent, MouseReleaseEvent, MouseWheelUpEve
 from src.events.event_loop import EventLoop
 from src.events.mouse_buttons import MouseButtons
 from src.main.config import Config
+from src.main.settings import Settings
 from src.models.calendar_model import CalendarModel, CalendarEvent
 from src.ui.alignment import HorizontalAlignment
 from src.ui.button import Button
@@ -117,8 +118,15 @@ class EventListEvent(UIObject):
             return True
 
     def render(self) -> None:
-        # pygame.draw.rect(self.canvas, self.event.color, self.get_rect(), 2, 6)
-        render_rounded_rect(self.canvas, self.event.color, self.get_rect(), 6)
+        border_width = 1
+        if Settings().get_settings()["render_filled_events"]:
+            border_width = 0
+
+        if Settings().get_settings()["high_quality_graphics"]:
+            render_rounded_rect(self.canvas, self.event.color, self.get_rect(), 6, width=border_width)
+        else:
+            pygame.draw.rect(self.canvas, self.event.color, self.get_rect(), width=border_width, border_radius=6)
+
         if self.highlight_animation.active and self.highlight_animation.values:
             c2 = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
             pygame.draw.rect(c2, (255, 255, 255), [0, 0, self.width, self.height], 2, 6)
@@ -260,7 +268,7 @@ class EventListView(View):
             hover_color=(50, 50, 50),
             click_color=(60, 60, 60),
             border_width=0,
-            border_radius=3
+            border_radius=6
         )
 
     def register_event(self, event: Event) -> bool:

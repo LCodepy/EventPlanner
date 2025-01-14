@@ -63,7 +63,6 @@ class CalendarSyncManager(metaclass=Singleton):
             self.last_synced = time.time()
             # self.sync_calendars_threaded()
             self.sync_all_calendars_threaded()
-            print("syncing")
 
     def fetch_events(self, dt: datetime.datetime, email: str = None) -> (Resource, list[dict]):
         if not AccountManager().current_account:

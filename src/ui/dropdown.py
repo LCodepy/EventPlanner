@@ -5,12 +5,14 @@ import pygame
 from src.events.event import Event, MouseMotionEvent, MouseReleaseEvent, MouseClickEvent, MouseFocusChangedEvent, \
     WindowMinimizedEvent, WindowUnminimizedEvent
 from src.events.mouse_buttons import MouseButtons
+from src.main.settings import Settings
 from src.ui.alignment import HorizontalAlignment
 from src.ui.button import Button
 from src.ui.colors import Color, Colors, brighten
 from src.ui.label import Label
 from src.ui.padding import Padding
 from src.ui.ui_object import UIObject
+from src.utils.rendering import render_rounded_rect
 from src.utils.ui_debugger import UIDebugger
 
 
@@ -19,7 +21,7 @@ class DropDown(UIObject):
     def __init__(self, canvas: pygame.Surface, pos: (int, int), size: (int, int), options: list[str],
                  color: Color = Colors.WHITE, border_color: Color = Colors.BLACK, text_color: Color = Colors.WHITE,
                  border_radius: int = 0,  border_width: int = 1,  hover_color: Color = None, click_color: Color = None,
-                 selected_option: int = 0, font: pygame.font.Font = None,
+                 selected_option: int = 0, font: pygame.font.Font = None, underline: bool = False,
                  horizontal_text_alignment: HorizontalAlignment = HorizontalAlignment.CENTER,
                  padding: Padding = None) -> None:
         super().__init__(canvas, pos, padding)
@@ -37,6 +39,8 @@ class DropDown(UIObject):
         self.click_color = click_color or brighten(self.text_color, 30)
         self.selected_option = selected_option
         self.font = font or pygame.font.SysFont("arial", 12)
+        self.underline = underline
+        self.horizontal_text_alignment = horizontal_text_alignment
         self.padding = padding or Padding()
 
         self.hovering = False
@@ -52,6 +56,8 @@ class DropDown(UIObject):
             font=self.font,
             horizontal_text_alignment=horizontal_text_alignment
         )
+        self.label.x += self.padding.left - self.padding.right
+        self.label.y += self.padding.top - self.padding.bottom
 
         self.buttons: list[Button] = []
 
@@ -111,19 +117,62 @@ class DropDown(UIObject):
             return True
 
     def render(self) -> None:
-        pygame.draw.line(self.canvas, self.label.text_color, (self.x - self.width // 2, self.y + self.height // 2),
-                         (self.x + self.width // 2 - 1, self.y + self.height // 2))
+        if self.underline:
+            pygame.draw.line(
+                self.canvas, self.label.text_color, (self.x - self.width // 2, self.y + self.height // 2 - 1),
+                (self.x + self.width // 2 - 1, self.y + self.height // 2 - 1)
+            )
+        elif Settings().get_settings()["high_quality_graphics"]:
+            render_rounded_rect(self.canvas, self.color, self.get_rect(), self.border_radius, width=0)
+            if self.border_width:
+                render_rounded_rect(
+                    self.canvas, self.border_color, self.get_rect(), self.border_radius, width=self.border_width
+                )
+        else:
+            pygame.draw.rect(self.canvas, self.color, self.get_rect(), border_radius=self.border_radius)
+            if self.border_width:
+                pygame.draw.rect(
+                    self.canvas, self.border_color, self.get_rect(), width=self.border_width,
+                    border_radius=self.border_radius
+                )
 
         self.label.render()
 
         if self.opened:
-            pygame.draw.rect(self.canvas, self.color,
-                             [self.get_rect().x, self.y + self.height // 2, self.width, (self.height - 4) * 3],
-                             border_radius=self.border_radius)
-            if self.border_width:
-                pygame.draw.rect(self.canvas, self.border_color,
-                                 [self.get_rect().x, self.y + self.height // 2, self.width, (self.height - 4) * 3],
-                                 border_radius=self.border_radius, width=self.border_width)
+            if Settings().get_settings()["high_quality_graphics"]:
+                render_rounded_rect(
+                    self.canvas,
+                    self.color,
+                    pygame.Rect(
+                        self.get_rect().x, self.y + self.height // 2, self.width,
+                        (self.height - 4) * (len(self.options) - 1)
+                    ),
+                    self.border_radius,
+                    width=0
+                )
+                if self.border_width:
+                    render_rounded_rect(
+                        self.canvas,
+                        self.border_color,
+                        pygame.Rect(
+                            self.get_rect().x, self.y + self.height // 2, self.width,
+                            (self.height - 4) * (len(self.options) - 1)
+                        ),
+                        self.border_radius,
+                        width=self.border_width
+                    )
+            else:
+                pygame.draw.rect(
+                    self.canvas, self.color, [self.get_rect().x, self.y + self.height // 2, self.width,
+                                              (self.height - 4) * (len(self.options) - 1)],
+                    border_radius=self.border_radius
+                )
+                if self.border_width:
+                    pygame.draw.rect(
+                        self.canvas, self.border_color, [self.get_rect().x, self.y + self.height // 2, self.width,
+                                                         (self.height - 4) * (len(self.options) - 1)],
+                        border_radius=self.border_radius, width=self.border_width
+                    )
 
         for btn in self.buttons:
             btn.render()
@@ -158,10 +207,12 @@ class DropDown(UIObject):
                     self.canvas,
                     (self.x, self.y + 6 + (i + 1) * (self.height - 6)),
                     (self.width - 6, self.height - 6),
-                    label=Label(text=self.options[j], text_color=self.text_color, font=self.font),
+                    label=Label(text=self.options[j], text_color=self.text_color, font=self.font,
+                                horizontal_text_alignment=self.horizontal_text_alignment),
                     color=self.color,
                     border_width=0,
-                    border_radius=0
+                    border_radius=self.border_radius,
+                    padding=self.padding
                 )
             )
             self.buttons[i].bind_on_click(lambda idx=j: self.on_button_click(idx))

@@ -278,7 +278,7 @@ class TodoListView(View):
             hover_color=(50, 50, 50),
             click_color=(60, 60, 60),
             border_width=0,
-            border_radius=3
+            border_radius=6
         )
 
     def register_event(self, event: Event) -> bool:

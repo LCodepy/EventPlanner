@@ -6,6 +6,7 @@ import pygame.gfxdraw
 from src.events.event import Event, MouseMotionEvent, MouseReleaseEvent, MouseClickEvent, MouseFocusChangedEvent, \
     WindowMinimizedEvent, WindowUnminimizedEvent
 from src.events.mouse_buttons import MouseButtons
+from src.main.settings import Settings
 from src.ui.colors import Color, Colors, brighten
 from src.ui.label import Label
 from src.ui.padding import Padding
@@ -102,12 +103,19 @@ class Button(UIObject):
         return False
 
     def render(self) -> None:
-        #pygame.draw.rect(self.canvas, self.render_color, self.get_rect(), border_radius=self.border_radius)
-        if self.border_width:
-            render_rounded_rect(self.canvas, self.border_color, self.get_rect(), self.border_radius)
-            # pygame.draw.rect(
-            #     self.canvas, self.border_color, self.get_rect(), width=self.border_width, border_radius=self.border_radius
-            # )
+        if Settings().get_settings()["high_quality_graphics"]:
+            render_rounded_rect(self.canvas, self.render_color, self.get_rect(), self.border_radius)
+            if self.border_width:
+                render_rounded_rect(
+                    self.canvas, self.border_color, self.get_rect(), self.border_radius, width=self.border_width
+                )
+        else:
+            pygame.draw.rect(self.canvas, self.render_color, self.get_rect(), border_radius=self.border_radius)
+            if self.border_width:
+                pygame.draw.rect(
+                    self.canvas, self.border_color, self.get_rect(), width=self.border_width,
+                    border_radius=self.border_radius
+                )
         pygame.draw.rect(self.canvas, self.render_color, [self.get_rect().x + 1, self.get_rect().y + 1, self.get_rect().w - 2, self.get_rect().h - 2], border_radius=self.border_radius)
 
         if self.hover_image and self.hovering:

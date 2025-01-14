@@ -6,10 +6,12 @@ from src.events.event import Event, MouseMotionEvent, MouseClickEvent, MouseRele
     MouseWheelUpEvent, MouseWheelDownEvent
 from src.events.event_loop import EventLoop
 from src.main.language_manager import LanguageManager
+from src.main.settings import Settings
 from src.ui.button import Button
 from src.ui.colors import Colors
 from src.ui.label import Label
 from src.utils.assets import Assets
+from src.utils.rendering import render_rounded_rect
 from src.views.view import View
 
 
@@ -61,8 +63,12 @@ class ChooseMonthView(View):
     def render(self) -> None:
         self.canvas.fill((0, 0, 0, 0))
 
-        pygame.draw.rect(self.canvas, Colors.BACKGROUND_GREY22, [0, 0, self.width, self.height], border_radius=4)
-        pygame.draw.rect(self.canvas, Colors.GREY70, [0, 0, self.width, self.height], width=1, border_radius=4)
+        if Settings().get_settings()["high_quality_graphics"]:
+            render_rounded_rect(self.canvas, Colors.BACKGROUND_GREY22, pygame.Rect(0, 0, self.width, self.height), 4)
+            render_rounded_rect(self.canvas, Colors.GREY70, pygame.Rect(0, 0, self.width, self.height), 4, width=1)
+        else:
+            pygame.draw.rect(self.canvas, Colors.BACKGROUND_GREY22, [0, 0, self.width, self.height], border_radius=4)
+            pygame.draw.rect(self.canvas, Colors.GREY70, [0, 0, self.width, self.height], width=1, border_radius=4)
 
         for btn in self.buttons:
             btn.render()

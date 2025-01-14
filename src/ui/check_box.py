@@ -5,11 +5,13 @@ import pygame
 from src.events.event import MouseMotionEvent, Event, MouseFocusChangedEvent, WindowMinimizedEvent, \
     WindowUnminimizedEvent, MouseClickEvent, MouseReleaseEvent
 from src.events.mouse_buttons import MouseButtons
+from src.main.settings import Settings
 from src.ui.colors import brighten, Colors, Color
 from src.ui.image import Image
 from src.ui.padding import Padding
 from src.ui.ui_object import UIObject
 from src.utils.assets import Assets
+from src.utils.rendering import render_rounded_rect
 from src.utils.ui_debugger import UIDebugger
 
 
@@ -88,15 +90,24 @@ class CheckBox(UIObject):
         return False
 
     def render(self) -> None:
-        pygame.draw.rect(self.canvas, self.render_color, self.get_rect(), border_radius=self.border_radius)
+        if Settings().get_settings()["high_quality_graphics"]:
+            render_rounded_rect(self.canvas, self.render_color, self.get_rect(), self.border_radius)
+        else:
+            pygame.draw.rect(self.canvas, self.render_color, self.get_rect(), border_radius=self.border_radius)
+
         if self.checked:
             self.image.render()
 
         if self.border_width:
-            pygame.draw.rect(
-                self.canvas, self.border_color, self.get_rect(), width=self.border_width,
-                border_radius=self.border_radius
-            )
+            if Settings().get_settings()["high_quality_graphics"]:
+                render_rounded_rect(
+                    self.canvas, self.border_color, self.get_rect(), self.border_radius, width=self.border_width
+                )
+            else:
+                pygame.draw.rect(
+                    self.canvas, self.border_color, self.get_rect(), width=self.border_width,
+                    border_radius=self.border_radius
+                )
 
         # UI debugging
         if UIDebugger.is_enabled():

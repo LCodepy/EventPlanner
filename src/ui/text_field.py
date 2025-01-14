@@ -8,11 +8,13 @@ from src.events.event import Event, MouseMotionEvent, MouseClickEvent, MouseRele
     KeyPressEvent, RenderCursorEvent, DeleteCharacterEvent, MouseFocusChangedEvent, WindowMinimizedEvent, \
     WindowUnminimizedEvent
 from src.events.mouse_buttons import MouseButtons
+from src.main.settings import Settings
 from src.ui.colors import Color, Colors, darken, brighten
 from src.ui.label import Label
 from src.ui.padding import Padding
 from src.ui.ui_object import UIObject
 from src.utils.logging import Log
+from src.utils.rendering import render_rounded_rect
 from src.utils.ui_debugger import UIDebugger
 
 
@@ -255,17 +257,27 @@ class TextField(UIObject):
         self.label.text_color = self.hint_text_color
 
     def render(self) -> None:
-        pygame.draw.rect(self.canvas, self.color, self.get_rect(), border_radius=self.border_radius)
+        if Settings().get_settings()["high_quality_graphics"] and self.border_radius:
+            render_rounded_rect(self.canvas, self.color, self.get_rect(), self.border_radius)
+        else:
+            pygame.draw.rect(self.canvas, self.color, self.get_rect(), border_radius=self.border_radius)
+
         if self.border_width:
             border_color = self.border_color
             if self.focused:
                 border_color = brighten(self.border_color, 100)
             elif self.hovering:
                 border_color = brighten(self.border_color, 50)
-            pygame.draw.rect(
-                self.canvas, border_color, self.get_rect(),
-                width=self.border_width, border_radius=self.border_radius
-            )
+
+            if Settings().get_settings()["high_quality_graphics"] and self.border_radius:
+                render_rounded_rect(
+                    self.canvas, border_color, self.get_rect(), self.border_radius, width=self.border_width
+                )
+            else:
+                pygame.draw.rect(
+                    self.canvas, border_color, self.get_rect(), border_radius=self.border_radius,
+                    width=self.border_width
+                )
 
         if self.underline is not None:
             pygame.draw.line(

@@ -7,6 +7,7 @@ from src.events.event import MouseClickEvent, MouseReleaseEvent, MouseWheelUpEve
 from src.events.event_loop import EventLoop
 from src.events.mouse_buttons import MouseButtons
 from src.main.config import Config
+from src.main.settings import Settings
 from src.models.calendar_model import CalendarModel, CalendarEvent
 from src.ui.alignment import HorizontalAlignment
 from src.ui.colors import Colors
@@ -17,6 +18,7 @@ from src.ui.text_field import TextField
 from src.ui.ui_object import UIObject
 from src.utils.assets import Assets
 from src.main.language_manager import LanguageManager
+from src.utils.rendering import render_rounded_rect
 from src.views.view import View
 
 
@@ -78,8 +80,22 @@ class SearchEvent(UIObject):
     def render(self) -> None:
         self.ui_canvas.fill((0, 0, 0, 0))
 
-        pygame.draw.rect(self.ui_canvas, (50, 50, 50) if self.hovering else Colors.BACKGROUND_GREY22, (0, 0, self.width, self.height), border_radius=4)
-        pygame.draw.rect(self.ui_canvas, self.event.color, (0, 0, self.width, self.height), border_radius=4, width=1)
+        if Settings().get_settings()["high_quality_graphics"]:
+            render_rounded_rect(
+                self.ui_canvas, (50, 50, 50) if self.hovering else Colors.BACKGROUND_GREY22,
+                pygame.Rect(0, 0, self.width, self.height), 4, width=0
+            )
+            render_rounded_rect(
+                self.ui_canvas, self.event.color, pygame.Rect(0, 0, self.width, self.height), 4, width=1
+            )
+        else:
+            pygame.draw.rect(
+                self.ui_canvas, (50, 50, 50) if self.hovering else Colors.BACKGROUND_GREY22,
+                (0, 0, self.width, self.height), border_radius=4
+            )
+            pygame.draw.rect(
+                self.ui_canvas, self.event.color, (0, 0, self.width, self.height), border_radius=4, width=1
+            )
 
         self.description_label.render()
         self.datetime_label.render()
