@@ -136,6 +136,10 @@ class TextField(UIObject):
                     self.move_cursor(-1)
                 elif self.arrow_pressed[pygame.K_RIGHT] and self.cursor_pos < len(self.text) - 1:
                     self.move_cursor(1)
+                elif self.arrow_pressed[pygame.K_UP]:
+                    self.move_cursor_up_down(-1)
+                elif self.arrow_pressed[pygame.K_DOWN]:
+                    self.move_cursor_up_down(1)
             return True
 
         if self.label is not None and self.label.register_event(event):
@@ -150,6 +154,10 @@ class TextField(UIObject):
             self.arrow_pressed[pygame.K_LEFT] = False
         elif keycode == pygame.K_RIGHT:
             self.arrow_pressed[pygame.K_RIGHT] = False
+        elif keycode == pygame.K_UP:
+            self.arrow_pressed[pygame.K_UP] = False
+        elif keycode == pygame.K_DOWN:
+            self.arrow_pressed[pygame.K_DOWN] = False
 
         if keycode == pygame.K_BACKSPACE:
             self.delete_char()
@@ -205,17 +213,48 @@ class TextField(UIObject):
             self.arrow_pressed[pygame.K_RIGHT] = False
             self.arrow_pressed_time = None
 
+        if keycode == pygame.K_UP:
+            self.move_cursor_up_down(-1)
+            self.arrow_pressed[pygame.K_UP] = True
+            self.arrow_pressed_time = time.time()
+            return
+        else:
+            self.arrow_pressed[pygame.K_UP] = False
+            self.arrow_pressed_time = None
+
+        if keycode == pygame.K_DOWN:
+            self.move_cursor_up_down(1)
+            self.arrow_pressed[pygame.K_DOWN] = True
+            self.arrow_pressed_time = time.time()
+            return
+        else:
+            self.arrow_pressed[pygame.K_DOWN] = False
+            self.arrow_pressed_time = None
+
     def delete_char(self) -> None:
+        if self.text[self.cursor_pos] == "\t":
+            return
+
         if self.cursor_pos == len(self.text) - 1:
             self.text = self.text[:-1]
+        elif self.cursor_pos == 0 and len(self.label.lines[0]) == 1:
+            self.text = self.text[self.cursor_pos + 1:]
+            self.label.set_text(self.text, first_line="\t")
+            self.text = "\t" + self.text
+            return
         elif self.cursor_pos != -1:
             self.text = self.text[:self.cursor_pos] + self.text[self.cursor_pos + 1:]
+
         self.move_cursor(-1, delete=True)
         self.label.set_text(self.text)
 
     def delete_next_char(self) -> None:
         if self.cursor_pos < len(self.text) - 1:
             self.text = self.text[:self.cursor_pos + 1] + self.text[self.cursor_pos + 2:]
+
+        if self.label.text[self.cursor_pos + 1] == "\n" and self.label.y_offset > 0:
+            self.label.y_offset -= self.label.get_text_height() + self.label.line_spacing
+
         self.label.set_text(self.text)
 
     def add_char(self, char: str) -> None:
@@ -227,6 +266,12 @@ class TextField(UIObject):
         self.cursor_pos = max(min(self.cursor_pos + direction, len(self.text)-1), -1)
 
         if not self.oneline:
+            char_pos = self.label.get_char_pos(self.cursor_pos)[1]
+
+            if direction < 0 and char_pos < self.label.y - self.label.height // 2:
+                self.label.y_offset += self.label.get_text_height() + self.label.line_spacing
+            elif direction > 0 and char_pos + self.label.get_text_height() > self.label.y + self.label.height // 2:
+                self.label.y_offset -= self.label.get_text_height() + self.label.line_spacing
             return
 
         char_pos = self.label.get_char_pos(self.cursor_pos)[0] + self.label.width // 2 - self.label.x
@@ -241,6 +286,61 @@ class TextField(UIObject):
         elif direction < 0 and char_pos < 0 and not delete:
             self.label.x_offset -= char_pos
             self.label_offsets.append(-char_pos)
+
+    def move_cursor_up_down(self, direction: int) -> None:
+        if (direction < 0 and self.cursor_pos < 0) or (direction > 0 and self.cursor_pos >= len(self.text) - 1):
+            return
+
+        line = 0
+        char_count = 0
+        char_count2 = 1
+        char_pos = 0
+        for i in range(len(self.label.lines)):
+            line = i
+            char_count = 0
+            for _ in self.label.lines[line]:
+                if char_pos <= self.cursor_pos:
+                    char_count += 1
+                else:
+                    char_count2 += 1
+
+                char_pos += 1
+
+            if char_pos > self.cursor_pos:
+                break
+
+        if direction > 0:
+            if line >= len(self.label.lines) - 1:
+                return
+            new_line = line+1
+            char_count2 += len(self.label.lines[new_line]) - 1
+        else:
+            if line < 1:
+                return
+            new_line = line - 1
+
+        change = -char_count
+        if direction > 0:
+            change = char_count2
+
+        x, y = self.label.get_char_pos(self.cursor_pos)
+        closest = self.label.get_closest_character(
+            x, y + (self.label.get_text_height() + self.label.line_spacing) * direction
+        )
+
+        char_count3 = -1
+        char_pos = self.cursor_pos + change - len(self.label.lines[new_line]) + 1
+        for _ in self.label.lines[new_line]:
+            if char_pos >= closest:
+                char_count3 += 1
+            char_pos += 1
+
+        change -= char_count3
+
+        if direction < 0 and line >= 1:
+            self.move_cursor(change)
+        elif direction > 0 and line < len(self.label.lines) - 1:
+            self.move_cursor(change)
 
     def get_relative_char_pos(self, char_pos: int) -> int:
         return self.label.get_char_pos(char_pos)[0] + self.label.width // 2 - self.x
@@ -313,10 +413,10 @@ class TextField(UIObject):
         self.label.update_canvas(self.canvas)
 
     def update_position(self, x: int = None, y: int = None) -> None:
-        self.label.x += (self.x - (x or self.x))
-        self.label.y += (self.y - (y or self.y))
-        self.x = x or self.x
-        self.y = y or self.y
+        self.label.x += (self.x - (self.x if x is None else x))
+        self.label.y += (self.y - (self.y if y is None else y))
+        self.x = self.x if x is None else x
+        self.y = self.y if y is None else y
 
     def resize(self, width: int = None, height: int = None) -> None:
         self.width = width or self.width

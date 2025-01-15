@@ -14,7 +14,7 @@ class AddEventController:
         self.event_loop = event_loop
 
         self.view.close_button.bind_on_click(self.on_close)
-        self.view.bind_on_add_button_click(self.add_task)
+        self.view.bind_on_add_button_click(self.add_event)
         self.view.bind_color_buttons(self.on_color_button_click)
 
     def on_color_button_click(self, color: Color) -> Callable:
@@ -30,7 +30,7 @@ class AddEventController:
     def on_close(self) -> None:
         self.event_loop.enqueue_event(CloseViewEvent(time.time(), self.view))
 
-    def add_task(self) -> None:
+    def add_event(self) -> None:
         color = Colors.EVENT_BLUE204
         for btn in self.view.color_buttons:
             if btn.border_width != 0:

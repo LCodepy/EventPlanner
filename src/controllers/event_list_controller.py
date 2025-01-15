@@ -25,7 +25,6 @@ class EventListController:
 
         self.pressed = False
         self.last_frame_interacted = False
-        self.scroll_value = 15
         self.add_event_view = None
 
         self.view.add_event_button.bind_on_click(self.open_add_event_view)
@@ -77,10 +76,15 @@ class EventListController:
         for t in self.view.time_table:
             max_event_y = max(max_event_y, max(self.view.time_table[t], key=lambda e: e.y).get_rect().bottom)
 
+        scroll_value = Config.scroll_value * event.scroll
+
         if isinstance(event, MouseWheelUpEvent) and min(map(lambda l: l.y, self.view.time_labels)) < self.view.events_pos[1]:
-            self.view.scroll_offset += self.scroll_value
-        elif isinstance(event, MouseWheelDownEvent) and max_event_y > self.view.task_list_bottom[1] - Config.appbar_height:
-            self.view.scroll_offset -= self.scroll_value
+            self.view.scroll_offset += scroll_value
+            self.view.scroll_offset = min(self.view.scroll_offset, 0)
+        elif isinstance(event, MouseWheelDownEvent) and max_event_y > self.view.event_list_bottom[1]:
+            if max_event_y + scroll_value <= self.view.event_list_bottom[1]:
+                scroll_value = self.view.event_list_bottom[1] - max_event_y
+            self.view.scroll_offset += scroll_value
 
         self.view.create_time_table()
         self.bind_view_methods()

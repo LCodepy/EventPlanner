@@ -286,7 +286,7 @@ class CalendarModel:
 
         return events
 
-    def get_upcoming_events(self, date: datetime.date, threaded: bool = False) -> list[CalendarEvent]:
+    def get_upcoming_events(self, date: datetime.datetime, threaded: bool = False) -> list[CalendarEvent]:
         if threaded:
             conn = sqlite3.connect(self.calendar_database_path)
             cursor = conn.cursor()
@@ -312,6 +312,12 @@ class CalendarModel:
                         pickle.loads(t[9]), t[10], t[11]
                     ),
                     cursor.fetchall()
+                )
+            )
+            events = list(
+                filter(
+                    lambda e: e.date != date.date() or (e.time.hour > date.hour or (e.time.hour <= date.hour and e.time.minute > date.minute)),
+                    events
                 )
             )
 

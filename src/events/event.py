@@ -43,6 +43,7 @@ class MouseWheelUpEvent(Event):
 
     x: int
     y: int
+    scroll: int
 
 
 @dataclass
@@ -50,6 +51,7 @@ class MouseWheelDownEvent(Event):
 
     x: int
     y: int
+    scroll: int
 
 
 @dataclass

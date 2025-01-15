@@ -296,7 +296,7 @@ class EventListView(View):
 
         for evs in self.time_table.values():
             for ev in evs:
-                if ev.register_event(event):
+                if self.is_event_valid(event) and ev.register_event(event):
                     registered_events = True
 
         if isinstance(event, MouseClickEvent) and self.on_click and event.button is MouseButtons.LEFT_BUTTON:
@@ -313,15 +313,15 @@ class EventListView(View):
     def render(self) -> None:
         self.canvas.fill(Colors.BACKGROUND_GREY30)
 
-        pygame.draw.line(self.canvas, Colors.GREY70, (self.event_list_x, 60), (self.event_list_x, self.height - 80))
-        pygame.draw.line(self.canvas, Colors.GREY70, (10, 100), (self.width - 10, 100))
-
         self.render_events()
 
         self.render_shadow()
 
         self.title_label.render()
         self.add_event_button.render()
+
+        pygame.draw.line(self.canvas, Colors.GREY70, (self.event_list_x, 100), (self.event_list_x, self.height - 80))
+        pygame.draw.line(self.canvas, Colors.GREY70, (10, 100), (self.width - 10, 100))
 
         pygame.draw.line(self.canvas, Colors.GREY70, (self.width - 1, 0), (self.width - 1, self.height))
 
@@ -452,6 +452,11 @@ class EventListView(View):
     def set_rendering(self, b: bool) -> None:
         self.rendering = b
 
+    def is_event_valid(self, event: Event) -> bool:
+        if isinstance(event, (MouseClickEvent, MouseReleaseEvent, )):
+            return self.event_list_top[1] - 20 < event.y < self.event_list_bottom[1] + 20
+        return True
+
     def is_focused(self, event: Union[MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent]) -> bool:
         return self.x <= event.x < self.x + self.width and self.y <= event.y < self.y + self.height
 
@@ -462,10 +467,10 @@ class EventListView(View):
         return Config.side_view_min_size
 
     @property
-    def task_list_bottom(self) -> (int, int):
-        return self.events_pos[0], self.add_event_button.y - 40
+    def event_list_bottom(self) -> (int, int):
+        return self.events_pos[0], self.add_event_button.y - 60
 
     @property
-    def task_list_top(self) -> (int, int):
+    def event_list_top(self) -> (int, int):
         return self.events_pos[0], self.events_pos[1]
 

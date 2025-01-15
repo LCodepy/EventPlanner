@@ -18,7 +18,6 @@ class SettingsController:
 
         self.pressed = False
         self.last_frame_interacted = False
-        self.scroll_value = 15
 
         self.view.bind_on_click(self.on_click)
         self.view.bind_on_release(self.on_release)
@@ -60,9 +59,22 @@ class SettingsController:
         if event.x < 0 or event.x > self.view.width or event.y < 0 or event.y > self.view.height:
             return False
 
-        if isinstance(event, MouseWheelUpEvent):
-            # self.scroll_events(self.scroll_value)
+        scroll_value = Config.scroll_value * event.scroll
+        min_y = self.view.general_label.get_rect().top
+        max_y = self.view.sign_out_button.get_rect().bottom
+
+        if (
+            (isinstance(event, MouseWheelUpEvent) and min_y < 120) or
+            (isinstance(event, MouseWheelDownEvent) and max_y > self.view.height - 30)
+        ):
+            if max_y + scroll_value <= self.view.height - 30:
+                scroll_value = self.view.height - 30 - max_y
+            elif min_y + scroll_value >= 120:
+                scroll_value = 120 - min_y
+            self.scroll(scroll_value)
             return True
-        elif isinstance(event, MouseWheelDownEvent):
-            # self.scroll_events(-self.scroll_value)
-            return True
+
+    def scroll(self, scroll: int) -> None:
+        for obj in self.view.get_ui_elements():
+            if obj != self.view.title_label:
+                obj.update_position(y=obj.y + scroll)

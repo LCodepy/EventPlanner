@@ -44,8 +44,8 @@ class Label(UIObject):
         if self.width is not None:
             self.update_text()
 
-    def update_text(self) -> None:
-        self.lines = [""]
+    def update_text(self, first_line: str = "") -> None:
+        self.lines = [first_line]
 
         if not self.wrap_text:
             cut = False
@@ -96,9 +96,9 @@ class Label(UIObject):
 
             self.lines[line] += char
 
-    def set_text(self, text: str) -> None:
+    def set_text(self, text: str, first_line: str = "") -> None:
         self.text = text
-        self.update_text()
+        self.update_text(first_line=first_line)
 
     def set_wrap_text(self, b: bool) -> None:
         self.wrap_text = b
@@ -126,7 +126,7 @@ class Label(UIObject):
         self.label_canvas.fill((0, 0, 0, 0))
         current_line_y = 0
         for text in self.lines:
-            text = text.replace("\n", "")
+            text = text.replace("\n", "").replace("\t", "")
 
             rendered, aligned_x, aligned_y = self.align_text(text, current_line_y)
 
@@ -206,9 +206,10 @@ class Label(UIObject):
         current_line_y = 0
         for text in self.lines:
             if char_index < len(text):
-                text = text.replace("\n", "")
-                _, aligned_x, aligned_y = self.align_text(text, current_line_y)
+                _, aligned_x, aligned_y = self.align_text(text.replace("\n", "").replace("\t", ""), current_line_y)
                 rendered = self.font.render(text[:char_index+1], self.bold, self.text_color)
+                if "\n" in text or "\t" in text:
+                    rendered = self.font.render(text[1:char_index+1], self.bold, self.text_color)
                 return self.x + aligned_x + rendered.get_width() + self.x_offset, self.y + aligned_y + self.y_offset
 
             current_line_y += self.get_text_height() + self.line_spacing

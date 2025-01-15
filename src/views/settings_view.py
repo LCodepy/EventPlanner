@@ -92,17 +92,17 @@ class SettingsView(View):
             selected_option=self.language_manager.languages.index(self.language_manager.get_language_name())
         )
 
-        self.show_catholic_events_label = Label(
+        self.catholic_events_label = Label(
             self.canvas,
             (170, 320),
             (300, 40),
-            text="Catholic events",
+            text="Catholic Events",
             text_color=Colors.TEXT_LIGHT_GREY,
             font=Assets().font18,
             horizontal_text_alignment=HorizontalAlignment.LEFT
         )
 
-        self.show_catholic_events_label2 = Label(
+        self.show_catholic_events_label = Label(
             self.canvas,
             (200, 350),
             (300, 20),
@@ -112,7 +112,7 @@ class SettingsView(View):
             horizontal_text_alignment=HorizontalAlignment.LEFT
         )
 
-        self.show_catholic_events_checkbox = CheckBox(
+        self.catholic_events_checkbox = CheckBox(
             self.canvas,
             (30, 350),
             20,
@@ -122,11 +122,69 @@ class SettingsView(View):
             border_width=1
         )
 
-        self.fill_events_label = ...
+        self.fill_events_label = Label(
+            self.canvas,
+            (170, 410),
+            (300, 40),
+            text="Filled Events",
+            text_color=Colors.TEXT_LIGHT_GREY,
+            font=Assets().font18,
+            horizontal_text_alignment=HorizontalAlignment.LEFT
+        )
+
+        self.fill_events_label2 = Label(
+            self.canvas,
+            (200, 440),
+            (300, 20),
+            text="Make events more colorful",
+            text_color=Colors.TEXT_GREY,
+            font=Assets().font14,
+            horizontal_text_alignment=HorizontalAlignment.LEFT
+        )
+
+        self.fill_events_checkbox = CheckBox(
+            self.canvas,
+            (30, 440),
+            20,
+            color=Colors.BACKGROUND_GREY22,
+            border_color=Colors.GREY70,
+            border_radius=4,
+            border_width=1
+        )
+
+        self.graphics_label = Label(
+            self.canvas,
+            (170, 500),
+            (300, 40),
+            text="High Quality Graphics",
+            text_color=Colors.TEXT_LIGHT_GREY,
+            font=Assets().font18,
+            horizontal_text_alignment=HorizontalAlignment.LEFT
+        )
+
+        self.graphics_label2 = Label(
+            self.canvas,
+            (200, 530),
+            (300, 20),
+            text="Enable high-quality graphics",
+            text_color=Colors.TEXT_GREY,
+            font=Assets().font14,
+            horizontal_text_alignment=HorizontalAlignment.LEFT
+        )
+
+        self.graphics_label_checkbox = CheckBox(
+            self.canvas,
+            (30, 530),
+            20,
+            color=Colors.BACKGROUND_GREY22,
+            border_color=Colors.GREY70,
+            border_radius=4,
+            border_width=1
+        )
 
         self.account_label = Label(
             self.canvas,
-            (110, 450),
+            (110, 600),
             (200, 40),
             text="Account",
             text_color=Colors.TEXT_LIGHT_GREY,
@@ -136,17 +194,27 @@ class SettingsView(View):
 
         self.auto_sync_label = Label(
             self.canvas,
-            (120, 450),
+            (120, 660),
             (200, 40),
-            text="Auto sync:",
-            text_color=Colors.TEXT_GREY,
+            text="Auto Sync",
+            text_color=Colors.TEXT_LIGHT_GREY,
             font=Assets().font18,
+            horizontal_text_alignment=HorizontalAlignment.LEFT
+        )
+
+        self.auto_sync_label2 = Label(
+            self.canvas,
+            (200, 690),
+            (300, 40),
+            text="Enable auto syncing calendars",
+            text_color=Colors.TEXT_GREY,
+            font=Assets().font14,
             horizontal_text_alignment=HorizontalAlignment.LEFT
         )
 
         self.auto_sync_checkbox = CheckBox(
             self.canvas,
-            (130, 450),
+            (30, 690),
             20,
             color=Colors.BACKGROUND_GREY22,
             border_color=Colors.GREY70,
@@ -156,9 +224,9 @@ class SettingsView(View):
 
         self.sync_button = Button(
             self.canvas,
-            (130, 460),
-            (220, 40),
-            label=Label(text="Sync Calendars", text_color=Colors.TEXT_GREY, font=Assets().font18),
+            (140, 760),
+            (240, 36),
+            label=Label(text="Sync Calendars", text_color=Colors.TEXT_LIGHT_GREY, font=Assets().font18),
             color=Colors.BACKGROUND_GREY22,
             border_radius=4,
             border_width=0
@@ -166,9 +234,9 @@ class SettingsView(View):
 
         self.sign_out_button = Button(
             self.canvas,
-            (130, 520),
-            (220, 40),
-            label=Label(text="Sign Out Of All Accounts", text_color=Colors.TEXT_GREY, font=Assets().font18),
+            (140, 820),
+            (240, 36),
+            label=Label(text="Sign Out Of All Accounts", text_color=Colors.TEXT_LIGHT_GREY, font=Assets().font18),
             color=Colors.BACKGROUND_GREY22,
             border_radius=4,
             border_width=0
@@ -191,6 +259,8 @@ class SettingsView(View):
         elif isinstance(event, MouseReleaseEvent) and self.on_release and event.button is MouseButtons.LEFT_BUTTON:
             self.on_release(event)
         elif isinstance(event, MouseMotionEvent) and self.on_mouse_motion(event):
+            return True
+        elif isinstance(event, (MouseWheelUpEvent, MouseWheelDownEvent)) and self.on_scroll(event):
             return True
 
         return registered_events
@@ -253,4 +323,3 @@ class SettingsView(View):
 
     def get_min_size(self) -> (int, int):
         return Config.side_view_min_size
-

@@ -310,7 +310,7 @@ class TodoListView(View):
 
         if not any(map(lambda a: a.active, self.move_task_animations.values())):
             for task in self.get_sorted_tasks():
-                if task.register_event(event):
+                if (self.is_event_valid(event) or task.moving_task) and task.register_event(event):
                     registered_events = True
 
         if isinstance(event, MouseClickEvent) and self.on_click and event.button is MouseButtons.LEFT_BUTTON:
@@ -337,9 +337,6 @@ class TodoListView(View):
         for task in self.get_sorted_tasks_for_rendering():
             task.render()
 
-        pygame.draw.rect(self.canvas, Colors.BACKGROUND_GREY30, (0, 0, self.width, 50))
-        pygame.draw.rect(self.canvas, Colors.BACKGROUND_GREY30, (0, self.task_list_bottom[1], self.width, 100))
-
         self.render_shadow()
 
         self.title_label.render()
@@ -350,13 +347,12 @@ class TodoListView(View):
         self.display.blit(self.canvas, (self.x, self.y))
 
     def render_shadow(self) -> None:
-        pygame.draw.rect(self.canvas, Colors.BACKGROUND_GREY30, [0, 0, self.width, 50])
-        pygame.draw.rect(self.canvas, Colors.BACKGROUND_GREY30, (0, self.task_list_bottom[1], self.width, 100))
-        c = pygame.Surface(self.canvas.get_size(), pygame.SRCALPHA)
+        pygame.draw.rect(self.canvas, Colors.BACKGROUND_GREY30, [0, 0, self.width, self.task_list_top[1]])
+        pygame.draw.rect(self.canvas, Colors.BACKGROUND_GREY30, (0, self.task_list_bottom[1] + 22, self.width, 100))
+        c = pygame.Surface((self.width, 22), pygame.SRCALPHA)
         for i in range(22):
-            y = self.task_list_bottom[1] - i
-            pygame.draw.line(c, (30, 30, 30, 255 - i * 12), (0, y), (self.width, y))
-        self.canvas.blit(c, (0, 0))
+            pygame.draw.line(c, (30, 30, 30, i * 12), (0, i), (self.width, i))
+        self.canvas.blit(c, (0, self.task_list_bottom[1]))
 
     def resize(self, width: int = None, height: int = None) -> None:
         self.width = width or self.width
@@ -478,6 +474,11 @@ class TodoListView(View):
 
     def is_focused(self, event: Union[MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent]) -> bool:
         return self.x <= event.x < self.x + self.width and self.y <= event.y < self.y + self.height
+
+    def is_event_valid(self, event: Event) -> bool:
+        if isinstance(event, (MouseClickEvent, MouseReleaseEvent, )):
+            return self.task_list_top[1] < event.y < self.task_list_bottom[1]
+        return True
 
     def get_task_position(self, idx: int) -> (int, int):
         return self.task_list_pos[0], self.task_list_pos[1] + idx * (self.task_size[1] + 5)

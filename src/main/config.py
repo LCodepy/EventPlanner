@@ -7,6 +7,7 @@ class Config:
     fps = 60
     time_zone = "Europe/Belgrade"
 
+    scroll_value = 18
     appbar_height = 30
     taskbar_width = 60
     side_view_width = 320

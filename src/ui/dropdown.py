@@ -186,10 +186,10 @@ class DropDown(UIObject):
         self.label.update_canvas(self.canvas)
 
     def update_position(self, x: int = None, y: int = None) -> None:
-        self.label.x -= (self.x - (x or self.x))
-        self.label.y -= (self.y - (y or self.y))
-        self.x = x or self.x
-        self.y = y or self.y
+        self.label.x -= (self.x - (self.x if x is None else x))
+        self.label.y -= (self.y - (self.y if y is None else y))
+        self.x = self.x if x is None else x
+        self.y = self.y if y is None else y
 
     def update_options(self, options: list[str]) -> None:
         self.options = options

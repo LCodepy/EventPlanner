@@ -120,8 +120,8 @@ class CheckBox(UIObject):
         self.image.update_canvas(self.canvas)
 
     def update_position(self, x: int = None, y: int = None) -> None:
-        self.x = x or self.x
-        self.y = y or self.y
+        self.x = self.x if x is None else x
+        self.y = self.y if y is None else y
 
         self.image.x = x
         self.image.y = y

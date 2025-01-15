@@ -22,7 +22,6 @@ class SearchController:
 
         self.pressed = False
         self.last_frame_interacted = False
-        self.scroll_value = 15
 
         self.view.bind_on_click(self.on_click)
         self.view.bind_on_release(self.on_release)
@@ -68,11 +67,21 @@ class SearchController:
         if event.x < 0 or event.x > self.view.width or event.y < 0 or event.y > self.view.height or not self.view.events:
             return False
 
-        if isinstance(event, MouseWheelUpEvent) and self.view.events[0].get_rect().centery < self.view.event_list_start_pos[1]:
-            self.scroll_events(self.scroll_value)
-            return True
-        elif isinstance(event, MouseWheelDownEvent) and self.view.events[-1].get_rect().bottom > self.view.height - Config.appbar_height:
-            self.scroll_events(-self.scroll_value)
+        scroll_value = Config.scroll_value * event.scroll
+        min_y = self.view.events[0].get_rect().centery
+        max_y = self.view.events[-1].get_rect().bottom
+
+        if (
+            (isinstance(event, MouseWheelUpEvent) and
+             min_y < self.view.event_list_start_pos[1]) or
+            (isinstance(event, MouseWheelDownEvent) and
+             max_y > self.view.height - 30)
+        ):
+            if max_y + scroll_value <= self.view.height - 30:
+                scroll_value = self.view.height - 30 - max_y
+            elif min_y + scroll_value >= self.view.event_list_start_pos[1]:
+                scroll_value = self.view.event_list_start_pos[1] - min_y
+            self.scroll_events(scroll_value)
             return True
 
     def scroll_events(self, scroll: int = 0) -> None:

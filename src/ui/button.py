@@ -138,10 +138,10 @@ class Button(UIObject):
 
     def update_position(self, x: int = None, y: int = None) -> None:
         if self.label:
-            self.label.x -= (self.x - (x or self.x))
-            self.label.y -= (self.y - (y or self.y))
-        self.x = x or self.x
-        self.y = y or self.y
+            self.label.x -= (self.x - (self.x if x is None else x))
+            self.label.y -= (self.y - (self.y if y is None else y))
+        self.x = self.x if x is None else x
+        self.y = self.y if y is None else y
 
     def on_click(self) -> None:
         if self.apply_hover_effects:

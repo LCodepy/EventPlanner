@@ -24,7 +24,6 @@ class TodoListController:
 
         self.pressed = False
         self.last_frame_interacted = False
-        self.scroll_value = 15
 
         self.view.bind_delete_task(self.delete_task)
         self.view.bind_move_task(self.move_task)
@@ -221,11 +220,21 @@ class TodoListController:
         if event.x < 0 or event.x > self.view.width or event.y < 0 or event.y > self.view.height or not self.view.tasks:
             return False
 
-        if isinstance(event, MouseWheelUpEvent) and self.view.get_sorted_tasks()[0].get_rect().top < self.view.task_list_top[1]:
-            self.scroll_tasks(self.scroll_value)
-            return True
-        elif isinstance(event, MouseWheelDownEvent) and self.view.get_sorted_tasks()[-1].get_rect().bottom > self.view.task_list_bottom[1] - Config.appbar_height:
-            self.scroll_tasks(-self.scroll_value)
+        scroll_value = Config.scroll_value * event.scroll
+        min_y = self.view.get_sorted_tasks()[0].get_rect().top
+        max_y = self.view.get_sorted_tasks()[-1].get_rect().bottom
+
+        if (
+            (isinstance(event, MouseWheelUpEvent) and
+             min_y < self.view.task_list_top[1]) or
+            (isinstance(event, MouseWheelDownEvent) and
+             max_y > self.view.task_list_bottom[1])
+        ):
+            if max_y + scroll_value <= self.view.task_list_bottom[1]:
+                scroll_value = self.view.task_list_bottom[1] - max_y
+            elif min_y + scroll_value >= self.view.task_list_top[1]:
+                scroll_value = self.view.task_list_top[1] - min_y
+            self.scroll_tasks(scroll_value)
             return True
 
     def scroll_tasks(self, scroll: int = 0) -> None:

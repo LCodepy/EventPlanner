@@ -117,7 +117,7 @@ class Main:
             if self.view_manager.register_events(event):
                 self.update_display = True
 
-            if isinstance(event, CloseWindowEvent):
+            if isinstance(event, CloseWindowEvent) and self.calendar_sync_manager.sync_finished:
                 self.calendar_sync_manager.sync_all_calendars_threaded()
                 self.running = False
                 break

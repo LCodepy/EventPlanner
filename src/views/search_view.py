@@ -117,8 +117,8 @@ class SearchEvent(UIObject):
         self.datetime_label.update_canvas(self.ui_canvas)
 
     def update_position(self, x: int = None, y: int = None) -> None:
-        self.x = x or self.x
-        self.y = y or self.y
+        self.x = self.x if x is None else x
+        self.y = self.y if y is None else y
 
     def bind_on_release(self, on_release: Callable[[int], None]) -> None:
         self.on_release = lambda event=self.event: on_release(event)
@@ -187,7 +187,7 @@ class SearchView(View):
             size=(20, 20)
         )
 
-        self.events = []
+        self.events: list[SearchEvent] = []
 
     def register_event(self, event: Event) -> bool:
         registered_events = False
@@ -203,7 +203,7 @@ class SearchView(View):
             registered_events = True
 
         for search_event in self.events:
-            if search_event.get_rect().top < self.height and search_event.register_event(event):
+            if search_event.get_rect().top < self.height and search_event.get_rect().bottom > 0 and search_event.register_event(event):
                 registered_events = True
 
         if isinstance(event, MouseClickEvent) and self.on_click and event.button is MouseButtons.LEFT_BUTTON:
@@ -221,7 +221,7 @@ class SearchView(View):
         self.canvas.fill(Colors.BACKGROUND_GREY30)
 
         for event in self.events:
-            if event.get_rect().top < self.height:
+            if event.get_rect().top < self.height and event.get_rect().bottom > 0:
                 event.render()
 
         self.render_shadow()
@@ -271,10 +271,9 @@ class SearchView(View):
         self.search_bar_icon.update_canvas(self.canvas)
 
         for event in self.events:
-            if event.get_rect().top < self.height:
-                event.update_canvas(self.canvas)
-                event.resize(self.width - 20)
-                event.x = self.width // 2
+            event.update_canvas(self.canvas)
+            event.resize(self.width - 20)
+            event.x = self.width // 2
 
         self.title_label.x = self.width // 2
         self.search_bar.x = self.width // 2

@@ -62,7 +62,7 @@ class AddTaskView(View):
         self.description_text_field = TextField(
             self.canvas,
             (self.width // 2, 190),
-            (self.width - 60, 180),
+            (self.width - 60, 174),
             label=Label(text_color=Colors.TEXT_GREY, font=Assets().font18),
             hint=self.language_manager.get_string("task_description"),
             hint_text_color=Colors.TEXT_DARK_GREY,
@@ -187,8 +187,8 @@ class AddTaskView(View):
             obj.update_canvas(self.canvas)
 
     def update_position(self, x: int = None, y: int = None) -> None:
-        self.x = x or self.x
-        self.y = y or self.y
+        self.x = self.x if x is None else x
+        self.y = self.y if y is None else y
 
     def resize(self, width: int = None, height: int = None) -> None:
         self.width = width

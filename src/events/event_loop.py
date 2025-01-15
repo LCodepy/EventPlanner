@@ -59,10 +59,10 @@ class EventLoop:
                     button = MouseButtons.UNKNOWN
                 self.event_queue.add(MouseReleaseEvent(current_time, mouse_x, mouse_y, button))
             elif event.type == pygame.MOUSEWHEEL:
-                if event.y == 1:
-                    self.event_queue.add(MouseWheelUpEvent(current_time, mouse_x, mouse_y))
-                elif event.y == -1:
-                    self.event_queue.add(MouseWheelDownEvent(current_time, mouse_x, mouse_y))
+                if event.y > 0:
+                    self.event_queue.add(MouseWheelUpEvent(current_time, mouse_x, mouse_y, event.dict["precise_y"]))
+                elif event.y < 0:
+                    self.event_queue.add(MouseWheelDownEvent(current_time, mouse_x, mouse_y, event.dict["precise_y"]))
             elif event.type == pygame.MOUSEMOTION:
                 x, y = event.pos
                 xr, yr = event.rel
