@@ -22,7 +22,10 @@ class Settings(metaclass=Singleton):
         if len(categories) == 1:
             data[categories[0]] = value
         elif len(categories) == 2:
-            data[categories[0]][categories[1]] = value
+            try:
+                data[categories[0]][categories[1]] = value
+            except KeyError:
+                raise ValueError(f"Sub-category {categories[1]} doesn't exist in category {categories[0]}.")
         else:
             raise ValueError("Too many subcategories (max 3).")
 

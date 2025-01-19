@@ -7,6 +7,7 @@ from src.events.event import MouseClickEvent, MouseReleaseEvent, Event, MouseWhe
 from src.events.mouse_buttons import MouseButtons
 from src.main.config import Config
 from src.main.language_manager import LanguageManager
+from src.main.settings import Settings
 from src.ui.alignment import HorizontalAlignment
 from src.ui.button import Button
 from src.ui.check_box import CheckBox
@@ -119,7 +120,8 @@ class SettingsView(View):
             color=Colors.BACKGROUND_GREY22,
             border_color=Colors.GREY70,
             border_radius=4,
-            border_width=1
+            border_width=1,
+            checked=Settings().get_settings()["show_catholic_events"]
         )
 
         self.fill_events_label = Label(
@@ -149,7 +151,8 @@ class SettingsView(View):
             color=Colors.BACKGROUND_GREY22,
             border_color=Colors.GREY70,
             border_radius=4,
-            border_width=1
+            border_width=1,
+            checked=Settings().get_settings()["render_filled_events"]
         )
 
         self.graphics_label = Label(
@@ -172,14 +175,15 @@ class SettingsView(View):
             horizontal_text_alignment=HorizontalAlignment.LEFT
         )
 
-        self.graphics_label_checkbox = CheckBox(
+        self.graphics_checkbox = CheckBox(
             self.canvas,
             (30, 530),
             20,
             color=Colors.BACKGROUND_GREY22,
             border_color=Colors.GREY70,
             border_radius=4,
-            border_width=1
+            border_width=1,
+            checked=Settings().get_settings()["high_quality_graphics"]
         )
 
         self.account_label = Label(
@@ -219,7 +223,8 @@ class SettingsView(View):
             color=Colors.BACKGROUND_GREY22,
             border_color=Colors.GREY70,
             border_radius=4,
-            border_width=1
+            border_width=1,
+            checked=Settings().get_settings()["autosync"]
         )
 
         self.sync_button = Button(

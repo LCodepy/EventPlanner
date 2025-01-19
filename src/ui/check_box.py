@@ -20,7 +20,7 @@ class CheckBox(UIObject):
     def __init__(self, canvas: pygame.Surface, pos: (int, int), width: int, color: Color = Colors.WHITE,
                  border_color: Color = Colors.BLACK, border_radius: int = 0, border_width: int = 1,
                  apply_hover_effects: bool = True, hover_color: Color = None, click_color: Color = None,
-                 padding: Padding = None) -> None:
+                 checked: bool = False, padding: Padding = None) -> None:
         super().__init__(canvas, pos, padding)
         self.canvas = canvas
         self.x, self.y = pos
@@ -33,6 +33,7 @@ class CheckBox(UIObject):
         self.apply_hover_effects = apply_hover_effects
         self.hover_color = hover_color or brighten(self.color, 20)
         self.click_color = click_color or brighten(self.color, 30)
+        self.checked = checked
         self.padding = padding or Padding()
 
         self.image = Image(self.canvas, pos, Assets().checkmark_icon, size=(self.width - 4, self.width - 4))
@@ -41,7 +42,6 @@ class CheckBox(UIObject):
 
         self.hovering = False
         self.pressed = False
-        self.checked = False
 
         self.on_click_bind = None
         self.on_enter_bind = None
@@ -123,8 +123,8 @@ class CheckBox(UIObject):
         self.x = self.x if x is None else x
         self.y = self.y if y is None else y
 
-        self.image.x = x
-        self.image.y = y
+        self.image.x = self.x
+        self.image.y = self.y
 
     def on_click(self) -> None:
         if self.apply_hover_effects:

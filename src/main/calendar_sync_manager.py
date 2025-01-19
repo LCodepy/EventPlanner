@@ -13,6 +13,7 @@ from src.events.event import CalendarSyncEvent, Event, UserSignInEvent, EditCale
 from src.events.event_loop import EventLoop
 from src.main.account_manager import AccountManager
 from src.main.config import Config
+from src.main.settings import Settings
 from src.models.calendar_model import CalendarModel, CalendarEvent, EventRecurrence
 from src.ui.colors import Colors, Color
 from src.utils.authentication import GoogleAuthentication
@@ -59,7 +60,8 @@ class CalendarSyncManager(metaclass=Singleton):
         elif isinstance(event, CalendarSyncEvent):
             self.sync_finished = True
 
-        if time.time() - self.last_synced > self.sync_time and self.sync_finished:
+        if time.time() - self.last_synced > self.sync_time and self.sync_finished and Settings().get_settings()["autosync"]:
+            print("syncing")
             self.last_synced = time.time()
             # self.sync_calendars_threaded()
             self.sync_all_calendars_threaded()

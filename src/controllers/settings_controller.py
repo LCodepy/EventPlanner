@@ -4,9 +4,10 @@ from typing import Union
 import pygame
 
 from src.events.event import MouseMotionEvent, MouseClickEvent, MouseReleaseEvent, ResizeViewEvent, OpenViewEvent, \
-    MouseWheelUpEvent, MouseWheelDownEvent
+    MouseWheelUpEvent, MouseWheelDownEvent, UpdateCalendarEvent
 from src.events.event_loop import EventLoop
 from src.main.config import Config
+from src.main.settings import Settings
 from src.views.settings_view import SettingsView
 
 
@@ -23,6 +24,11 @@ class SettingsController:
         self.view.bind_on_release(self.on_release)
         self.view.bind_on_mouse_motion(self.on_mouse_motion)
         self.view.bind_on_scroll(self.on_scroll)
+
+        self.view.catholic_events_checkbox.bind_on_click(self.on_catholic_events_checkbox_clicked)
+        self.view.fill_events_checkbox.bind_on_click(self.on_fill_events_checkbox_clicked)
+        self.view.graphics_checkbox.bind_on_click(self.on_graphics_checkbox_clicked)
+        self.view.auto_sync_checkbox.bind_on_click(self.on_autosync_checkbox_clicked)
 
     def on_click(self, event: MouseClickEvent) -> None:
         if self.view.width - 5 < event.x < self.view.width and 0 < event.y < self.view.height:
@@ -78,3 +84,16 @@ class SettingsController:
         for obj in self.view.get_ui_elements():
             if obj != self.view.title_label:
                 obj.update_position(y=obj.y + scroll)
+
+    def on_catholic_events_checkbox_clicked(self) -> None:
+        Settings().update_settings(["show_catholic_events"], self.view.catholic_events_checkbox.checked)
+        self.event_loop.enqueue_event(UpdateCalendarEvent(time.time()))
+
+    def on_fill_events_checkbox_clicked(self) -> None:
+        Settings().update_settings(["render_filled_events"], self.view.fill_events_checkbox.checked)
+
+    def on_graphics_checkbox_clicked(self) -> None:
+        Settings().update_settings(["high_quality_graphics"], self.view.graphics_checkbox.checked)
+
+    def on_autosync_checkbox_clicked(self) -> None:
+        Settings().update_settings(["autosync"], self.view.auto_sync_checkbox.checked)

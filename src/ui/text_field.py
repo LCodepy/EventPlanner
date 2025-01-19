@@ -173,6 +173,9 @@ class TextField(UIObject):
 
         if keycode == pygame.K_RETURN and not self.oneline:
             self.add_char("\n")
+            if len(self.label.lines) * (self.label.get_text_height() + self.label.line_spacing) > self.label.height and \
+                    self.label.get_char_pos(self.cursor_pos)[1] < self.label.y + self.label.height // 2 - self.label.get_text_height() - self.label.line_spacing:
+                self.label.y_offset += self.label.get_text_height() + self.label.line_spacing
         elif keycode == pygame.K_SPACE and " " in self.allowed_char_set:
             self.add_char(" ")
         elif unicode and unicode in self.allowed_char_set and keycode != pygame.K_RETURN:
@@ -232,27 +235,25 @@ class TextField(UIObject):
             self.arrow_pressed_time = None
 
     def delete_char(self) -> None:
-        if self.text[self.cursor_pos] == "\t":
-            return
+        if self.cursor_pos >= 0 and self.text[self.cursor_pos] == "\n" and self.label.y_offset > 0:
+            self.label.y_offset -= self.label.get_text_height() + self.label.line_spacing
 
         if self.cursor_pos == len(self.text) - 1:
             self.text = self.text[:-1]
         elif self.cursor_pos == 0 and len(self.label.lines[0]) == 1:
             self.text = self.text[self.cursor_pos + 1:]
-            self.label.set_text(self.text, first_line="\t")
-            self.text = "\t" + self.text
-            return
+            self.label.y_offset -= self.label.get_text_height() + self.label.line_spacing
         elif self.cursor_pos != -1:
             self.text = self.text[:self.cursor_pos] + self.text[self.cursor_pos + 1:]
 
-        self.move_cursor(-1, delete=True)
         self.label.set_text(self.text)
+        self.move_cursor(-1, delete=True)
 
     def delete_next_char(self) -> None:
         if self.cursor_pos < len(self.text) - 1:
             self.text = self.text[:self.cursor_pos + 1] + self.text[self.cursor_pos + 2:]
 
-        if self.label.text[self.cursor_pos + 1] == "\n" and self.label.y_offset > 0:
+        if self.cursor_pos + 1 < len(self.label.text) and self.label.text[self.cursor_pos + 1] == "\n" and self.label.y_offset > 0:
             self.label.y_offset -= self.label.get_text_height() + self.label.line_spacing
 
         self.label.set_text(self.text)
@@ -288,13 +289,14 @@ class TextField(UIObject):
             self.label_offsets.append(-char_pos)
 
     def move_cursor_up_down(self, direction: int) -> None:
-        if (direction < 0 and self.cursor_pos < 0) or (direction > 0 and self.cursor_pos >= len(self.text) - 1):
+        if (direction < 0 and self.cursor_pos < 0) or (direction > 0 and self.cursor_pos >= len(self.text) - 1) or self.oneline:
             return
 
         line = 0
         char_count = 0
         char_count2 = 1
         char_pos = 0
+
         for i in range(len(self.label.lines)):
             line = i
             char_count = 0
@@ -334,6 +336,9 @@ class TextField(UIObject):
             if char_pos >= closest:
                 char_count3 += 1
             char_pos += 1
+
+        if not self.label.lines[new_line]:
+            char_count3 = 0
 
         change -= char_count3
 

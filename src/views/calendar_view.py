@@ -252,12 +252,16 @@ class CalendarView(View):
 
                     event.label.render()
 
+                border_width = 1
+                if Settings().get_settings()["render_filled_events"]:
+                    border_width = 0
+
                 if self.day_buttons[i].hovering:
                     height = 4 if collapsed else event.label.height
                     surf2 = pygame.Surface((width, height), pygame.SRCALPHA)
                     surf2.fill((0, 0, 0, 0))
                     pygame.draw.rect(surf2, (0, 0, 0), [0, 0, width, height],
-                                     border_radius=5, width=2)
+                                     border_radius=5, width=border_width)
                     surf2.set_alpha(30)
                     self.canvas.blit(
                         surf2, (event.label.x - width // 2, event.label.y - event.label.height // 2)

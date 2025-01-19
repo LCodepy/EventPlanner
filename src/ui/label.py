@@ -90,7 +90,7 @@ class Label(UIObject):
                     self.lines.append(new_line)
                     line += 1
 
-            if line > 0 and not self.lines[line - 1]:
+            if line > 1 and not self.lines[line - 1]:
                 self.lines.pop(line - 1)
                 line -= 1
 
@@ -126,7 +126,7 @@ class Label(UIObject):
         self.label_canvas.fill((0, 0, 0, 0))
         current_line_y = 0
         for text in self.lines:
-            text = text.replace("\n", "").replace("\t", "")
+            text = text.replace("\n", "")
 
             rendered, aligned_x, aligned_y = self.align_text(text, current_line_y)
 
@@ -206,9 +206,9 @@ class Label(UIObject):
         current_line_y = 0
         for text in self.lines:
             if char_index < len(text):
-                _, aligned_x, aligned_y = self.align_text(text.replace("\n", "").replace("\t", ""), current_line_y)
+                _, aligned_x, aligned_y = self.align_text(text.replace("\n", ""), current_line_y)
                 rendered = self.font.render(text[:char_index+1], self.bold, self.text_color)
-                if "\n" in text or "\t" in text:
+                if "\n" in text:
                     rendered = self.font.render(text[1:char_index+1], self.bold, self.text_color)
                 return self.x + aligned_x + rendered.get_width() + self.x_offset, self.y + aligned_y + self.y_offset
 
