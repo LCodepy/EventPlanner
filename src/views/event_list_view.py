@@ -6,7 +6,7 @@ import pygame
 
 from src.events.event import MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent, Event, \
     MouseMotionEvent, AddCalendarEventEvent, DeleteCalendarEventEvent, OpenEditCalendarEventEvent, \
-    EditCalendarEventEvent, LanguageChangedEvent, TimerEvent
+    EditCalendarEventEvent, LanguageChangedEvent, TimerEvent, CalendarSyncEvent
 from src.events.event_loop import EventLoop
 from src.events.mouse_buttons import MouseButtons
 from src.main.config import Config
@@ -22,6 +22,7 @@ from src.utils.animations import ChangeValuesAnimation
 from src.utils.assets import Assets
 from src.main.language_manager import LanguageManager
 from src.utils.rendering import render_rounded_rect
+from src.utils.ui_utils import adjust_labels_font_size
 from src.views.view import View
 
 
@@ -59,22 +60,23 @@ class EventListEvent(UIObject):
             (self.x - 10, self.y),
             (self.width - 50, self.height),
             text=self.event.description,
-            text_color=(200, 200, 200),
+            text_color=Colors.TEXT_LIGHT_GREY,
             font=Assets().font18,
             horizontal_text_alignment=HorizontalAlignment.LEFT,
             wrap_text=True
         )
         self.resize_to_label_size()
 
+        color = self.event.color if Settings().get_settings()["render_filled_events"] else Colors.BACKGROUND_GREY30
         self.delete_task_button = Button(
             self.canvas,
             (self.x + self.width // 2 - Assets().delete_task_icon_large.get_width() // 2 - 5, self.y),
             (Assets().delete_task_icon_large.get_width(), Assets().delete_task_icon_large.get_height()),
-            image=Assets().delete_task_icon_large,
+            image=Assets().delete_filled_event_icon_large if Settings().get_settings()["render_filled_events"] else Assets().delete_task_icon_large,
             hover_image=Assets().delete_task_icon_large_hover,
-            color=Colors.BACKGROUND_GREY30,
-            hover_color=Colors.BACKGROUND_GREY30,
-            click_color=Colors.BACKGROUND_GREY30,
+            color=color,
+            hover_color=color,
+            click_color=color,
             border_width=0
         )
         if self.editable:
@@ -177,12 +179,16 @@ class EventListEvent(UIObject):
         self.resize_to_label_size()
 
     def resize_to_label_size(self) -> None:
+        color = Colors.TEXT_LIGHT_GREY
+        if Settings().get_settings()["render_filled_events"] and self.event.color in (Colors.EVENT_YELLOW204, Colors.EVENT_GREEN204):
+            color = Colors.WHITE
+
         self.description_label = Label(
             self.canvas,
             (self.x - 10, self.y),
             (max(self.width - 50, 20), self.description_label.get_min_label_size()[1] + 18),
             text=self.event.description,
-            text_color=(200, 200, 200),
+            text_color=color,
             font=Assets().font18,
             horizontal_text_alignment=HorizontalAlignment.LEFT,
             wrap_text=True
@@ -229,7 +235,7 @@ class EventListView(View):
         self.on_release = None
         self.on_mouse_motion = None
         self.on_scroll = None
-        self.on_resize = None
+        self.on_create_time_table = None
 
         self.add_event = None
         self.edit_event = None
@@ -270,6 +276,9 @@ class EventListView(View):
             border_width=0,
             border_radius=6
         )
+        self.add_event_button.label.resize(width=100)
+
+        adjust_labels_font_size(self.get_ui_elements())
 
     def register_event(self, event: Event) -> bool:
         registered_events = False
@@ -280,6 +289,9 @@ class EventListView(View):
             self.edit_event(event)
         elif isinstance(event, LanguageChangedEvent):
             self.update_language()
+        elif isinstance(event, CalendarSyncEvent):
+            self.create_time_table()
+            self.on_create_time_table()
 
         if self.event_to_highlight:
             self.event_loop.enqueue_event(
@@ -412,7 +424,7 @@ class EventListView(View):
                 event.update_position(x=self.events_pos[0])
 
         self.create_time_table()
-        self.on_resize()
+        self.on_create_time_table()
 
     def update_language(self) -> None:
         self.add_event_button.label.set_text(self.language_manager.get_string("add_event"))
@@ -446,8 +458,8 @@ class EventListView(View):
     def bind_on_scroll(self, on_scroll: Callable[[Union[MouseWheelDownEvent, MouseWheelUpEvent]], bool]) -> None:
         self.on_scroll = on_scroll
 
-    def bind_on_resize(self, on_resize: Callable) -> None:
-        self.on_resize = on_resize
+    def bind_on_create_time_table(self, on_create_time_table: Callable) -> None:
+        self.on_create_time_table = on_create_time_table
 
     def set_rendering(self, b: bool) -> None:
         self.rendering = b

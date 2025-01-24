@@ -47,6 +47,7 @@ class TextField(UIObject):
         self.text = ""
 
         self.text_color = self.label.text_color
+        self.label.count_start_line = 1
         self.label.post_init(self.canvas, pos, (size[0] - self.padding.left - self.padding.right,
                                                 size[1] - self.padding.top - self.padding.bottom))
         self.label.oneline = oneline

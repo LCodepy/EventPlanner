@@ -37,6 +37,9 @@ class CalendarController:
         self.event_loop.enqueue_event(OpenViewEvent(time.time(), view, False))
 
     def change_to_previous_month(self) -> None:
+        if self.view.month-1 < 1 and self.view.year < 2:
+            return
+
         self.view.month -= 1
         if self.view.month < 1:
             self.view.month = 12

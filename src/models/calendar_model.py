@@ -1,5 +1,4 @@
 import datetime
-import json
 import os
 import pickle
 import sqlite3
@@ -7,9 +6,10 @@ from dataclasses import dataclass
 from enum import Enum, auto
 
 from src.main.settings import Settings
-from src.ui.colors import Color, Colors, get_rgb_color, get_hex_color
+from src.ui.colors import Color, get_rgb_color, get_hex_color
 from src.utils.assets import Assets
 from src.utils.calendar_functions import get_month_length, calculate_easter
+from src.main.language_manager import LanguageManager
 
 
 class EventRecurrence(Enum):
@@ -63,31 +63,15 @@ class CalendarModel:
         self.current_id = None
         self.load_current_id()
 
-        self.default_events = []
         self.default_event_color = None
         self.catholic_event_color = None
-        self.load_default_events()
+        self.load_data()
 
-    def load_default_events(self) -> None:
+    def load_data(self) -> None:
         settings = Settings().get_settings()
 
         self.default_event_color = get_rgb_color(settings["default_event_color"])
         self.catholic_event_color = get_rgb_color(settings["catholic_event_color"])
-
-        for i, event in enumerate(settings["default_events"]):
-            if not event["date"]:
-                continue
-            month, day = event["date"].split("-")
-            date = datetime.date(datetime.datetime.now().year, int(month), int(day))
-
-            self.default_events.append(
-                CalendarEvent(
-                    i, date, datetime.time(0, 0), event["description"],
-                    self.default_event_color, EventRecurrence.YEARLY, is_default=True
-                )
-            )
-
-        self.current_id = max(self.current_id, len(self.default_events))
 
     def load_current_id(self) -> None:
         settings = Settings().get_settings()
@@ -135,7 +119,7 @@ class CalendarModel:
                 (date.year, date.month, date.day, pickle.dumps(EventRecurrence.NEVER))
             )
 
-        default_events = list(filter(lambda ev: ev.date == date, self.default_events))
+        default_events = list(filter(lambda ev: ev.date == date, self.get_default_events()))
         easter_events = list(filter(lambda ev: ev.date == date, self.get_easter_events(date.year)))
         catholic_events = list(filter(lambda ev: ev.date.month == date.month and ev.date.day == date.day,
                                       self.get_catholic_events()))
@@ -172,7 +156,7 @@ class CalendarModel:
                 )
             )
 
-        default_events = list(filter(lambda ev: ev.date.month == month, self.default_events))
+        default_events = list(filter(lambda ev: ev.date.month == month, self.get_default_events()))
         easter_events = list(filter(lambda ev: ev.date.month == month, self.get_easter_events(year)))
         catholic_events = list(filter(lambda ev: ev.date.month == month, self.get_catholic_events()))
 
@@ -242,6 +226,26 @@ class CalendarModel:
 
         return ret
 
+    def get_default_events(self) -> list[CalendarEvent]:
+        events = LanguageManager().get_string("default_event_list")
+        default_events = []
+
+        for i, event in enumerate(events):
+            if not event["date"]:
+                continue
+            month, day = event["date"].split("-")
+            date = datetime.date(datetime.datetime.now().year, int(month), int(day))
+
+            default_events.append(
+                CalendarEvent(
+                    i, date, datetime.time(0, 0), event["description"],
+                    self.default_event_color, EventRecurrence.YEARLY, is_default=True
+                )
+            )
+
+        self.current_id = max(self.current_id, len(default_events))
+        return default_events
+
     def get_easter_events(self, year: int) -> list[CalendarEvent]:
         easter = datetime.date(*calculate_easter(year))
         easter_m = easter + datetime.timedelta(days=1)
@@ -266,12 +270,13 @@ class CalendarModel:
 
     def get_catholic_events(self) -> list[CalendarEvent]:
         settings = Settings().get_settings()
+        catholic_events = LanguageManager().get_string("catholic_event_list")
 
         if not settings["show_catholic_events"]:
             return []
 
         events = []
-        for i, event in enumerate(settings["catholic_events"]):
+        for i, event in enumerate(catholic_events):
             if not event["date"]:
                 continue
             month, day = event["date"].split("-")
@@ -382,7 +387,7 @@ class CalendarModel:
             )
 
             default_events = list(
-                filter(lambda ev: query.lower() in ev.description.lower(), self.default_events)
+                filter(lambda ev: query.lower() in ev.description.lower(), self.get_default_events())
             )
 
             easter_events = list(

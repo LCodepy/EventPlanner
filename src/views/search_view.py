@@ -19,6 +19,7 @@ from src.ui.ui_object import UIObject
 from src.utils.assets import Assets
 from src.main.language_manager import LanguageManager
 from src.utils.rendering import render_rounded_rect
+from src.utils.ui_utils import adjust_labels_font_size
 from src.views.view import View
 
 
@@ -158,7 +159,7 @@ class SearchView(View):
         self.title_label = Label(
             self.canvas,
             (self.width // 2, self.height // 2),
-            (200, 50),
+            (self.width - 10, 50),
             text=self.language_manager.get_string("event_appear_message"),
             text_color=Colors.TEXT_DARK_GREY,
             font=Assets().font18
@@ -188,6 +189,8 @@ class SearchView(View):
         )
 
         self.events: list[SearchEvent] = []
+
+        adjust_labels_font_size(self.get_ui_elements())
 
     def register_event(self, event: Event) -> bool:
         registered_events = False

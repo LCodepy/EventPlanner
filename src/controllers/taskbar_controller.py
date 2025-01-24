@@ -92,7 +92,7 @@ class TaskbarController:
             self.event_loop.enqueue_event(CloseViewEvent(time.time(), self.search_view))
         else:
             if AccountManager().is_signed_in():
-                model = CalendarModel(database_name=f"calendar_{AccountManager().current_account.email}")
+                model = CalendarModel(database_name=f"calendar_{AccountManager().current_user.email}")
             else:
                 model = CalendarModel()
             self.search_view = SearchView(
@@ -110,7 +110,7 @@ class TaskbarController:
             self.event_loop.enqueue_event(CloseViewEvent(time.time(), self.todo_list_view))
         else:
             if AccountManager().is_signed_in():
-                model = TodoListModel(database_name=f"todo_list_{AccountManager().current_account.email}")
+                model = TodoListModel(database_name=f"todo_list_{AccountManager().current_user.email}")
             else:
                 model = TodoListModel()
             self.todo_list_view = TodoListView(

@@ -104,7 +104,7 @@ class GoogleAuthentication:
                 creds.refresh(Request())
             else:
                 flow = InstalledAppFlow.from_client_secrets_file(Assets().google_credentials_file_path, SCOPES)
-                creds = flow.run_local_server(port=GoogleAuthentication.get_available_port())
+                creds = flow.run_local_server(port=GoogleAuthentication.get_available_port(), timeout_seconds=300)
 
                 with open(token_file, "w") as token:
                     token.write(creds.to_json())

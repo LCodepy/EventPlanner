@@ -4,8 +4,10 @@ from typing import Union
 import pygame
 
 from src.events.event import MouseMotionEvent, MouseClickEvent, MouseReleaseEvent, ResizeViewEvent, OpenViewEvent, \
-    MouseWheelUpEvent, MouseWheelDownEvent, UpdateCalendarEvent
+    MouseWheelUpEvent, MouseWheelDownEvent, UpdateCalendarEvent, LanguageChangedEvent
 from src.events.event_loop import EventLoop
+from src.main.account_manager import AccountManager
+from src.main.calendar_sync_manager import CalendarSyncManager
 from src.main.config import Config
 from src.main.settings import Settings
 from src.views.settings_view import SettingsView
@@ -25,10 +27,13 @@ class SettingsController:
         self.view.bind_on_mouse_motion(self.on_mouse_motion)
         self.view.bind_on_scroll(self.on_scroll)
 
+        self.view.language_dropdown.bind_on_select(self.on_language_dropdown_clicked)
         self.view.catholic_events_checkbox.bind_on_click(self.on_catholic_events_checkbox_clicked)
         self.view.fill_events_checkbox.bind_on_click(self.on_fill_events_checkbox_clicked)
         self.view.graphics_checkbox.bind_on_click(self.on_graphics_checkbox_clicked)
         self.view.auto_sync_checkbox.bind_on_click(self.on_autosync_checkbox_clicked)
+        self.view.sync_button.bind_on_click(self.on_sync_button_clicked)
+        self.view.sign_out_button.bind_on_click(self.on_sign_out_button_clicked)
 
     def on_click(self, event: MouseClickEvent) -> None:
         if self.view.width - 5 < event.x < self.view.width and 0 < event.y < self.view.height:
@@ -85,6 +90,12 @@ class SettingsController:
             if obj != self.view.title_label:
                 obj.update_position(y=obj.y + scroll)
 
+    def on_language_dropdown_clicked(self) -> None:
+        lang = self.view.language_dropdown.get_selected_option().lower()
+        Settings().update_settings(["language"], lang)
+        self.view.language_manager.set_language(self.view.language_manager.language_names[lang])
+        self.event_loop.enqueue_event(LanguageChangedEvent(time.time()))
+
     def on_catholic_events_checkbox_clicked(self) -> None:
         Settings().update_settings(["show_catholic_events"], self.view.catholic_events_checkbox.checked)
         self.event_loop.enqueue_event(UpdateCalendarEvent(time.time()))
@@ -97,3 +108,12 @@ class SettingsController:
 
     def on_autosync_checkbox_clicked(self) -> None:
         Settings().update_settings(["autosync"], self.view.auto_sync_checkbox.checked)
+
+    def on_sync_button_clicked(self) -> None:
+        CalendarSyncManager().sync_calendars_threaded(send_event=True)
+
+    def on_sign_out_button_clicked(self) -> None:
+        users = AccountManager().users[:]
+        for user in users:
+            AccountManager().sign_out_user(user)
+        AccountManager().users.clear()

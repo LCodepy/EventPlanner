@@ -17,6 +17,7 @@ from src.main.settings import Settings
 from src.models.calendar_model import CalendarModel, CalendarEvent, EventRecurrence
 from src.ui.colors import Colors, Color
 from src.utils.authentication import GoogleAuthentication
+from src.utils.logging import Log
 from src.utils.singleton import Singleton
 
 
@@ -25,15 +26,15 @@ class CalendarSyncManager(metaclass=Singleton):
     def __init__(self, event_loop: EventLoop = None) -> None:
         self.event_loop = event_loop
 
-        if AccountManager().current_account is not None:
+        if AccountManager().current_user is not None:
             self.model = CalendarModel(
-                database_name=f"calendar_{AccountManager().current_account.email}"
+                database_name=f"calendar_{AccountManager().current_user.email}"
             )
         else:
             self.model = CalendarModel()
 
-        self.events_to_delete = {user.email: [] for user in AccountManager().accounts}
-        self.events_to_edit = {user.email: [] for user in AccountManager().accounts}
+        self.events_to_delete = {user.email: [] for user in AccountManager().users}
+        self.events_to_edit = {user.email: [] for user in AccountManager().users}
 
         self.sync_finished = True
         self.last_synced = 0
@@ -46,9 +47,9 @@ class CalendarSyncManager(metaclass=Singleton):
                 self.events_to_edit[event.user.email] = []
 
             self.model = CalendarModel(
-                database_name=f"calendar_{AccountManager().current_account.email}"
+                database_name=f"calendar_{AccountManager().current_user.email}"
             )
-        elif isinstance(event, UserSignOutEvent):
+        elif isinstance(event, UserSignOutEvent) and AccountManager().current_user is None:
             self.model = CalendarModel()
         elif isinstance(event, EditCalendarEventEvent):
             self.update_event(
@@ -61,16 +62,13 @@ class CalendarSyncManager(metaclass=Singleton):
             self.sync_finished = True
 
         if time.time() - self.last_synced > self.sync_time and self.sync_finished and Settings().get_settings()["autosync"]:
-            print("syncing")
+            Log.i("Calendar Sync Manager: Syncing calendars...")
             self.last_synced = time.time()
             # self.sync_calendars_threaded()
             self.sync_all_calendars_threaded()
 
     def fetch_events(self, dt: datetime.datetime, email: str = None) -> (Resource, list[dict]):
-        if not AccountManager().current_account:
-            return []
-
-        service = GoogleAuthentication.initialize_service(email or AccountManager().current_account.email)
+        service = GoogleAuthentication.initialize_service(email or AccountManager().current_user.email)
 
         now = dt.isoformat() + "Z"
 
@@ -131,31 +129,31 @@ class CalendarSyncManager(metaclass=Singleton):
 
         for event in local_not_synced:
             google_id = self.add_event_to_google(service, event)
-            self.model.update_event(event, google_id=google_id, threaded=True)
+            model.update_event(event, google_id=google_id, threaded=True)
 
         for event in google_not_synced:
-            self.model.add_event(event, threaded=True)
+            model.add_event(event, threaded=True)
 
         for g_id, event in local_synced.items():
             if g_id not in google_synced.keys():
-                self.model.remove_event(event, threaded=True)
-            elif not self.model.compare_events(event, google_synced[g_id]):
-                self.model.update_event(event, updated_event=google_synced[g_id], threaded=True)
+                model.remove_event(event, threaded=True)
+            elif not model.compare_events(event, google_synced[g_id]):
+                model.update_event(event, updated_event=google_synced[g_id], threaded=True)
 
         if send_event:
             self.event_loop.enqueue_threaded_event(CalendarSyncEvent(time.time()))
 
     def sync_deleted_events(self, service: Resource, email: str = None) -> None:
-        for event in self.events_to_delete[email or AccountManager().current_account.email]:
+        for event in self.events_to_delete[email or AccountManager().current_user.email]:
             try:
                 service.events().delete(calendarId="primary", eventId=event.google_id).execute()
             except HttpError as e:
                 print(e)
 
-        self.events_to_delete[email or AccountManager().current_account.email].clear()
+        self.events_to_delete[email or AccountManager().current_user.email].clear()
 
     def sync_updated_events(self, service: Resource, email: str = None) -> None:
-        for event in self.events_to_edit[email or AccountManager().current_account.email]:
+        for event in self.events_to_edit[email or AccountManager().current_user.email]:
             try:
                 google_event = service.events().get(calendarId="primary", eventId=event.google_id).execute()
 
@@ -187,7 +185,7 @@ class CalendarSyncManager(metaclass=Singleton):
             except HttpError as e:
                 print(e)
 
-        self.events_to_edit[email or AccountManager().current_account.email].clear()
+        self.events_to_edit[email or AccountManager().current_user.email].clear()
 
     def get_google_event_list(self, events: list[dict]) -> list[CalendarEvent]:
         ret = []
@@ -240,7 +238,7 @@ class CalendarSyncManager(metaclass=Singleton):
     def sync_all_calendars_threaded(self) -> None:
         def sync(on_complete):
             try:
-                for user in AccountManager().accounts:
+                for user in AccountManager().users:
                     try:
                         CalendarSyncManager().sync_calendars_threaded(email=user.email, send_event=False)
                     except Exception as e:
@@ -295,13 +293,13 @@ class CalendarSyncManager(metaclass=Singleton):
                                                    description or event.description, color or event.color,
                                                    recurrence or event.recurrence, google_id=event.google_id)
 
-        self.events_to_edit[AccountManager().current_account.email].append(new_event)
+        self.events_to_edit[AccountManager().current_user.email].append(new_event)
 
     def remove_event(self, event: CalendarEvent) -> None:
         if not event.google_id:
             return
 
-        self.events_to_delete[AccountManager().current_account.email].append(event)
+        self.events_to_delete[AccountManager().current_user.email].append(event)
 
     @staticmethod
     def get_color_by_id(color_id: str) -> Color:

@@ -32,7 +32,7 @@ class EventListController:
         self.view.bind_on_release(self.on_release)
         self.view.bind_on_mouse_motion(self.on_mouse_motion)
         self.view.bind_on_scroll(self.on_scroll)
-        self.view.bind_on_resize(self.on_resize)
+        self.view.bind_on_create_time_table(self.on_create_time_table)
         self.view.bind_add_event(self.add_event)
         self.view.bind_edit_event(self.edit_event)
         self.bind_view_methods()
@@ -91,7 +91,7 @@ class EventListController:
 
         return True
 
-    def on_resize(self) -> None:
+    def on_create_time_table(self) -> None:
         self.view.bind_event_methods(self.delete_event, self.open_options, self.open_edit_calendar_event)
 
     def delete_event(self, event: CalendarEvent) -> None:

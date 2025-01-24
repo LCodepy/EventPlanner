@@ -16,6 +16,7 @@ from src.ui.text_field import TextField
 from src.utils.assets import Assets
 from src.main.language_manager import LanguageManager
 from src.utils.rendering import render_rounded_rect
+from src.utils.ui_utils import adjust_labels_font_size
 from src.views.view import View
 
 
@@ -151,6 +152,8 @@ class AddEventView(View):
             border_width=0,
             border_radius=6
         )
+
+        adjust_labels_font_size(self.get_ui_elements())
 
     def register_event(self, event: Event) -> bool:
         registered_events = False

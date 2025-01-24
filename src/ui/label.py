@@ -15,7 +15,8 @@ class Label(UIObject):
                  text_color: Color = Colors.BLACK, font: pygame.font.Font = None, bold: bool = True,
                  horizontal_text_alignment: HorizontalAlignment = HorizontalAlignment.CENTER,
                  vertical_text_alignment: VerticalAlignment = VerticalAlignment.CENTER,
-                 padding: Padding = None, line_spacing: int = 2, wrap_text: bool = True, oneline: bool = False) -> None:
+                 padding: Padding = None, line_spacing: int = 2, wrap_text: bool = True, oneline: bool = False,
+                 count_start_line: bool = 0) -> None:
         if canvas and pos and size:
             super().__init__(canvas, pos, padding)
             self.canvas = canvas
@@ -35,6 +36,7 @@ class Label(UIObject):
         self.line_spacing = line_spacing
         self.wrap_text = wrap_text
         self.oneline = oneline
+        self.count_start_line = int(count_start_line)
 
         self.x_offset, self.y_offset = 0, 0
 
@@ -44,8 +46,8 @@ class Label(UIObject):
         if self.width is not None:
             self.update_text()
 
-    def update_text(self, first_line: str = "") -> None:
-        self.lines = [first_line]
+    def update_text(self) -> None:
+        self.lines = [""]
 
         if not self.wrap_text:
             cut = False
@@ -90,15 +92,15 @@ class Label(UIObject):
                     self.lines.append(new_line)
                     line += 1
 
-            if line > 1 and not self.lines[line - 1]:
+            if line > self.count_start_line and not self.lines[line - 1]:
                 self.lines.pop(line - 1)
                 line -= 1
 
             self.lines[line] += char
 
-    def set_text(self, text: str, first_line: str = "") -> None:
+    def set_text(self, text: str) -> None:
         self.text = text
-        self.update_text(first_line=first_line)
+        self.update_text()
 
     def set_wrap_text(self, b: bool) -> None:
         self.wrap_text = b
@@ -280,4 +282,3 @@ class Label(UIObject):
             canvas.blit(transparent, (aligned_x, aligned_y))
         else:
             canvas.blit(rendered, (aligned_x, aligned_y))
-

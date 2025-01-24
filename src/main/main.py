@@ -49,7 +49,7 @@ class Main:
         self.render_all = False
 
         Settings(Assets().settings_database_path)
-        LanguageManager(self.event_loop)
+        LanguageManager()
         self.account_manager = AccountManager(self.win, self.event_loop)
         self.calendar_sync_manager = CalendarSyncManager(self.event_loop)
 

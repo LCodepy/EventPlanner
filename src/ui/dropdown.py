@@ -47,6 +47,10 @@ class DropDown(UIObject):
         self.pressed = False
         self.opened = False
 
+        self.on_select = None
+        self.on_release_bind = None
+        self.on_click_bind = None
+
         self.label = Label(
             self.canvas,
             (self.x, self.y),
@@ -231,8 +235,12 @@ class DropDown(UIObject):
         self.opened = False
         self.buttons = []
 
+        if self.on_select:
+            self.on_select()
+
     def on_click(self) -> None:
-        pass
+        if self.on_click_bind:
+            self.on_click_bind()
 
     def on_release(self) -> None:
         if self.opened:
@@ -243,11 +251,23 @@ class DropDown(UIObject):
         self.opened = True
         self.create_buttons()
 
+        if self.on_release_bind:
+            self.on_release_bind()
+
     def on_enter(self) -> None:
         self.label.text_color = self.hover_color
 
     def on_exit(self) -> None:
         self.label.text_color = self.text_color
+
+    def bind_on_click(self, on_click: Callable) -> None:
+        self.on_click_bind = on_click
+
+    def bind_on_release(self, on_release: Callable) -> None:
+        self.on_release_bind = on_release
+
+    def bind_on_select(self, on_select: Callable) -> None:
+        self.on_select = on_select
 
     def is_hovering(self, mouse_pos) -> bool:
         mouse_x, mouse_y = mouse_pos

@@ -19,6 +19,7 @@ from src.ui.ui_object import UIObject
 from src.utils.animations import ChangeValuesAnimation
 from src.utils.assets import Assets
 from src.main.language_manager import LanguageManager
+from src.utils.ui_utils import adjust_labels_font_size
 from src.views.view import View
 
 
@@ -259,10 +260,19 @@ class TodoListView(View):
         self.title_label = Label(
             self.canvas,
             (self.width // 2, 35),
-            (self.width, 50),
+            (self.width - 10, 50),
             text=self.language_manager.get_string("todo_list"),
             text_color=Colors.TEXT_GREY,
             font=Assets().font24
+        )
+
+        self.description_label = Label(
+            self.canvas,
+            (self.width // 2, self.height // 2),
+            (self.width - 10, 50),
+            text=self.language_manager.get_string("todo_list_description"),
+            text_color=Colors.TEXT_DARK_GREY,
+            font=Assets().font18
         )
 
         self.add_task_button = Button(
@@ -280,6 +290,8 @@ class TodoListView(View):
             border_width=0,
             border_radius=6
         )
+
+        adjust_labels_font_size(self.get_ui_elements())
 
     def register_event(self, event: Event) -> bool:
         registered_events = False
@@ -340,6 +352,8 @@ class TodoListView(View):
         self.render_shadow()
 
         self.title_label.render()
+        if not self.tasks:
+            self.description_label.render()
         self.add_task_button.render()
 
         pygame.draw.line(self.canvas, Colors.GREY70, (self.width - 1, 0), (self.width - 1, self.height))
@@ -362,6 +376,7 @@ class TodoListView(View):
 
         self.title_label.update_canvas(self.canvas)
         self.add_task_button.update_canvas(self.canvas)
+        self.description_label.update_canvas(self.canvas)
 
         self.task_size = (self.width - 10, self.task_size[1])
         self.task_list_pos = (self.width // 2, self.task_list_pos[1])
@@ -377,6 +392,8 @@ class TodoListView(View):
         if width:
             self.title_label.x = self.width // 2
             self.add_task_button.update_position(x=self.width // 2)
+            self.description_label.resize(width=self.width - 10)
+            self.description_label.update_position(x=self.width // 2)
 
         self.add_task_button.update_position(y=self.height - 40)
 

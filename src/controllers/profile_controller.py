@@ -66,7 +66,7 @@ class ProfileController:
             return True
 
     def on_sign_in(self) -> None:
-        if AccountManager().accounts:
+        if AccountManager().users:
             view = SwitchAccountsView(
                 self.view.display, self.event_loop, *Config.switch_account_view_size,
                 self.view.x + self.view.width // 2 - Config.switch_account_view_size[0] // 2,

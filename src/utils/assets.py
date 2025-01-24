@@ -103,6 +103,10 @@ class Assets(metaclass=Singleton):
             os.path.join(self.IMAGES_PATH, "left_arrow_icon_large_hover.png")
         ).convert_alpha()
 
+        self.delete_filled_event_icon_large = pygame.image.load(
+            os.path.join(self.IMAGES_PATH, "delete_filled_event_icon_large.png")
+        ).convert_alpha()
+
         self.checkmark_icon = pygame.image.load(
             os.path.join(self.IMAGES_PATH, "checkmark_icon_large.png")
         ).convert_alpha()
@@ -118,6 +122,10 @@ class Assets(metaclass=Singleton):
 
         # Fonts
         self.font = "roboto"
+        self.font4 = pygame.font.SysFont(self.font, 4)
+        self.font6 = pygame.font.SysFont(self.font, 6)
+        self.font8 = pygame.font.SysFont(self.font, 8)
+        self.font10 = pygame.font.SysFont(self.font, 10)
         self.font12 = pygame.font.SysFont(self.font, 12)
         self.font14 = pygame.font.SysFont(self.font, 14)
         self.font16 = pygame.font.SysFont(self.font, 16)
@@ -126,3 +134,7 @@ class Assets(metaclass=Singleton):
         self.font24 = pygame.font.SysFont(self.font, 24)
         self.font32 = pygame.font.SysFont(self.font, 32)
         self.font36 = pygame.font.SysFont(self.font, 36)
+        self.fonts = [
+            self.font4, self.font6, self.font8, self.font10, self.font12, self.font16, self.font18, self.font20,
+            self.font24, self.font32, self.font36
+        ]

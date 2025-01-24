@@ -18,6 +18,7 @@ from src.utils.assets import Assets
 from src.main.language_manager import LanguageManager
 from src.utils.authentication import User
 from src.utils.rendering import render_rounded_rect
+from src.utils.ui_utils import adjust_labels_font_size
 from src.views.view import View
 
 
@@ -81,7 +82,7 @@ class SwitchAccountsView(View):
         self.title_label = Label(
             self.canvas,
             (self.width // 2, 40),
-            (self.width, 30),
+            (self.width - 10, 30),
             text=self.language_manager.get_string("choose_account"),
             text_color=Colors.TEXT_LIGHT_GREY,
             font=Assets().font24
@@ -90,7 +91,7 @@ class SwitchAccountsView(View):
         self.no_accounts_label = Label(
             self.canvas,
             (self.width // 2, self.height // 2),
-            (self.width, 20),
+            (self.width - 10, 20),
             text=self.language_manager.get_string("no_accounts"),
             text_color=Colors.GREY140,
             font=Assets().font18
@@ -108,9 +109,12 @@ class SwitchAccountsView(View):
             border_color=Colors.GREY70,
             padding=Padding(left=10)
         )
+        self.add_account_button.label.resize(width=self.width // 2 - 10)
 
         self.accounts: list[AccountObject] = []
         self.create_accounts()
+
+        adjust_labels_font_size(self.get_ui_elements())
 
     def register_event(self, event: Event) -> bool:
         registered_events = False
@@ -171,9 +175,9 @@ class SwitchAccountsView(View):
         self.display.blit(self.canvas, (self.x, self.y))
 
     def create_accounts(self) -> None:
-        accounts = AccountManager().accounts[:]
-        if AccountManager().current_account:
-            accounts.remove(AccountManager().current_account)
+        accounts = AccountManager().users[:]
+        if AccountManager().current_user:
+            accounts.remove(AccountManager().current_user)
 
         self.accounts = [
             AccountObject(

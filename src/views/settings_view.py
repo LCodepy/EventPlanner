@@ -16,6 +16,7 @@ from src.ui.dropdown import DropDown
 from src.ui.label import Label
 from src.ui.padding import Padding
 from src.utils.assets import Assets
+from src.utils.ui_utils import adjust_labels_font_size
 from src.views.view import View
 
 
@@ -41,8 +42,8 @@ class SettingsView(View):
         self.title_label = Label(
             self.canvas,
             (self.width // 2, 50),
-            (self.width, 50),
-            text="Settings",
+            (self.width - 10, 50),
+            text=self.language_manager.get_string("settings"),
             text_color=Colors.TEXT_LIGHT_GREY,
             font=Assets().font32
         )
@@ -51,7 +52,7 @@ class SettingsView(View):
             self.canvas,
             (110, 140),
             (200, 40),
-            text="General",
+            text=self.language_manager.get_string("general"),
             text_color=Colors.TEXT_LIGHT_GREY,
             font=Assets().font24,
             horizontal_text_alignment=HorizontalAlignment.LEFT
@@ -61,7 +62,7 @@ class SettingsView(View):
             self.canvas,
             (120, 200),
             (200, 40),
-            text="Language",
+            text=self.language_manager.get_string("language"),
             text_color=Colors.TEXT_LIGHT_GREY,
             font=Assets().font18,
             horizontal_text_alignment=HorizontalAlignment.LEFT
@@ -71,7 +72,7 @@ class SettingsView(View):
             self.canvas,
             (170, 225),
             (300, 20),
-            text="Select display language",
+            text=self.language_manager.get_string("language_description"),
             text_color=Colors.TEXT_GREY,
             font=Assets().font14,
             horizontal_text_alignment=HorizontalAlignment.LEFT
@@ -95,9 +96,9 @@ class SettingsView(View):
 
         self.catholic_events_label = Label(
             self.canvas,
-            (170, 320),
-            (300, 40),
-            text="Catholic Events",
+            (120, 320),
+            (200, 40),
+            text=self.language_manager.get_string("catholic_events"),
             text_color=Colors.TEXT_LIGHT_GREY,
             font=Assets().font18,
             horizontal_text_alignment=HorizontalAlignment.LEFT
@@ -107,7 +108,7 @@ class SettingsView(View):
             self.canvas,
             (200, 350),
             (300, 20),
-            text="Show all catholic events",
+            text=self.language_manager.get_string("catholic_events_description"),
             text_color=Colors.TEXT_GREY,
             font=Assets().font14,
             horizontal_text_alignment=HorizontalAlignment.LEFT
@@ -126,9 +127,9 @@ class SettingsView(View):
 
         self.fill_events_label = Label(
             self.canvas,
-            (170, 410),
-            (300, 40),
-            text="Filled Events",
+            (120, 410),
+            (200, 40),
+            text=self.language_manager.get_string("filled_events"),
             text_color=Colors.TEXT_LIGHT_GREY,
             font=Assets().font18,
             horizontal_text_alignment=HorizontalAlignment.LEFT
@@ -138,7 +139,7 @@ class SettingsView(View):
             self.canvas,
             (200, 440),
             (300, 20),
-            text="Make events more colorful",
+            text=self.language_manager.get_string("filled_events_description"),
             text_color=Colors.TEXT_GREY,
             font=Assets().font14,
             horizontal_text_alignment=HorizontalAlignment.LEFT
@@ -157,9 +158,9 @@ class SettingsView(View):
 
         self.graphics_label = Label(
             self.canvas,
-            (170, 500),
-            (300, 40),
-            text="High Quality Graphics",
+            (140, 500),
+            (240, 40),
+            text=self.language_manager.get_string("graphics"),
             text_color=Colors.TEXT_LIGHT_GREY,
             font=Assets().font18,
             horizontal_text_alignment=HorizontalAlignment.LEFT
@@ -169,7 +170,7 @@ class SettingsView(View):
             self.canvas,
             (200, 530),
             (300, 20),
-            text="Enable high-quality graphics",
+            text=self.language_manager.get_string("graphics_description"),
             text_color=Colors.TEXT_GREY,
             font=Assets().font14,
             horizontal_text_alignment=HorizontalAlignment.LEFT
@@ -190,7 +191,7 @@ class SettingsView(View):
             self.canvas,
             (110, 600),
             (200, 40),
-            text="Account",
+            text=self.language_manager.get_string("account"),
             text_color=Colors.TEXT_LIGHT_GREY,
             font=Assets().font24,
             horizontal_text_alignment=HorizontalAlignment.LEFT
@@ -198,9 +199,9 @@ class SettingsView(View):
 
         self.auto_sync_label = Label(
             self.canvas,
-            (120, 660),
-            (200, 40),
-            text="Auto Sync",
+            (140, 660),
+            (260, 40),
+            text=self.language_manager.get_string("auto_sync"),
             text_color=Colors.TEXT_LIGHT_GREY,
             font=Assets().font18,
             horizontal_text_alignment=HorizontalAlignment.LEFT
@@ -208,9 +209,9 @@ class SettingsView(View):
 
         self.auto_sync_label2 = Label(
             self.canvas,
-            (200, 690),
-            (300, 40),
-            text="Enable auto syncing calendars",
+            (225, 690),
+            (350, 20),
+            text=self.language_manager.get_string("auto_sync_description"),
             text_color=Colors.TEXT_GREY,
             font=Assets().font14,
             horizontal_text_alignment=HorizontalAlignment.LEFT
@@ -231,7 +232,8 @@ class SettingsView(View):
             self.canvas,
             (140, 760),
             (240, 36),
-            label=Label(text="Sync Calendars", text_color=Colors.TEXT_LIGHT_GREY, font=Assets().font18),
+            label=Label(text=self.language_manager.get_string("sync_calendars"),
+                        text_color=Colors.TEXT_LIGHT_GREY, font=Assets().font18),
             color=Colors.BACKGROUND_GREY22,
             border_radius=4,
             border_width=0
@@ -241,11 +243,14 @@ class SettingsView(View):
             self.canvas,
             (140, 820),
             (240, 36),
-            label=Label(text="Sign Out Of All Accounts", text_color=Colors.TEXT_LIGHT_GREY, font=Assets().font18),
+            label=Label(text=self.language_manager.get_string("sign_out_all"),
+                        text_color=Colors.TEXT_LIGHT_GREY, font=Assets().font18),
             color=Colors.BACKGROUND_GREY22,
             border_radius=4,
             border_width=0
         )
+
+        adjust_labels_font_size(self.get_ui_elements())
 
     def register_event(self, event: Event) -> bool:
         registered_events = False
@@ -274,7 +279,7 @@ class SettingsView(View):
         self.canvas.fill(Colors.BACKGROUND_GREY30)
 
         for obj in self.get_ui_elements():
-            if obj != self.language_dropdown:
+            if obj != self.language_dropdown and obj != self.title_label:
                 obj.render()
 
         self.language_dropdown.render()
@@ -288,9 +293,22 @@ class SettingsView(View):
             (self.width - 10, self.account_label.y + 18)
         )
 
+        self.render_shadow()
+
+        self.title_label.render()
+
         pygame.draw.line(self.canvas, Colors.GREY70, (self.width - 1, 0), (self.width - 1, self.height))
 
         self.display.blit(self.canvas, (self.x, self.y))
+
+    def render_shadow(self) -> None:
+        pygame.draw.rect(self.canvas, Colors.BACKGROUND_GREY30, [0, 0, self.width, 80])
+        c = pygame.Surface(self.canvas.get_size(), pygame.SRCALPHA)
+        for i in range(22):
+            y = 80 + i * 2
+            pygame.draw.line(c, (30, 30, 30, 255 - i * 12), (0, y), (self.width, y))
+            pygame.draw.line(c, (30, 30, 30, 255 - i * 12), (0, y+1), (self.width, y+1))
+        self.canvas.blit(c, (0, 0))
 
     def resize(self, width: int = None, height: int = None) -> None:
         self.width = width or self.width
@@ -303,7 +321,31 @@ class SettingsView(View):
         self.title_label.x = self.width // 2
 
     def update_language(self) -> None:
-        pass
+        self.title_label.set_text(self.language_manager.get_string("settings"))
+        self.general_label.set_text(self.language_manager.get_string("general"))
+        self.language_label.set_text(self.language_manager.get_string("language"))
+        self.language_label2.set_text(self.language_manager.get_string("language_description"))
+        self.catholic_events_label.set_text(self.language_manager.get_string("catholic_events"))
+        self.show_catholic_events_label.set_text(self.language_manager.get_string("catholic_events_description"))
+        self.fill_events_label.set_text(self.language_manager.get_string("filled_events"))
+        self.fill_events_label2.set_text(self.language_manager.get_string("filled_events_description"))
+        self.graphics_label.set_text(self.language_manager.get_string("graphics"))
+        self.graphics_label2.set_text(self.language_manager.get_string("graphics_description"))
+        self.account_label.set_text(self.language_manager.get_string("account"))
+        self.auto_sync_label.set_text(self.language_manager.get_string("auto_sync"))
+        self.auto_sync_label2.set_text(self.language_manager.get_string("auto_sync_description"))
+        self.sync_button.label.set_text(self.language_manager.get_string("sync_calendars"))
+        self.sign_out_button.label.set_text(self.language_manager.get_string("sign_out_all"))
+
+        self.language_label2.font = Assets().font14
+        self.catholic_events_label.font = Assets().font14
+        self.fill_events_label2.font = Assets().font14
+        self.graphics_label2.font = Assets().font14
+        self.auto_sync_label2.font = Assets().font14
+        self.sync_button.label.font = Assets().font18
+        self.sign_out_button.label.font = Assets().font18
+
+        adjust_labels_font_size(self.get_ui_elements())
 
     def bind_on_click(self, on_click: Callable[[MouseClickEvent], None]) -> None:
         self.on_click = on_click

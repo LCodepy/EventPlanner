@@ -4,10 +4,12 @@ import pygame
 import pygame.gfxdraw
 
 from src.events.event import Event
+from src.main.settings import Settings
 from src.ui.colors import Colors
 from src.ui.label import Label
 from src.ui.padding import Padding
 from src.ui.ui_object import UIObject
+from src.utils.rendering import render_rounded_rect
 
 
 class IndependentLabel(UIObject):
@@ -36,9 +38,13 @@ class IndependentLabel(UIObject):
         pygame.gfxdraw.aapolygon(self.canvas, self.get_triangle(), (100, 100, 100))
         pygame.gfxdraw.aapolygon(self.canvas, self.get_triangle(), (100, 100, 100))
         pygame.gfxdraw.aapolygon(self.canvas, self.get_triangle(), Colors.GREY70)
+        pygame.gfxdraw.filled_polygon(self.canvas, [(0, self.height // 2), (10, self.height // 4 + 1), (10, self.height * 3 // 4 - 1)], Colors.BACKGROUND_GREY22)
 
         pygame.draw.rect(self.canvas, Colors.BACKGROUND_GREY22, self.get_rect(), border_radius=4)
-        pygame.draw.rect(self.canvas, Colors.GREY70, self.get_rect(), width=1, border_radius=4)
+        if Settings().get_settings()["high_quality_graphics"]:
+            render_rounded_rect(self.canvas, Colors.GREY70, self.get_rect(), 4, width=1)
+        else:
+            pygame.draw.rect(self.canvas, Colors.GREY70, self.get_rect(), width=1, border_radius=4)
 
         pygame.draw.line(self.canvas, Colors.BACKGROUND_GREY22, (10, self.height // 4 + 1), (10, self.height // 4 * 3))
 
@@ -47,7 +53,7 @@ class IndependentLabel(UIObject):
         self.shadow_canvas.fill((0, 0, 0, 0))
         for i in range(8):
             pygame.draw.rect(self.shadow_canvas, (0, 0, 0, max(70 - i * 9, 0)),
-                             (self.get_rect()[0], 0, self.get_rect()[2] + i, self.get_rect()[3] + i),
+                             (self.get_rect().x, 0, self.get_rect().w + i, self.get_rect().h + i),
                              border_radius=4 + 2 * i, width=2)
 
         self.display.blit(self.shadow_canvas, (self.x, self.y))
@@ -59,5 +65,5 @@ class IndependentLabel(UIObject):
     def get_triangle(self) -> list[tuple[int, int]]:
         return [(0, self.height // 2), (10, self.height // 4), (10, self.height * 3 // 4)]
 
-    def get_rect(self) -> list[int]:
-        return [10, 0, self.width - 10, self.height]
+    def get_rect(self) -> pygame.Rect:
+        return pygame.Rect(10, 0, self.width - 10, self.height)

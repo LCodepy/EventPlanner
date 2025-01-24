@@ -1,34 +1,134 @@
 {
-  "months": ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"],
-  "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
-  "event_dropdown_options": ["Weekly", "Monthly", "Yearly", "Never"],
-  "todo_list": "Todo List",
-  "add_task": "Add Task",
-  "task_description": "Task description...",
-  "importance_level": "Importance Level",
-  "low": "Low",
-  "mid": "Mid",
-  "high": "High",
-  "add": "Add",
-  "apply": "Apply",
-  "edit": "Edit",
-  "delete": "Delete",
-  "add_event": "Add Event",
-  "edit_event": "Edit Event",
-  "event_description": "Event description...",
-  "invalid_time_error": "Time is not valid.",
-  "recurring": "Recurring:",
-  "calendar": "Calendar",
-  "profile": "Profile",
-  "settings": "Settings",
-  "search": "Search",
-  "search_events": "Search Events",
-  "event_appear_message": "Events will appear here...",
-  "sign_in": "Sign in",
-  "sync": "Sync",
-  "choose_account": "Choose Account",
-  "no_accounts": "No accounts to show.",
-  "add_account": "Add Account",
-  "switch_account": "Switch Account",
-  "sign_out": "Sign Out"
+    "months": [
+        "january",
+        "february",
+        "march",
+        "april",
+        "may",
+        "june",
+        "july",
+        "august",
+        "september",
+        "october",
+        "november",
+        "december"
+    ],
+    "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+    ],
+    "event_dropdown_options": [
+        "Weekly",
+        "Monthly",
+        "Yearly",
+        "Never"
+    ],
+    "todo_list": "Todo List",
+    "todo_list_description": "No tasks to show.",
+    "add_task": "Add Task",
+    "task_description": "Task description...",
+    "importance_level": "Importance Level",
+    "low": "Low",
+    "mid": "Mid",
+    "high": "High",
+    "add": "Add",
+    "apply": "Apply",
+    "edit": "Edit",
+    "delete": "Delete",
+    "add_event": "Add Event",
+    "edit_event": "Edit Event",
+    "event_description": "Event description...",
+    "invalid_time_error": "Time is not valid.",
+    "recurring": "Recurring:",
+    "calendar": "Calendar",
+    "profile": "Profile",
+    "settings": "Settings",
+    "search": "Search",
+    "search_events": "Search Events",
+    "event_appear_message": "Events will appear here...",
+    "sign_in": "Sign in",
+    "sync": "Sync",
+    "choose_account": "Choose Account",
+    "no_accounts": "No accounts to show.",
+    "add_account": "Add Account",
+    "switch_account": "Switch Account",
+    "sign_out": "Sign Out",
+    "general": "General",
+    "language": "Language",
+    "language_description": "Select display language",
+    "catholic_events": "Catholic Events",
+    "catholic_events_description": "Show all catholic events",
+    "filled_events": "Filled Events",
+    "filled_events_description": "Make events more colorful",
+    "graphics": "High Quality Graphics",
+    "graphics_description": "Enable high-quality graphics",
+    "account": "Account",
+    "auto_sync": "Auto Sync",
+    "auto_sync_description": "Enable auto syncing calendars",
+    "sync_calendars": "Sync Calendars",
+    "sign_out_all": "Sign Out Of All Accounts",
+    "default_event_list": [
+        {
+            "description": "New Year",
+            "date": "01-01"
+        },
+        {
+            "description": "Epiphany (Three Kings' Day)",
+            "date": "01-06"
+        },
+        {
+            "description": "Easter",
+            "date": null
+        },
+        {
+            "description": "Easter Monday",
+            "date": null
+        },
+        {
+            "description": "Labor Day",
+            "date": "05-01"
+        },
+        {
+            "description": "Statehood Day",
+            "date": "05-30"
+        },
+        {
+            "description": "Corpus Christi",
+            "date": null
+        },
+        {
+            "description": "Anti-Fascist Struggle Day",
+            "date": "06-22"
+        },
+        {
+            "description": "Victory and Homeland Thanksgiving Day and Croatian Defenders Day",
+            "date": "08-05"
+        },
+        {
+            "description": "Assumption of Mary",
+            "date": "08-15"
+        },
+        {
+            "description": "All Saints' Day",
+            "date": "11-01"
+        },
+        {
+            "description": "Remembrance Day for Victims of the Homeland War and the Vukovar and Škabrnja Victims",
+            "date": "11-18"
+        },
+        {
+            "description": "Christmas",
+            "date": "12-25"
+        },
+        {
+            "description": "St. Stephen's Day",
+            "date": "12-26"
+        }
+    ],
+    "catholic_event_list": []
 }

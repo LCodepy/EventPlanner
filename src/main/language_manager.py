@@ -1,13 +1,9 @@
 import json
 import os
-import time
 from enum import Enum, auto
 from typing import Union
 
-from src.events.event import LanguageChangedEvent
-from src.events.event_loop import EventLoop
 from src.main.settings import Settings
-from src.utils.assets import Assets
 from src.utils.singleton import Singleton
 
 
@@ -15,19 +11,22 @@ class Language(Enum):
 
     ENGLISH = auto()
     CROATIAN = auto()
+    SPANISH = auto()
+    GERMAN = auto()
 
 
 class LanguageManager(metaclass=Singleton):
 
     LANGUAGES_PATH = os.getcwd() + "\\assets\\languages"
 
-    def __init__(self, event_loop: EventLoop = None, language: Language = Language.ENGLISH) -> None:
-        self.event_loop = event_loop
+    def __init__(self, language: Language = Language.ENGLISH) -> None:
         self.language = language
 
         self.language_names = {
             "hrv": Language.CROATIAN,
-            "eng": Language.ENGLISH
+            "eng": Language.ENGLISH,
+            "esp": Language.SPANISH,
+            "deu": Language.GERMAN
         }
 
         self.languages = []
@@ -53,7 +52,7 @@ class LanguageManager(metaclass=Singleton):
             with open(os.path.join(self.LANGUAGES_PATH, filename + ".json")) as file:
                 self.strings = json.load(file)
 
-        self.event_loop.enqueue_event(LanguageChangedEvent(time.time()))
+        self.language = language
 
     def get_string(self, key: str) -> Union[str, list[str]]:
         return self.strings[key]

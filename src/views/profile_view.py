@@ -14,6 +14,7 @@ from src.ui.image import Image
 from src.ui.label import Label
 from src.utils.assets import Assets
 from src.main.language_manager import LanguageManager
+from src.utils.ui_utils import adjust_labels_font_size
 from src.views.view import View
 
 
@@ -61,8 +62,8 @@ class ProfileView(View):
         self.name_label = Label(
             self.canvas,
             (self.width // 2, 180),
-            (self.width, 40),
-            text=AccountManager().current_account.name if AccountManager().current_account else "",
+            (self.width - 10, 40),
+            text=AccountManager().current_user.name if AccountManager().current_user else "",
             text_color=Colors.TEXT_LIGHT_GREY,
             font=Assets().font24
         )
@@ -70,8 +71,8 @@ class ProfileView(View):
         self.email_label = Label(
             self.canvas,
             (self.width // 2, 220),
-            (self.width, 30),
-            text=AccountManager().current_account.email if AccountManager().current_account else "",
+            (self.width - 10, 30),
+            text=AccountManager().current_user.email if AccountManager().current_user else "",
             text_color=Colors.TEXT_GREY,
             font=Assets().font18
         )
@@ -109,6 +110,8 @@ class ProfileView(View):
             border_radius=4
         )
 
+        adjust_labels_font_size(self.get_ui_elements())
+
     def register_event(self, event: Event) -> bool:
         registered_events = False
 
@@ -116,8 +119,8 @@ class ProfileView(View):
             self.update_language()
         elif isinstance(event, UserSignInEvent):
             self.profile_picture.set_image(AccountManager().get_current_profile_picture())
-            self.name_label.set_text(AccountManager().current_account.name)
-            self.email_label.set_text(AccountManager().current_account.email)
+            self.name_label.set_text(AccountManager().current_user.name)
+            self.email_label.set_text(AccountManager().current_user.email)
 
         event = self.get_event(event)
 
@@ -173,6 +176,8 @@ class ProfileView(View):
         self.sync_button.update_position(self.width // 2)
         self.switch_account_button.update_position(self.width // 2)
         self.sign_out_button.update_position(self.width // 2)
+        self.name_label.resize(width=self.width-10)
+        self.email_label.resize(width=self.width-10)
 
     def update_language(self) -> None:
         pass
@@ -196,7 +201,7 @@ class ProfileView(View):
         pass
 
     def get_state(self) -> int:
-        if AccountManager().current_account is None:
+        if AccountManager().current_user is None:
             return 0
         return 1
 

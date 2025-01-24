@@ -250,6 +250,9 @@ class CalendarView(View):
 
                     next_y = event.label.y + event.label.height // 2 + 4
 
+                    if Settings().get_settings()["render_filled_events"] and event.event.color in (Colors.EVENT_YELLOW204, Colors.EVENT_GREEN204):
+                        event.label.text_color = Colors.WHITE
+
                     event.label.render()
 
                 border_width = 1
@@ -301,7 +304,9 @@ class CalendarView(View):
 
     def update_language(self) -> None:
         self.create_day_buttons()
+        self.calendar_binding()
         self.create_weekday_labels()
+        self.month_button.label.set_text(self.get_month_name(self.month).upper())
 
     def get_day_button_color(self, idx: int, starting_day: int) -> Color:
         return Colors.RED if datetime.date(self.year, self.month, idx - starting_day + 1) == self.today.date() else (

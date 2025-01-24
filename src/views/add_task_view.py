@@ -15,6 +15,7 @@ from src.ui.text_field import TextField
 from src.utils.assets import Assets
 from src.main.language_manager import LanguageManager
 from src.utils.rendering import render_rounded_rect
+from src.utils.ui_utils import adjust_labels_font_size
 from src.views.view import View
 
 
@@ -53,7 +54,7 @@ class AddTaskView(View):
         self.add_task_label = Label(
             self.canvas,
             (self.width // 2, 40),
-            (150, 50),
+            (300, 50),
             text=self.language_manager.get_string("add_task"),
             text_color=Colors.TEXT_GREY,
             font=Assets().font24
@@ -92,6 +93,7 @@ class AddTaskView(View):
             padding=Padding(left=10)
         )
         self.low_importance_button.bind_on_click(self.on_low_importance_button_click)
+        self.low_importance_button.label.resize(width=45)
 
         self.medium_importance_button = Button(
             self.canvas,
@@ -104,6 +106,7 @@ class AddTaskView(View):
             padding=Padding(left=10)
         )
         self.medium_importance_button.bind_on_click(self.on_medium_importance_button_click)
+        self.medium_importance_button.label.resize(width=45)
 
         self.high_importance_button = Button(
             self.canvas,
@@ -116,6 +119,7 @@ class AddTaskView(View):
             padding=Padding(left=10)
         )
         self.high_importance_button.bind_on_click(self.on_high_importance_button_click)
+        self.high_importance_button.label.resize(width=45)
 
         self.add_task_button = Button(
             self.canvas,
@@ -128,6 +132,8 @@ class AddTaskView(View):
             border_width=0,
             border_radius=6
         )
+
+        adjust_labels_font_size(self.get_ui_elements())
 
     def register_event(self, event: Event) -> bool:
         registered_events = False

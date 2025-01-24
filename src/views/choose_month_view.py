@@ -12,6 +12,7 @@ from src.ui.colors import Colors
 from src.ui.label import Label
 from src.utils.assets import Assets
 from src.utils.rendering import render_rounded_rect
+from src.utils.ui_utils import adjust_labels_font_size
 from src.views.view import View
 
 
@@ -39,6 +40,8 @@ class ChooseMonthView(View):
 
         self.buttons: list[Button] = []
         self.create_buttons()
+
+        adjust_labels_font_size(self.get_ui_elements())
 
     def register_event(self, event: Event) -> bool:
         registered_events = False
