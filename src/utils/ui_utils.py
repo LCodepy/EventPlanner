@@ -23,6 +23,7 @@ def adjust_labels_font_size(ui_elements: list[UIObject]):
         while (label.get_min_label_size()[0] >= label.width or label.get_min_label_size()[1] >= label.height) and idx > 0:
             idx -= 1
             label.font = Assets().fonts[idx]
+            label.update_text()
 
 
 def adjust_dropdown_font_size(dropdown: DropDown):

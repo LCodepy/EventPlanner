@@ -60,8 +60,8 @@ class SettingsView(View):
 
         self.language_label = Label(
             self.canvas,
-            (120, 200),
-            (200, 40),
+            (140, 200),
+            (240, 40),
             text=self.language_manager.get_string("language"),
             text_color=Colors.TEXT_LIGHT_GREY,
             font=Assets().font18,
@@ -82,7 +82,7 @@ class SettingsView(View):
             self.canvas,
             (120, 260),
             (200, 30),
-            list(map(lambda l: l.upper(), self.language_manager.languages)),
+            self.language_manager.get_repr_languages(),
             color=Colors.BACKGROUND_GREY22,
             border_color=Colors.GREY70,
             text_color=Colors.TEXT_LIGHT_GREY,
@@ -91,13 +91,15 @@ class SettingsView(View):
             font=Assets().font16,
             horizontal_text_alignment=HorizontalAlignment.LEFT,
             padding=Padding(left=10),
-            selected_option=self.language_manager.languages.index(self.language_manager.get_language_name())
+            selected_option=self.language_manager.languages.index(self.language_manager.get_language_name()),
+            button_height=30,
+            scroll_value=Config.scroll_value
         )
 
         self.catholic_events_label = Label(
             self.canvas,
-            (120, 320),
-            (200, 40),
+            (140, 320),
+            (240, 40),
             text=self.language_manager.get_string("catholic_events"),
             text_color=Colors.TEXT_LIGHT_GREY,
             font=Assets().font18,
@@ -127,8 +129,8 @@ class SettingsView(View):
 
         self.fill_events_label = Label(
             self.canvas,
-            (120, 410),
-            (200, 40),
+            (140, 410),
+            (240, 40),
             text=self.language_manager.get_string("filled_events"),
             text_color=Colors.TEXT_LIGHT_GREY,
             font=Assets().font18,
@@ -199,7 +201,7 @@ class SettingsView(View):
 
         self.auto_sync_label = Label(
             self.canvas,
-            (140, 660),
+            (150, 660),
             (260, 40),
             text=self.language_manager.get_string("auto_sync"),
             text_color=Colors.TEXT_LIGHT_GREY,
@@ -270,7 +272,7 @@ class SettingsView(View):
             self.on_release(event)
         elif isinstance(event, MouseMotionEvent) and self.on_mouse_motion(event):
             return True
-        elif isinstance(event, (MouseWheelUpEvent, MouseWheelDownEvent)) and self.on_scroll(event):
+        elif isinstance(event, (MouseWheelUpEvent, MouseWheelDownEvent)) and not self.language_dropdown.is_scrolling and self.on_scroll(event):
             return True
 
         return registered_events
@@ -282,8 +284,6 @@ class SettingsView(View):
             if obj != self.language_dropdown and obj != self.title_label:
                 obj.render()
 
-        self.language_dropdown.render()
-
         pygame.draw.line(
             self.canvas, Colors.TEXT_DARK_GREY, (10, self.general_label.y + 18),
             (self.width - 10, self.general_label.y + 18)
@@ -292,6 +292,8 @@ class SettingsView(View):
             self.canvas, Colors.TEXT_DARK_GREY, (10, self.account_label.y + 18),
             (self.width - 10, self.account_label.y + 18)
         )
+
+        self.language_dropdown.render()
 
         self.render_shadow()
 
@@ -320,6 +322,10 @@ class SettingsView(View):
 
         self.title_label.x = self.width // 2
 
+        self.language_dropdown.set_max_height(None)
+        if height and self.language_dropdown.get_box_rect().bottom >= self.height - 10:
+            self.language_dropdown.set_max_height(self.height - 10 - self.language_dropdown.get_box_rect().top)
+
     def update_language(self) -> None:
         self.title_label.set_text(self.language_manager.get_string("settings"))
         self.general_label.set_text(self.language_manager.get_string("general"))
@@ -342,6 +348,11 @@ class SettingsView(View):
         self.fill_events_label2.font = Assets().font14
         self.graphics_label2.font = Assets().font14
         self.auto_sync_label2.font = Assets().font14
+        self.language_label.font = Assets().font18
+        self.catholic_events_label.font = Assets().font18
+        self.fill_events_label.font = Assets().font18
+        self.graphics_label.font = Assets().font18
+        self.auto_sync_label.font = Assets().font18
         self.sync_button.label.font = Assets().font18
         self.sign_out_button.label.font = Assets().font18
 

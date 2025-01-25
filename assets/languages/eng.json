@@ -130,5 +130,1462 @@
             "date": "12-26"
         }
     ],
-    "catholic_event_list": []
+    "catholic_event_list": [
+        {
+            "description": "Nova Godina, Marija Bogorodica",
+            "date": "01-01"
+        },
+        {
+            "description": "Bazilije, Grgur, Izidor",
+            "date": "01-02"
+        },
+        {
+            "description": "Ime Isusovo, Ime Isusovo, Genoveva",
+            "date": "01-03"
+        },
+        {
+            "description": "Andela Folinjska, Emanuel",
+            "date": "01-04"
+        },
+        {
+            "description": "Gaudencije, Emilijana",
+            "date": "01-05"
+        },
+        {
+            "description": "Bogojavljenje, Tri Kralja",
+            "date": "01-06"
+        },
+        {
+            "description": "Lucijan, Karlo Secijski, Rajko",
+            "date": "01-07"
+        },
+        {
+            "description": "Gospa od brze pomo\u0107i, Gospa od Brze Pomo\u0107i, Severin",
+            "date": "01-08"
+        },
+        {
+            "description": "Hadrijan, Julijan, \u017divko",
+            "date": "01-09"
+        },
+        {
+            "description": "Agaton, Dobroslav, Aldo",
+            "date": "01-10"
+        },
+        {
+            "description": "Honorat, Higin, Neven",
+            "date": "01-11"
+        },
+        {
+            "description": "Ernest, Tatjana, Bernard",
+            "date": "01-12"
+        },
+        {
+            "description": "Hilarije, Veronika, Radovan",
+            "date": "01-13"
+        },
+        {
+            "description": "Firmin, Eufrazije, Fulgencije, Feliks, Sre\u0107ko, Rajko",
+            "date": "01-14"
+        },
+        {
+            "description": "Pavao Pust, Anastazija",
+            "date": "01-15"
+        },
+        {
+            "description": "Marcel, Oton, Mistav, \u010caslav",
+            "date": "01-16"
+        },
+        {
+            "description": "Antun opat, Lucije, Zvonko",
+            "date": "01-17"
+        },
+        {
+            "description": "Margareta, Priska, Biserka",
+            "date": "01-18"
+        },
+        {
+            "description": "Mario, Ljiljana, Marta, Senka",
+            "date": "01-19"
+        },
+        {
+            "description": "Fabijan i Sebastijan, Tijana",
+            "date": "01-20"
+        },
+        {
+            "description": "Agneza, Janja, Ne\u017ea",
+            "date": "01-21"
+        },
+        {
+            "description": "Vinko, \u0111akon i mu\u010d., Irena",
+            "date": "01-22"
+        },
+        {
+            "description": "Emerencijana, Milka, Vjera",
+            "date": "01-23"
+        },
+        {
+            "description": "Franjo Sale\u0161ki, Bogoslav",
+            "date": "01-24"
+        },
+        {
+            "description": "Obra\u0107enje sv. Pavla, Ananija",
+            "date": "01-25"
+        },
+        {
+            "description": "Timotej i Tit, Paula Rimska",
+            "date": "01-26"
+        },
+        {
+            "description": "An\u0111ela Merici, Pribislav",
+            "date": "01-27"
+        },
+        {
+            "description": "Toma Akvinski, Tomislav",
+            "date": "01-28"
+        },
+        {
+            "description": "Valerije, Zdravko, Zdeslav",
+            "date": "01-29"
+        },
+        {
+            "description": "Hijacinta, Martina, Gordana",
+            "date": "01-30"
+        },
+        {
+            "description": "Ivan Bosco, Marcela, Vanja",
+            "date": "01-31"
+        },
+        {
+            "description": "Brigita, Miroslav, Sever",
+            "date": "02-01"
+        },
+        {
+            "description": "Svije\u0107nica, blagoslov svije\u0107a",
+            "date": "02-02"
+        },
+        {
+            "description": "Bla\u017e, blagoslov grla",
+            "date": "02-03"
+        },
+        {
+            "description": "Josip Leoni\u0161ki, Andrija Corsini, Eutihije, Veronika Jeruzalemska",
+            "date": "02-04"
+        },
+        {
+            "description": "Agata, Dobrila, Modest, Jagoda",
+            "date": "02-05"
+        },
+        {
+            "description": "Pavao Miki i dr., Doroteja",
+            "date": "02-06"
+        },
+        {
+            "description": "Pio IX. papa, Maksim, Rikard",
+            "date": "02-07"
+        },
+        {
+            "description": "Jeronim, Jerko, Jozefina",
+            "date": "02-08"
+        },
+        {
+            "description": "Skolastika, Apolonija",
+            "date": "02-09"
+        },
+        {
+            "description": "Gospa Lurdska, Alojzije Stepinac",
+            "date": "02-10"
+        },
+        {
+            "description": "Dan bolesnih",
+            "date": "02-11"
+        },
+        {
+            "description": "Damjan, Zvonimir, Eulalija",
+            "date": "02-12"
+        },
+        {
+            "description": "Katarina Ricci, Bo\u017eidarka",
+            "date": "02-13"
+        },
+        {
+            "description": "Valentinovo, Valentin, Zdravko",
+            "date": "02-14"
+        },
+        {
+            "description": "Klaudije, Vitomir, Vito",
+            "date": "02-15"
+        },
+        {
+            "description": "Julijana, Onezim, Miljenko",
+            "date": "02-16"
+        },
+        {
+            "description": "Utemeljitelj Reda slugu BDM",
+            "date": "02-17"
+        },
+        {
+            "description": "\u0160imun, Gizela, Bernardica",
+            "date": "02-18"
+        },
+        {
+            "description": "Konrad, Bonifacije, Blago",
+            "date": "02-19"
+        },
+        {
+            "description": "Jacinta i Franjo, Leon \u010cudotvorac",
+            "date": "02-20"
+        },
+        {
+            "description": "Petar Damjani, Eleonora",
+            "date": "02-21"
+        },
+        {
+            "description": "Katedra Sv. Petra, Tvrtko",
+            "date": "02-22"
+        },
+        {
+            "description": "Polikarp, Grozdan, Romana",
+            "date": "02-23"
+        },
+        {
+            "description": "Sinerot srijemski, Matija",
+            "date": "02-24"
+        },
+        {
+            "description": "Viktorin, Hrvoje, Berislav",
+            "date": "02-25"
+        },
+        {
+            "description": "Aleksandar, Sandra, Alka",
+            "date": "02-26"
+        },
+        {
+            "description": "Gabrijel od \u017dalosne Gospe, Tugomil, Donat biskup",
+            "date": "02-27"
+        },
+        {
+            "description": "Roman, Teofit, Bogoljub",
+            "date": "02-28"
+        },
+        {
+            "description": "Albin, Jadranko, Zoran, David",
+            "date": "03-01"
+        },
+        {
+            "description": "Lucije, \u010dedomil, Iskra, Ines",
+            "date": "03-02"
+        },
+        {
+            "description": "Kunigunda, Liberat Weiss, Marin, Kamilo, Anzelmo",
+            "date": "03-03"
+        },
+        {
+            "description": "Kazimir, Eugen, Natko",
+            "date": "03-04"
+        },
+        {
+            "description": "Lucije, Adrian, Vedran",
+            "date": "03-05"
+        },
+        {
+            "description": "Marcijan, Marcen, Marsela",
+            "date": "03-06"
+        },
+        {
+            "description": "Perpetua i Felicita, Ru\u017ea",
+            "date": "03-07"
+        },
+        {
+            "description": "Ivan od Boga, Iv\u0161a, Bo\u0161ko",
+            "date": "03-08"
+        },
+        {
+            "description": "Franciska Rimska, Franjka",
+            "date": "03-09"
+        },
+        {
+            "description": "Emil, Makarije, Kajo, Simplicije",
+            "date": "03-10"
+        },
+        {
+            "description": "Firmin, Tvrtko, Kandid",
+            "date": "03-11"
+        },
+        {
+            "description": "Bernard, Alojzije, Dora",
+            "date": "03-12"
+        },
+        {
+            "description": "Patricija, Sabina, Ratka",
+            "date": "03-13"
+        },
+        {
+            "description": "Matilda, Milijana, Borka, Eva",
+            "date": "03-14"
+        },
+        {
+            "description": "Zaharija, Ljudevit, Veljko",
+            "date": "03-15"
+        },
+        {
+            "description": "Hilarije i Ticijan, Hrvoje",
+            "date": "03-16"
+        },
+        {
+            "description": "Patrik, Domagoj, Hrvatin",
+            "date": "03-17"
+        },
+        {
+            "description": "\u010cirit Jeruzalemski, Eduard",
+            "date": "03-18"
+        },
+        {
+            "description": "4. Josip zaru\u010dnik BDM",
+            "date": "03-19"
+        },
+        {
+            "description": "Klaudija, Dionizije, Vladislav",
+            "date": "03-20"
+        },
+        {
+            "description": "Kristijan, Vesna, Vlasta",
+            "date": "03-21"
+        },
+        {
+            "description": "Oktavijan, Lea Rimska",
+            "date": "03-22"
+        },
+        {
+            "description": "Turibije, Oton, Anuncijata",
+            "date": "03-23"
+        },
+        {
+            "description": "Latin, Javorka, Katarina \u0160vedska",
+            "date": "03-24"
+        },
+        {
+            "description": "Rok, Anastazija",
+            "date": "03-25"
+        },
+        {
+            "description": "Dru\u017eba Gospe Karmelske",
+            "date": "03-26"
+        },
+        {
+            "description": "Sveti Toma, Josipa, Oskara",
+            "date": "03-27"
+        },
+        {
+            "description": "Vladimir, Ivan, Dubravka",
+            "date": "03-28"
+        },
+        {
+            "description": "Petra, Nevenka, Divna",
+            "date": "03-29"
+        },
+        {
+            "description": "Kvirin, Bogoljub, Leonard",
+            "date": "03-30"
+        },
+        {
+            "description": "Benjamin, Amos, Ljubomir, Natalija",
+            "date": "03-31"
+        },
+        {
+            "description": "Herman, Ivana, Pavao",
+            "date": "04-01"
+        },
+        {
+            "description": "Vinko, Jeronim, Radoslav",
+            "date": "04-02"
+        },
+        {
+            "description": "Ricard, Apolonija, Leopold",
+            "date": "04-03"
+        },
+        {
+            "description": "Irena, Dario, Zora",
+            "date": "04-04"
+        },
+        {
+            "description": "Vladislav, Vitomir, Juraj",
+            "date": "04-05"
+        },
+        {
+            "description": "Marija, Jelena, Andreja",
+            "date": "04-06"
+        },
+        {
+            "description": "Izidor, Davor, Veronika",
+            "date": "04-07"
+        },
+        {
+            "description": "Dionizije, Marko, Milenko",
+            "date": "04-08"
+        },
+        {
+            "description": "Otmar, Mladenka, Marija Magdalena",
+            "date": "04-09"
+        },
+        {
+            "description": "Gospa Lurdska, Snje\u017eana, Bogdan",
+            "date": "04-10"
+        },
+        {
+            "description": "Leo, Filomen, Robert",
+            "date": "04-11"
+        },
+        {
+            "description": "Julije, Davorka, Damjan",
+            "date": "04-12"
+        },
+        {
+            "description": "Antun, Jaroslav, Vito",
+            "date": "04-13"
+        },
+        {
+            "description": "Luka, Julija, Pavao",
+            "date": "04-14"
+        },
+        {
+            "description": "Martina, Ljerka, Andrija",
+            "date": "04-15"
+        },
+        {
+            "description": "Benedikt, Tadija, Jadranka",
+            "date": "04-16"
+        },
+        {
+            "description": "Hermenegild, Goran, Marta",
+            "date": "04-17"
+        },
+        {
+            "description": "Euzebije, Anastazije",
+            "date": "04-18"
+        },
+        {
+            "description": "Valerija, Tatjana, Lida",
+            "date": "04-19"
+        },
+        {
+            "description": "Marija Egip\u0107anska, Karolina, Jovanka",
+            "date": "04-20"
+        },
+        {
+            "description": "Anselmo, Alfonz, Leda",
+            "date": "04-21"
+        },
+        {
+            "description": "Soter i Kajo, Leonida, Vojmil",
+            "date": "04-22"
+        },
+        {
+            "description": "Jura, Franjo, Pavica",
+            "date": "04-23"
+        },
+        {
+            "description": "Viktor, Alojzije, Ru\u017ea",
+            "date": "04-24"
+        },
+        {
+            "description": "Marko, Bernard, Martina",
+            "date": "04-25"
+        },
+        {
+            "description": "Petar i Pavle, Juraj, Karlo",
+            "date": "04-26"
+        },
+        {
+            "description": "Valerija, Mirjam, Matija",
+            "date": "04-27"
+        },
+        {
+            "description": "Hristifor, Jeronim, Rafael",
+            "date": "04-28"
+        },
+        {
+            "description": "Ava, Filip, Mihael",
+            "date": "04-29"
+        },
+        {
+            "description": "Katarina, Ivana, Pavao",
+            "date": "04-30"
+        },
+        {
+            "description": "Josip Radrik, Jerermija",
+            "date": "05-01"
+        },
+        {
+            "description": "Atanazije Aleksand., Antonin",
+            "date": "05-02"
+        },
+        {
+            "description": "Filip i Jakova ap., Aleksardar",
+            "date": "05-03"
+        },
+        {
+            "description": "Florijar, Julijan iz Bala",
+            "date": "05-04"
+        },
+        {
+            "description": "Peregrin, Maksim, Irena",
+            "date": "05-05"
+        },
+        {
+            "description": "Irinej Srijemski, Dominik",
+            "date": "05-06"
+        },
+        {
+            "description": "5. Flavije, Gizela, Dujam, Duje",
+            "date": "05-07"
+        },
+        {
+            "description": "Bla\u017eena Djevica Marija Posrednica Milosti",
+            "date": "05-08"
+        },
+        {
+            "description": "Uza\u0161a\u0161\u0107e Gosp. (Spasovo)",
+            "date": "05-09"
+        },
+        {
+            "description": "Ivan Merz, Job",
+            "date": "05-10"
+        },
+        {
+            "description": "Franjo Hieronim, Mamericije",
+            "date": "05-11"
+        },
+        {
+            "description": "Uskrsna Leopold Mandi\u0107, Pankracije",
+            "date": "05-12"
+        },
+        {
+            "description": "Gospa Fatimska, Servancije",
+            "date": "05-13"
+        },
+        {
+            "description": "Matija ap., Bonifacije, Mate",
+            "date": "05-14"
+        },
+        {
+            "description": "Izidor ratar, Sofija (Dan Obitelji)",
+            "date": "05-15"
+        },
+        {
+            "description": "Ivan Nepomuk, Andrija",
+            "date": "05-16"
+        },
+        {
+            "description": "PaskaL Pa\u0161ko, Gizela, Bruno",
+            "date": "05-17"
+        },
+        {
+            "description": "Ivan 1. papa, Erik, Sre\u0107ko",
+            "date": "05-18"
+        },
+        {
+            "description": "Celestin, Rajko, Ivan, Teofil",
+            "date": "05-19"
+        },
+        {
+            "description": "Bla\u017eena Djevica Marija Majka Crkve",
+            "date": "05-20"
+        },
+        {
+            "description": "Kristofor MagalL i dr., Dubravka",
+            "date": "05-21"
+        },
+        {
+            "description": "Rita, Jagoda, Helena, Jelka",
+            "date": "05-22"
+        },
+        {
+            "description": "Deziderije, \u017deljko, \u017deljana",
+            "date": "05-23"
+        },
+        {
+            "description": "Marija Pomo\u0107nica, Vinko",
+            "date": "05-24"
+        },
+        {
+            "description": "Beda \u010casni, Grgur VII. papa",
+            "date": "05-25"
+        },
+        {
+            "description": "Filip Neri, Zdenko",
+            "date": "05-26"
+        },
+        {
+            "description": "Augustin Canter., Bruno",
+            "date": "05-27"
+        },
+        {
+            "description": "German, Vilim, Velimir",
+            "date": "05-28"
+        },
+        {
+            "description": "Euzebije i Polion, Ervin",
+            "date": "05-29"
+        },
+        {
+            "description": "Ivana Ar\u0161ka, Ferdinand, Sre\u0107ko",
+            "date": "05-30"
+        },
+        {
+            "description": "Pohod Bla\u017eene Djevice Marije",
+            "date": "05-31"
+        },
+        {
+            "description": "Justin, Mladen, Teofil, Slobodan",
+            "date": "06-01"
+        },
+        {
+            "description": "Marcelin i Petar, Eugen",
+            "date": "06-02"
+        },
+        {
+            "description": "Karlo Lwanga i drugovi, Olivija",
+            "date": "06-03"
+        },
+        {
+            "description": "Kvirin Sisa\u010dki, Predrag",
+            "date": "06-04"
+        },
+        {
+            "description": "Bonifaclje, Dorotej, Valerija",
+            "date": "06-05"
+        },
+        {
+            "description": "Norbert, Artemije, Berto, Paulina",
+            "date": "06-06"
+        },
+        {
+            "description": "Koloman, Robert, Radoslav",
+            "date": "06-07"
+        },
+        {
+            "description": "Medardo, \u017darko, Vilim, kvatre",
+            "date": "06-08"
+        },
+        {
+            "description": "Efrem, Ranko",
+            "date": "06-09"
+        },
+        {
+            "description": "Bogumil, Dijana, Greta, kvatre",
+            "date": "06-10"
+        },
+        {
+            "description": "Barnaba apostol, Borna, kvatre",
+            "date": "06-11"
+        },
+        {
+            "description": "Ivan Fakundo, Bosiljko",
+            "date": "06-12"
+        },
+        {
+            "description": "Antun Padovanski, Ante, Antonija",
+            "date": "06-13"
+        },
+        {
+            "description": "Rufin, Elizej, Dinga",
+            "date": "06-14"
+        },
+        {
+            "description": "Vid, Modest",
+            "date": "06-15"
+        },
+        {
+            "description": "Franjo Regis, Gvido",
+            "date": "06-16"
+        },
+        {
+            "description": "Diogen, Inocent, Adolf",
+            "date": "06-17"
+        },
+        {
+            "description": "Marcelijan, Ozana, Ljubomir",
+            "date": "06-18"
+        },
+        {
+            "description": "Romuald, Rajka, Bogdan",
+            "date": "06-19"
+        },
+        {
+            "description": "Naum Ohridski, Silverije",
+            "date": "06-20"
+        },
+        {
+            "description": "Alojzije Gonzaga, Vjekoslav",
+            "date": "06-21"
+        },
+        {
+            "description": "Ivan Fisher, Toma More",
+            "date": "06-22"
+        },
+        {
+            "description": "Josip Cafasso, Sidonija, Zdenka",
+            "date": "06-23"
+        },
+        {
+            "description": "RO\u0110ENJE IVANA KRSTITELJA",
+            "date": "06-24"
+        },
+        {
+            "description": "Adalbert, Vilim, Doroteja",
+            "date": "06-25"
+        },
+        {
+            "description": "Ivan i Pavao, Vigilije, Zoran",
+            "date": "06-26"
+        },
+        {
+            "description": "\u0106iril Aleksandijski",
+            "date": "06-27"
+        },
+        {
+            "description": "Irenej, Mirko",
+            "date": "06-28"
+        },
+        {
+            "description": "PETAR i PAVAO, Kre\u0161o",
+            "date": "06-29"
+        },
+        {
+            "description": "Rimski prvomu\u010denici, Kajo, Emilijana",
+            "date": "06-30"
+        },
+        {
+            "description": "Aron, \u0160imun, Zvjezdana",
+            "date": "07-01"
+        },
+        {
+            "description": "Oton, Martinijan, Vi\u0161nja",
+            "date": "07-02"
+        },
+        {
+            "description": "Toma apostol, Tomislav",
+            "date": "07-03"
+        },
+        {
+            "description": "Elizabeta Portugalska, Elza",
+            "date": "07-04"
+        },
+        {
+            "description": "\u0106IRIL i METOD, Antun M. Zaccaria",
+            "date": "07-05"
+        },
+        {
+            "description": "Marija Goretti, Bogomila",
+            "date": "07-06"
+        },
+        {
+            "description": "Klaudije, Vilibald, Vilko",
+            "date": "07-07"
+        },
+        {
+            "description": "Akvila i Priscila, Hadrijan",
+            "date": "07-08"
+        },
+        {
+            "description": "Marija Petkovi\u0107, Leticija, Nikola Pik i drugovi",
+            "date": "07-09"
+        },
+        {
+            "description": "Amalija, Ljubica, Rufina",
+            "date": "07-10"
+        },
+        {
+            "description": "Benedikt opat, Benko, Olga",
+            "date": "07-11"
+        },
+        {
+            "description": "Mohor, Ivan Gualberti, Mislav",
+            "date": "07-12"
+        },
+        {
+            "description": "MAJKA BO\u017dJA BISTRI\u010cKA",
+            "date": "07-13"
+        },
+        {
+            "description": "Kamilo de Lellis, Angelina, Ga\u0161par",
+            "date": "07-14"
+        },
+        {
+            "description": "Presveti Otkupitelj, Dobri\u0161a",
+            "date": "07-15"
+        },
+        {
+            "description": "Gospa Karmelska, Karmela",
+            "date": "07-16"
+        },
+        {
+            "description": "Aleksije, Branko, Marcelina",
+            "date": "07-17"
+        },
+        {
+            "description": "Friderik, Simforoza, Ljuba",
+            "date": "07-18"
+        },
+        {
+            "description": "Aurelija, Zora, Zlatka, Makrina",
+            "date": "07-19"
+        },
+        {
+            "description": "Ilija prorok, Margareta, Ilijana",
+            "date": "07-20"
+        },
+        {
+            "description": "Lovro Brindi\u0161ki, Danijel, Dane, Danica",
+            "date": "07-21"
+        },
+        {
+            "description": "Marija Magdalena, Manda",
+            "date": "07-22"
+        },
+        {
+            "description": "Brigita, Apolinar, Valerijan",
+            "date": "07-23"
+        },
+        {
+            "description": "Kristina, Mirjana, Kunigunda",
+            "date": "07-24"
+        },
+        {
+            "description": "Jakov apostol, Kristofor",
+            "date": "07-25"
+        },
+        {
+            "description": "Joakim i Ana roditelji BDM",
+            "date": "07-26"
+        },
+        {
+            "description": "Klement Ohridski, Klemo",
+            "date": "07-27"
+        },
+        {
+            "description": "Prohor, Nikanor, Viktor I., Nazarije",
+            "date": "07-28"
+        },
+        {
+            "description": "Marta, Flora, Bla\u017eenka",
+            "date": "07-29"
+        },
+        {
+            "description": "Petar Krizolog, Rufin, An\u0111a",
+            "date": "07-30"
+        },
+        {
+            "description": "Ignacije Lojolski, Vatroslav",
+            "date": "07-31"
+        },
+        {
+            "description": "Alfons Liguori, Vjera, Nada",
+            "date": "08-01"
+        },
+        {
+            "description": "Gospa od An\u0111ela, Euzebije V.",
+            "date": "08-02"
+        },
+        {
+            "description": "Augustin Ka\u017eoti\u0107, Lidija",
+            "date": "08-03"
+        },
+        {
+            "description": "Ivan Marija Vianney, Justin",
+            "date": "08-04"
+        },
+        {
+            "description": "Gospa Snje\u017ena, Nives, Snje\u017eana",
+            "date": "08-05"
+        },
+        {
+            "description": "PREOBRA\u017dENJE GOSPODINOVO",
+            "date": "08-06"
+        },
+        {
+            "description": "Siksto papa, Kajetan, Donat",
+            "date": "08-07"
+        },
+        {
+            "description": "Dominik, Nedjeljko, Dinko",
+            "date": "08-08"
+        },
+        {
+            "description": "Edita Stein, Roman, Firmin, Tvrtko",
+            "date": "08-09"
+        },
+        {
+            "description": "Lovro \u0111akon, Lovorka",
+            "date": "08-10"
+        },
+        {
+            "description": "Klara Asi\u0161ka, Jasna, Suzana",
+            "date": "08-11"
+        },
+        {
+            "description": "Anicet, Hilarija, Veselka",
+            "date": "08-12"
+        },
+        {
+            "description": "Poncijan i Hipolit, Filomena",
+            "date": "08-13"
+        },
+        {
+            "description": "Maksimilijan Kolbe",
+            "date": "08-14"
+        },
+        {
+            "description": "Stjepan Ugarski, Rok",
+            "date": "08-16"
+        },
+        {
+            "description": "Hijacint, Liberat, Miron",
+            "date": "08-17"
+        },
+        {
+            "description": "Jelena Kri\u017earica",
+            "date": "08-18"
+        },
+        {
+            "description": "Ivan Eudes, Ljudevit, Tekla",
+            "date": "08-19"
+        },
+        {
+            "description": "Bernard iz Clarvauxa, Samuel",
+            "date": "08-20"
+        },
+        {
+            "description": "Pio X. papa, Hermogen",
+            "date": "08-21"
+        },
+        {
+            "description": "BDM Kraljica, Vladislava",
+            "date": "08-22"
+        },
+        {
+            "description": "Ru\u017ea Limska, Filip Benicije",
+            "date": "08-23"
+        },
+        {
+            "description": "Bartol apostol, Miroslav Bule\u0161i\u0107, Bari\u0161a",
+            "date": "08-24"
+        },
+        {
+            "description": "Ljudevit kralj, Patricije",
+            "date": "08-25"
+        },
+        {
+            "description": "Rufin, Zefirin",
+            "date": "08-26"
+        },
+        {
+            "description": "Monika, Honorat, \u010caslav",
+            "date": "08-27"
+        },
+        {
+            "description": "Augustin, Tin, Gustav",
+            "date": "08-28"
+        },
+        {
+            "description": "Mu\u010deni\u0161tvo Ivana Krstitelja",
+            "date": "08-29"
+        },
+        {
+            "description": "Feliks i Adaukt, Gaudencija",
+            "date": "08-30"
+        },
+        {
+            "description": "Rajmund, Rajko, Optat",
+            "date": "08-31"
+        },
+        {
+            "description": "Jo\u0161ua, Siksto, Terencije, Verena, Viktor",
+            "date": "09-01"
+        },
+        {
+            "description": "Kalista, Severina, Divna, Veljka",
+            "date": "09-02"
+        },
+        {
+            "description": "Grgur Veliki, Grga, Gordana",
+            "date": "09-03"
+        },
+        {
+            "description": "Ru\u017ea Viterbska, Marcel, Dunja",
+            "date": "09-04"
+        },
+        {
+            "description": "Majka Terezija, Lovro Jus.",
+            "date": "09-05"
+        },
+        {
+            "description": "Zakarija, Eleuterij, Boris, Davor",
+            "date": "09-06"
+        },
+        {
+            "description": "Marko Kri\u017eev\u010danin, Regina",
+            "date": "09-07"
+        },
+        {
+            "description": "MALA GOSPA \u2013 RO\u0110ENJE MARIJINO",
+            "date": "09-08"
+        },
+        {
+            "description": "Petar Klaver, Strahimir",
+            "date": "09-09"
+        },
+        {
+            "description": "Nikola Tolentinski, Pulherija",
+            "date": "09-10"
+        },
+        {
+            "description": "Proto i Hijacint, Helga",
+            "date": "09-11"
+        },
+        {
+            "description": "Ime Marijino, Dubravko",
+            "date": "09-12"
+        },
+        {
+            "description": "Ivan Zlatousti, Zlatko, Ljubo",
+            "date": "09-13"
+        },
+        {
+            "description": "Uzvi\u0161enje sv. Kri\u017ea",
+            "date": "09-14"
+        },
+        {
+            "description": "BDM \u017ealosna, Dolores",
+            "date": "09-15"
+        },
+        {
+            "description": "Kornelije i Ciprijan, Eufemija",
+            "date": "09-16"
+        },
+        {
+            "description": "Rane sv. Franje, Robert Belarmin",
+            "date": "09-17"
+        },
+        {
+            "description": "Josip Kupertinski, Sonja",
+            "date": "09-18"
+        },
+        {
+            "description": "Januarije, Teodor, \u017deljko",
+            "date": "09-19"
+        },
+        {
+            "description": "Andrija Kim, Svjetlana",
+            "date": "09-20"
+        },
+        {
+            "description": "Matej apostol i evan\u0111elist, Matko, kvatre",
+            "date": "09-21"
+        },
+        {
+            "description": "Toma Vilan., Ivan Mendez",
+            "date": "09-22"
+        },
+        {
+            "description": "Otac Pio, Lino, Tekla, Sofija, kvatre",
+            "date": "09-23"
+        },
+        {
+            "description": "Gospa od Otkupljenja, Rupert, kvatre",
+            "date": "09-24"
+        },
+        {
+            "description": "Aurelija, Zlata, Rikarda",
+            "date": "09-25"
+        },
+        {
+            "description": "Kuzma i Damjan, Damir",
+            "date": "09-26"
+        },
+        {
+            "description": "Vinko Paulski, Vicencija",
+            "date": "09-27"
+        },
+        {
+            "description": "Vjenceslav, Veteslav",
+            "date": "09-28"
+        },
+        {
+            "description": "Mihael, Gabriel i Rafael arkan\u0111eli",
+            "date": "09-29"
+        },
+        {
+            "description": "Jeronim, Honorij, Jerko",
+            "date": "09-30"
+        },
+        {
+            "description": "Terezija od Djeteta Isusa",
+            "date": "10-01"
+        },
+        {
+            "description": "An\u0111eli \u010duvari, An\u0111eo, An\u0111elko",
+            "date": "10-02"
+        },
+        {
+            "description": "Dionizije, Kandida, Gerhard",
+            "date": "10-03"
+        },
+        {
+            "description": "Franjo Asi\u0161ki, Franka, Kajo",
+            "date": "10-04"
+        },
+        {
+            "description": "Faustina Kow., Flavijan, Mauro",
+            "date": "10-05"
+        },
+        {
+            "description": "Bruno, Fides, Vjera, Vjerica",
+            "date": "10-06"
+        },
+        {
+            "description": "BDM od Krurice, Ru\u017ea, Ernest",
+            "date": "10-07"
+        },
+        {
+            "description": "Starac \u0160imun, Dimitrije, Hugo",
+            "date": "10-08"
+        },
+        {
+            "description": "Dionizije i dr., Abraham i Sara",
+            "date": "10-09"
+        },
+        {
+            "description": "Danijel i dr., Danko, Darija",
+            "date": "10-10"
+        },
+        {
+            "description": "Ivan XXIII. papa, Milan, Miljan",
+            "date": "10-11"
+        },
+        {
+            "description": "Maksimilijan, Makso, Velibor",
+            "date": "10-12"
+        },
+        {
+            "description": "Teofil, Bogoljub, Eduard",
+            "date": "10-13"
+        },
+        {
+            "description": "Kalist I. papa, Ljeposlav, Divna",
+            "date": "10-14"
+        },
+        {
+            "description": "Terezija Avilska, Tereza",
+            "date": "10-15"
+        },
+        {
+            "description": "Marija Margareta Alacoque",
+            "date": "10-16"
+        },
+        {
+            "description": "Igracije Artiohijski, Vatroslav",
+            "date": "10-17"
+        },
+        {
+            "description": "Luka ev. Luk\u0161a, Svjetlovid",
+            "date": "10-18"
+        },
+        {
+            "description": "Ivar Brebefski i Jogues i dr.",
+            "date": "10-19"
+        },
+        {
+            "description": "Vendelin, Irena, Miroslava",
+            "date": "10-20"
+        },
+        {
+            "description": "Ur\u0161ula, Karlo, Zvijezdan, Laura",
+            "date": "10-21"
+        },
+        {
+            "description": "Bl. Ivan Pavao II. papa, Ivan Pavao II. papa, Marko Jeruzalemski",
+            "date": "10-22"
+        },
+        {
+            "description": "Ivan Kapistranski, Teodoret",
+            "date": "10-23"
+        },
+        {
+            "description": "Antun M. Claret, Jaroslav, Flor",
+            "date": "10-24"
+        },
+        {
+            "description": "Katarina Kotromani\u010d, Darija",
+            "date": "10-25"
+        },
+        {
+            "description": "Dimitrije Srijemski, Dmitar",
+            "date": "10-26"
+        },
+        {
+            "description": "Sabina Avilska, Bartol",
+            "date": "10-27"
+        },
+        {
+            "description": "\u0160imun i Juda Tadej ap., Sini\u0161a",
+            "date": "10-28"
+        },
+        {
+            "description": "Mihovil Rua, Donat, Ida",
+            "date": "10-29"
+        },
+        {
+            "description": "Marcijan, Marcen, Marsela",
+            "date": "10-30"
+        },
+        {
+            "description": "Lucila Rimska, Alfons Rodrig",
+            "date": "10-31"
+        },
+        {
+            "description": "SVI SVETI, Svi Sveti, Svetislav, Sveto",
+            "date": "11-01"
+        },
+        {
+            "description": "Du\u0161ni dan, Du\u0161ni dan, Du\u0161ko, Du\u0161ica",
+            "date": "11-02"
+        },
+        {
+            "description": "Martir iz Porresa",
+            "date": "11-03"
+        },
+        {
+            "description": "Karlo Boromejski, Dragutir",
+            "date": "11-04"
+        },
+        {
+            "description": "Emerik, Mirko, Srijemski mu\u010denici",
+            "date": "11-05"
+        },
+        {
+            "description": "Melanija, Leonard pustinjak",
+            "date": "11-06"
+        },
+        {
+            "description": "Lazar Stilit, Engelbert",
+            "date": "11-07"
+        },
+        {
+            "description": "Gracija Kotorski, Klaudija",
+            "date": "11-08"
+        },
+        {
+            "description": "Posveta Lateranske bazilike",
+            "date": "11-09"
+        },
+        {
+            "description": "Leon Veliki papa, Lavoslav",
+            "date": "11-10"
+        },
+        {
+            "description": "Martir Tourski, Davorin",
+            "date": "11-11"
+        },
+        {
+            "description": "Jozafat, Emiltan, Renato",
+            "date": "11-12"
+        },
+        {
+            "description": "Stanislav Kostka, Stanko",
+            "date": "11-13"
+        },
+        {
+            "description": "Nikola Taveli\u010d, Ivan Trogirski",
+            "date": "11-14"
+        },
+        {
+            "description": "Albert Veliki, Leopold III.",
+            "date": "11-15"
+        },
+        {
+            "description": "Margareta \u0160kotska, Gera",
+            "date": "11-16"
+        },
+        {
+            "description": "Elizabeta Ugarska",
+            "date": "11-17"
+        },
+        {
+            "description": "Posveta baz. Petra i Pavla",
+            "date": "11-18"
+        },
+        {
+            "description": "Salomeja, Janja Asi\u0161ka, Eva",
+            "date": "11-19"
+        },
+        {
+            "description": "Feliks iz Valoisa, Sre\u0107ko",
+            "date": "11-20"
+        },
+        {
+            "description": "Prikazanje Bla\u017eene Djevice Marije, Gospa od Zdravlja",
+            "date": "11-21"
+        },
+        {
+            "description": "Cecilija, Dobrila, Slavujka",
+            "date": "11-22"
+        },
+        {
+            "description": "Klement I., Lukrecija, Felicita",
+            "date": "11-23"
+        },
+        {
+            "description": "Krizogon, Kr\u0161evan",
+            "date": "11-24"
+        },
+        {
+            "description": "Katarina Aleksandrijska",
+            "date": "11-25"
+        },
+        {
+            "description": "Leonard, Konrad, Delfina",
+            "date": "11-26"
+        },
+        {
+            "description": "Bla\u017eena Djevica Marija od \u010cudotvorne medaljice",
+            "date": "11-27"
+        },
+        {
+            "description": "Jakov Markijski, Dr\u017eislav",
+            "date": "11-28"
+        },
+        {
+            "description": "Svi sveti frarjeva\u010dkog reda",
+            "date": "11-29"
+        },
+        {
+            "description": "Andrija ap., Ardrija, Andro",
+            "date": "11-30"
+        },
+        {
+            "description": "Eligije, Natalija, Bo\u017eena",
+            "date": "12-01"
+        },
+        {
+            "description": "Habakuk pr., Bibijana, \u017divka",
+            "date": "12-02"
+        },
+        {
+            "description": "Franjo Ksaverski, Sofonija pr.",
+            "date": "12-03"
+        },
+        {
+            "description": "Barbara, Ivan Dama\u0161\u010danski",
+            "date": "12-04"
+        },
+        {
+            "description": "Krispina, Saba, Slavka",
+            "date": "12-05"
+        },
+        {
+            "description": "Nikola biskup, Nik\u0161a, Nikica",
+            "date": "12-06"
+        },
+        {
+            "description": "Ambrozije, Ambroz, Sabina",
+            "date": "12-07"
+        },
+        {
+            "description": "Bezgre\u0161no Za\u010de\u0107e Bla\u017eene Djevice Marije",
+            "date": "12-08"
+        },
+        {
+            "description": "Ivar Diego C., Ciprijan",
+            "date": "12-09"
+        },
+        {
+            "description": "Gospa Loretska",
+            "date": "12-10"
+        },
+        {
+            "description": "Damaz I. p., Josip Egipatski",
+            "date": "12-11"
+        },
+        {
+            "description": "Bla\u017eena Djevica Marija Guadalupska, Spiridon",
+            "date": "12-12"
+        },
+        {
+            "description": "Lucija, Svjetlana, Otilija",
+            "date": "12-13"
+        },
+        {
+            "description": "Ivar od Kri\u017ea, Oton iz Pule",
+            "date": "12-14"
+        },
+        {
+            "description": "Drinske mu\u010denice (Materice), Irenej, Kristina, Darija",
+            "date": "12-15"
+        },
+        {
+            "description": "Adela, Albina, Zorka, Hagaj",
+            "date": "12-16"
+        },
+        {
+            "description": "Lazar, Izak, Jolanda",
+            "date": "12-17"
+        },
+        {
+            "description": "Malahija pr., Gracijan Tour.",
+            "date": "12-18"
+        },
+        {
+            "description": "Arastazije, Benjanim, Urban",
+            "date": "12-19"
+        },
+        {
+            "description": "Amon, Eugen i Makarije",
+            "date": "12-20"
+        },
+        {
+            "description": "Petar Kanizije, Mihej pr.",
+            "date": "12-21"
+        },
+        {
+            "description": "Honorat, \u010caslav, Zenon",
+            "date": "12-22"
+        },
+        {
+            "description": "Ivar Kentijski, Ivar, Ivon",
+            "date": "12-23"
+        },
+        {
+            "description": "Badnjak",
+            "date": "12-24"
+        },
+        {
+            "description": "Bo\u017eidar",
+            "date": "12-25"
+        },
+        {
+            "description": "Stjepan Prvomu\u010denik, Stjepan prvomu\u010denik",
+            "date": "12-26"
+        },
+        {
+            "description": "Ivan ap. i ev., Ivona, Janko",
+            "date": "12-27"
+        },
+        {
+            "description": "Nevina dje\u010dica, Nevina dje\u010dica, Mladen",
+            "date": "12-28"
+        },
+        {
+            "description": "SV. OBITELJ, SVETA OBITELJ Toma Becket, Tomislav",
+            "date": "12-29"
+        },
+        {
+            "description": "Feliks I. papa, Trpimir",
+            "date": "12-30"
+        },
+        {
+            "description": "Silvestar, Silvio, Zahvalnica",
+            "date": "12-31"
+        }
+    ]
 }

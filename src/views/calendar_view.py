@@ -69,7 +69,7 @@ class CalendarView(View):
         self.month_button = Button(
             self.canvas,
             (self.width // 2, 100),
-            (200, 50),
+            (220, 50),
             label=Label(text=self.get_month_name(self.month).upper(), text_color=Colors.TEXT_LIGHT_GREY,
                         font=Assets().font36),
             border_width=0,

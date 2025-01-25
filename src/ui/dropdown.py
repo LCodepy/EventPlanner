@@ -1,9 +1,9 @@
-from typing import Callable
+from typing import Callable, Union, Optional
 
 import pygame
 
 from src.events.event import Event, MouseMotionEvent, MouseReleaseEvent, MouseClickEvent, MouseFocusChangedEvent, \
-    WindowMinimizedEvent, WindowUnminimizedEvent
+    WindowMinimizedEvent, WindowUnminimizedEvent, MouseWheelUpEvent, MouseWheelDownEvent
 from src.events.mouse_buttons import MouseButtons
 from src.main.settings import Settings
 from src.ui.alignment import HorizontalAlignment
@@ -23,6 +23,7 @@ class DropDown(UIObject):
                  border_radius: int = 0,  border_width: int = 1,  hover_color: Color = None, click_color: Color = None,
                  selected_option: int = 0, font: pygame.font.Font = None, underline: bool = False,
                  horizontal_text_alignment: HorizontalAlignment = HorizontalAlignment.CENTER,
+                 button_height: int = None, button_border_radius: int = None, scroll_value: int = 10,
                  padding: Padding = None) -> None:
         super().__init__(canvas, pos, padding)
         self.canvas = canvas
@@ -41,11 +42,20 @@ class DropDown(UIObject):
         self.font = font or pygame.font.SysFont("arial", 12)
         self.underline = underline
         self.horizontal_text_alignment = horizontal_text_alignment
+        self.button_height = button_height or (self.height - 6)
+        self.button_border_radius = button_border_radius
+        self.scroll_value = scroll_value
         self.padding = padding or Padding()
+
+        self.max_height = None
+        self.scroll = 0
+
+        self.box_surface = pygame.Surface((self.width, self.get_box_height()), pygame.SRCALPHA)
 
         self.hovering = False
         self.pressed = False
         self.opened = False
+        self.is_scrolling = False
 
         self.on_select = None
         self.on_release_bind = None
@@ -69,7 +79,7 @@ class DropDown(UIObject):
         registered_events = False
 
         for btn in self.buttons:
-            if btn.register_event(event):
+            if btn.register_event(self.get_button_event(event)):
                 registered_events = True
 
         if registered_events:
@@ -112,9 +122,13 @@ class DropDown(UIObject):
             self.pressed = False
             self.on_release()
             return True
+        elif isinstance(event, (MouseWheelUpEvent, MouseWheelDownEvent)) and self.is_hovering_box((event.x, event.y)):
+            self.on_scroll(event)
+            return True
         elif (
             isinstance(event, MouseClickEvent) and
-            not self.is_hovering((event.x, event.y))
+            not self.is_hovering((event.x, event.y)) and
+            (event.button is MouseButtons.LEFT_BUTTON or event.button is MouseButtons.RIGHT_BUTTON)
         ):
             self.opened = False
             self.buttons = []
@@ -123,8 +137,8 @@ class DropDown(UIObject):
     def render(self) -> None:
         if self.underline:
             pygame.draw.line(
-                self.canvas, self.label.text_color, (self.x - self.width // 2, self.y + self.height // 2 - 1),
-                (self.x + self.width // 2 - 1, self.y + self.height // 2 - 1)
+                self.canvas, self.label.text_color, (self.x - self.width // 2, self.y + self.height // 2 - 2),
+                (self.x + self.width // 2 - 1, self.y + self.height // 2 - 2)
             )
         elif Settings().get_settings()["high_quality_graphics"]:
             render_rounded_rect(self.canvas, self.color, self.get_rect(), self.border_radius, width=0)
@@ -148,38 +162,39 @@ class DropDown(UIObject):
                     self.canvas,
                     self.color,
                     pygame.Rect(
-                        self.get_rect().x, self.y + self.height // 2, self.width,
-                        (self.height - 4) * (len(self.options) - 1)
+                        self.get_rect().x, self.y + self.height // 2, self.width, self.get_box_height()
                     ),
                     self.border_radius,
                     width=0
                 )
-                if self.border_width:
-                    render_rounded_rect(
-                        self.canvas,
-                        self.border_color,
-                        pygame.Rect(
-                            self.get_rect().x, self.y + self.height // 2, self.width,
-                            (self.height - 4) * (len(self.options) - 1)
-                        ),
-                        self.border_radius,
-                        width=self.border_width
-                    )
             else:
                 pygame.draw.rect(
                     self.canvas, self.color, [self.get_rect().x, self.y + self.height // 2, self.width,
-                                              (self.height - 4) * (len(self.options) - 1)],
+                                              self.get_box_height()],
                     border_radius=self.border_radius
                 )
-                if self.border_width:
-                    pygame.draw.rect(
-                        self.canvas, self.border_color, [self.get_rect().x, self.y + self.height // 2, self.width,
-                                                         (self.height - 4) * (len(self.options) - 1)],
-                        border_radius=self.border_radius, width=self.border_width
-                    )
+
+        self.box_surface.fill((0, 0, 0, 0))
 
         for btn in self.buttons:
             btn.render()
+
+        if self.opened and self.border_width:
+            if Settings().get_settings()["high_quality_graphics"]:
+                render_rounded_rect(
+                    self.box_surface,
+                    self.border_color,
+                    pygame.Rect(0, 0, self.width, self.get_box_height()),
+                    self.border_radius,
+                    width=self.border_width
+                )
+            else:
+                pygame.draw.rect(
+                    self.box_surface, self.border_color, [0, 0, self.width, self.get_box_height()],
+                    border_radius=self.border_radius, width=self.border_width
+                )
+
+        self.canvas.blit(self.box_surface, (self.get_box_rect().x, self.get_box_rect().y))
 
         # UI debugging
         if UIDebugger.is_enabled():
@@ -208,14 +223,14 @@ class DropDown(UIObject):
                 continue
             self.buttons.append(
                 Button(
-                    self.canvas,
-                    (self.x, self.y + 6 + (i + 1) * (self.height - 6)),
-                    (self.width - 6, self.height - 6),
+                    self.box_surface,
+                    (self.width // 2, self.height // 2 + 3 + i * self.button_height + (self.height - self.button_height) // 2),
+                    (self.width - 6, self.button_height),
                     label=Label(text=self.options[j], text_color=self.text_color, font=self.font,
                                 horizontal_text_alignment=self.horizontal_text_alignment),
                     color=self.color,
                     border_width=0,
-                    border_radius=self.border_radius,
+                    border_radius=self.button_border_radius or self.border_radius,
                     padding=self.padding
                 )
             )
@@ -228,6 +243,20 @@ class DropDown(UIObject):
     def set_option(self, idx: int) -> None:
         self.selected_option = idx
         self.label.set_text(self.options[idx])
+
+    def set_max_height(self, height: Optional[int]) -> None:
+        self.max_height = height
+        self.box_surface = pygame.Surface((self.width, self.get_box_height()), pygame.SRCALPHA)
+        for btn in self.buttons:
+            btn.update_canvas(self.box_surface)
+
+        # if self.buttons:
+        #     scroll = self.get_box_height() - 3 - self.buttons[-1].get_rect().bottom
+        #     for btn in self.buttons:
+        #         btn.update_position(y=btn.y + scroll)
+
+    def get_box_height(self) -> int:
+        return self.max_height or self.button_height * (len(self.options) - 1) + 6
 
     def on_button_click(self, idx: int) -> None:
         self.selected_option = idx
@@ -260,6 +289,25 @@ class DropDown(UIObject):
     def on_exit(self) -> None:
         self.label.text_color = self.text_color
 
+    def on_scroll(self, event: Union[MouseWheelUpEvent, MouseWheelDownEvent]) -> None:
+        self.is_scrolling = True
+
+        scroll_value = self.scroll_value * event.scroll
+        min_y = self.buttons[0].get_rect().top
+        max_y = self.buttons[-1].get_rect().bottom
+
+        if (
+                (isinstance(event, MouseWheelUpEvent) and min_y < 3) or
+                (isinstance(event, MouseWheelDownEvent) and max_y > self.get_box_height() - 3)
+        ):
+            if max_y + scroll_value <= self.get_box_height() - 3:
+                scroll_value = self.get_box_height() - 3 - max_y
+            elif min_y + scroll_value >= 3:
+                scroll_value = 3 - min_y
+
+            for btn in self.buttons:
+                btn.update_position(y=btn.y + scroll_value)
+
     def bind_on_click(self, on_click: Callable) -> None:
         self.on_click_bind = on_click
 
@@ -269,7 +317,7 @@ class DropDown(UIObject):
     def bind_on_select(self, on_select: Callable) -> None:
         self.on_select = on_select
 
-    def is_hovering(self, mouse_pos) -> bool:
+    def is_hovering(self, mouse_pos: (int, int)) -> bool:
         mouse_x, mouse_y = mouse_pos
         if self.border_radius:
             left_center_x = self.x - self.width // 2 + self.border_radius
@@ -292,6 +340,26 @@ class DropDown(UIObject):
                     return False
 
         return self.get_rect().collidepoint(mouse_x, mouse_y)
+
+    def is_hovering_box(self, mouse_pos: (int, int)) -> bool:
+        if not self.opened:
+            return False
+
+        return self.get_box_rect().collidepoint(mouse_pos)
+
+    def get_button_event(self, event: Event) -> Event:
+        if isinstance(event, (MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent)):
+            return event.__class__(event.exec_time, event.x - self.get_box_rect().x, event.y - self.get_box_rect().y,
+                                   *list(event.__dict__.values())[3:])
+        elif isinstance(event, MouseMotionEvent):
+            return MouseMotionEvent(
+                event.exec_time, event.start_x - self.get_box_rect().x, event.start_y - self.get_box_rect().y,
+                event.x - self.get_box_rect().x, event.y - self.get_box_rect().y
+            )
+        return event
+
+    def get_box_rect(self) -> pygame.Rect:
+        return pygame.Rect(self.x - self.width // 2, self.y + self.height // 2, self.width, self.get_box_height())
 
     def get_rect(self) -> pygame.Rect:
         return pygame.Rect(self.x - self.width // 2, self.y - self.height // 2, self.width, self.height)

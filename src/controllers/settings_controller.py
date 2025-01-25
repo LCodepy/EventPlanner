@@ -91,9 +91,9 @@ class SettingsController:
                 obj.update_position(y=obj.y + scroll)
 
     def on_language_dropdown_clicked(self) -> None:
-        lang = self.view.language_dropdown.get_selected_option().lower()
-        Settings().update_settings(["language"], lang)
-        self.view.language_manager.set_language(self.view.language_manager.language_names[lang])
+        lang = self.view.language_dropdown.get_selected_option()
+        Settings().update_settings(["language"], self.view.language_manager.get_language_name(lang))
+        self.view.language_manager.set_language(self.view.language_manager.get_language_by_name(lang))
         self.event_loop.enqueue_event(LanguageChangedEvent(time.time()))
 
     def on_catholic_events_checkbox_clicked(self) -> None:

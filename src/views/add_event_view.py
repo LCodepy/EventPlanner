@@ -130,7 +130,9 @@ class AddEventView(View):
             font=Assets().font20,
             selected_option=3,
             underline=True,
-            border_radius=4
+            border_radius=6,
+            button_height=30,
+            button_border_radius=2
         )
 
         self.error_label = Label(
