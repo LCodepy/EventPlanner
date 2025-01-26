@@ -22,7 +22,7 @@ class Assets(metaclass=Singleton):
             self.GOOGLE_PATH = Path(sys._MEIPASS).__str__() + "\\assets\\google"
 
             self.DATA_PATH = (Path.home() / ".test/data").__str__()
-            self.GOOGLE_TOKENS_PATH = (Path.home() / "tokens").__str__()
+            self.GOOGLE_TOKENS_PATH = (Path.home() / ".test/tokens").__str__()
 
         # App Bar icons
         self.app_icon = pygame.image.load(
