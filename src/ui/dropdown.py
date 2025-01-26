@@ -141,6 +141,8 @@ class DropDown(UIObject):
         ):
             self.opened = False
             self.buttons = []
+            self.scroll = 0
+            self.scroller.y = 0
             return True
 
         return registered_events
@@ -310,6 +312,8 @@ class DropDown(UIObject):
         if self.opened:
             self.opened = False
             self.buttons = []
+            self.scroll = 0
+            self.scroller.y = 0
             return
 
         self.opened = True

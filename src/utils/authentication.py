@@ -36,6 +36,9 @@ class GoogleAuthentication:
 
     @staticmethod
     def authenticate_new_user() -> Optional[User]:
+        if not os.path.exists(Assets().google_credentials_file_path):
+            return
+
         flow = InstalledAppFlow.from_client_secrets_file(Assets().google_credentials_file_path, scopes=SCOPES)
         try:
             flow.run_local_server(port=GoogleAuthentication.get_available_port(), timeout_seconds=300)
@@ -58,6 +61,9 @@ class GoogleAuthentication:
 
     @staticmethod
     def authenticate_user_with_token(email: str) -> Optional[User]:
+        if not os.path.exists(Assets().google_credentials_file_path):
+            return
+
         token_file = os.path.join(Assets().google_tokens_path, f"token_{email}.json")
 
         try:

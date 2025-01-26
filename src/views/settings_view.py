@@ -1,9 +1,10 @@
+import time
 from typing import Union, Callable
 
 import pygame
 
 from src.events.event import MouseClickEvent, MouseReleaseEvent, Event, MouseWheelUpEvent, MouseWheelDownEvent, \
-    LanguageChangedEvent, MouseMotionEvent
+    LanguageChangedEvent, MouseMotionEvent, MouseFocusChangedEvent
 from src.events.mouse_buttons import MouseButtons
 from src.main.config import Config
 from src.main.language_manager import LanguageManager
@@ -262,8 +263,13 @@ class SettingsView(View):
             self.update_language()
 
         event = self.get_event(event)
+        if isinstance(event, (MouseClickEvent, MouseReleaseEvent, MouseMotionEvent, MouseWheelUpEvent, MouseWheelDownEvent)) and event.y < 80:
+            event = MouseFocusChangedEvent(time.time(), False)
 
         for obj in self.get_ui_elements():
+            if obj is not self.language_dropdown and isinstance(event, (MouseClickEvent, MouseReleaseEvent)) and \
+                    self.language_dropdown.is_hovering_box((event.x, event.y)):
+                continue
             if obj.register_event(event):
                 registered_events = True
 
@@ -310,7 +316,7 @@ class SettingsView(View):
         for i in range(22):
             y = 80 + i * 2
             pygame.draw.line(c, (30, 30, 30, 255 - i * 12), (0, y), (self.width, y))
-            pygame.draw.line(c, (30, 30, 30, 255 - i * 12), (0, y+1), (self.width, y+1))
+            pygame.draw.line(c, (30, 30, 30, 255 - i * 12), (0, y + 1), (self.width, y + 1))
         self.canvas.blit(c, (0, 0))
 
     def resize(self, width: int = None, height: int = None) -> None:
@@ -373,7 +379,8 @@ class SettingsView(View):
     def set_rendering(self, b: bool) -> None:
         self.rendering = b
 
-    def is_focused(self, event: Union[MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent]) -> bool:
+    def is_focused(self,
+                   event: Union[MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent]) -> bool:
         return self.x <= event.x < self.x + self.width and self.y <= event.y < self.y + self.height
 
     def on_delete(self) -> None:

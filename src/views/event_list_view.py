@@ -79,6 +79,7 @@ class EventListEvent(UIObject):
             click_color=color,
             border_width=0
         )
+
         if self.editable:
             self.delete_task_button.bind_on_click(self.on_delete)
 
@@ -169,6 +170,12 @@ class EventListEvent(UIObject):
             self.y = y
             if set_start_pos:
                 self.start_pos = (self.start_pos[0], y)
+
+        if self.delete_task_button.is_hovering(
+                (pygame.mouse.get_pos()[0] - Config.taskbar_width, pygame.mouse.get_pos()[1] - Config.appbar_height)
+        ):
+            self.delete_task_button.hovering = True
+            self.delete_task_button.on_enter()
 
     def resize(self, width: int = None, height: int = None) -> None:
         self.width = width or self.width

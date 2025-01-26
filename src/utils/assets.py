@@ -118,6 +118,11 @@ class Assets(metaclass=Singleton):
         self.google_credentials_file_path = os.path.join(self.GOOGLE_PATH, "credentials.json")
         self.google_tokens_path = os.path.join(self.GOOGLE_PATH, "tokens")
 
+        if not os.path.exists(self.GOOGLE_PATH):
+            os.mkdir(self.GOOGLE_PATH)
+        if not os.path.exists(self.google_tokens_path):
+            os.mkdir(self.google_tokens_path)
+
         self.user_profile_pictures = {None: self.profile_picture_icon_large}
 
         # Fonts
