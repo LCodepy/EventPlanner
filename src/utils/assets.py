@@ -1,4 +1,6 @@
 import os
+import sys
+from pathlib import Path
 
 import pygame
 
@@ -10,9 +12,18 @@ class Assets(metaclass=Singleton):
     IMAGES_PATH = os.getcwd() + "\\assets\\images"
     DATA_PATH = os.getcwd() + "\\assets\\data"
     GOOGLE_PATH = os.getcwd() + "\\assets\\google"
+    GOOGLE_TOKENS_PATH = "\\assets\\tokens"
     SETTINGS_PATH = os.getcwd() + "\\assets\\settings"
 
     def __init__(self) -> None:
+        if getattr(sys, "frozen", False):
+            self.IMAGES_PATH = Path(sys._MEIPASS).__str__() + "\\assets\\images"
+            self.SETTINGS_PATH = Path(sys._MEIPASS).__str__() + "\\assets\\settings"
+            self.GOOGLE_PATH = Path(sys._MEIPASS).__str__() + "\\assets\\google"
+
+            self.DATA_PATH = (Path.home() / ".test/data").__str__()
+            self.GOOGLE_TOKENS_PATH = (Path.home() / "tokens").__str__()
+
         # App Bar icons
         self.app_icon = pygame.image.load(
             os.path.join(self.IMAGES_PATH, "app_icon.png")
@@ -115,18 +126,7 @@ class Assets(metaclass=Singleton):
         self.calendar_database_path = os.path.join(self.DATA_PATH, "calendars")
         self.settings_database_path = os.path.join(self.SETTINGS_PATH, "settings.json")
 
-        if not os.path.exists(self.todo_list_database_path):
-            os.mkdir(self.todo_list_database_path)
-        if not os.path.exists(self.calendar_database_path):
-            os.mkdir(self.calendar_database_path)
-
         self.google_credentials_file_path = os.path.join(self.GOOGLE_PATH, "credentials.json")
-        self.google_tokens_path = os.path.join(self.GOOGLE_PATH, "tokens")
-
-        if not os.path.exists(self.GOOGLE_PATH):
-            os.mkdir(self.GOOGLE_PATH)
-        if not os.path.exists(self.google_tokens_path):
-            os.mkdir(self.google_tokens_path)
 
         self.user_profile_pictures = {None: self.profile_picture_icon_large}
 

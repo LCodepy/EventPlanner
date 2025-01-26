@@ -1,6 +1,8 @@
 import json
 import os
+import sys
 from enum import Enum, auto
+from pathlib import Path
 from typing import Union
 
 from src.main.settings import Settings
@@ -33,6 +35,9 @@ class LanguageManager(metaclass=Singleton):
 
     def __init__(self, language: Language = Language.ENGLISH) -> None:
         self.language = language
+
+        if getattr(sys, "frozen", False):
+            self.LANGUAGES_PATH = Path(sys._MEIPASS).__str__() + "\\assets\\languages"
 
         self.language_names = {
             "afr": Language.AFRIKAANS,

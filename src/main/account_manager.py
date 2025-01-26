@@ -47,7 +47,7 @@ class AccountManager(metaclass=Singleton):
         return False
 
     def load_users(self) -> None:
-        users = os.listdir(Assets().google_tokens_path)
+        users = os.listdir(Assets().GOOGLE_TOKENS_PATH)
         for acc in users:
             user = GoogleAuthentication.authenticate_user_with_token(acc[6:-5])
             if user:
@@ -105,7 +105,7 @@ class AccountManager(metaclass=Singleton):
 
         self.users.remove(user)
 
-        token_path = os.path.join(Assets().google_tokens_path, f"token_{user.email}.json")
+        token_path = os.path.join(Assets().GOOGLE_TOKENS_PATH, f"token_{user.email}.json")
         calendar_path = os.path.join(Assets().calendar_database_path, f"calendar_{user.email}.db")
         todo_list_path = os.path.join(Assets().calendar_database_path, f"todo_list_{user.email}.db")
 

@@ -54,7 +54,7 @@ class GoogleAuthentication:
         if "name" in user_info:
             name = user_info["name"]
 
-        with open(os.path.join(Assets().google_tokens_path, f"token_{email}.json"), 'w') as token:
+        with open(os.path.join(Assets().GOOGLE_TOKENS_PATH, f"token_{email}.json"), 'w') as token:
             token.write(flow.credentials.to_json())
 
         return User(email, uri, name)
@@ -64,7 +64,7 @@ class GoogleAuthentication:
         if not os.path.exists(Assets().google_credentials_file_path):
             return
 
-        token_file = os.path.join(Assets().google_tokens_path, f"token_{email}.json")
+        token_file = os.path.join(Assets().GOOGLE_TOKENS_PATH, f"token_{email}.json")
 
         try:
             creds = Credentials.from_authorized_user_file(token_file, scopes=SCOPES)
@@ -90,14 +90,14 @@ class GoogleAuthentication:
         if "name" in user_info:
             name = user_info["name"]
 
-        with open(os.path.join(Assets().google_tokens_path, f"token_{email}.json"), "w") as token:
+        with open(os.path.join(Assets().GOOGLE_TOKENS_PATH, f"token_{email}.json"), "w") as token:
             token.write(creds.to_json())
 
         return User(email, uri, name)
 
     @staticmethod
     def initialize_service(email: str) -> Resource:
-        token_file = os.path.join(Assets().google_tokens_path, f"token_{email}.json")
+        token_file = os.path.join(Assets().GOOGLE_TOKENS_PATH, f"token_{email}.json")
         creds = None
 
         try:
