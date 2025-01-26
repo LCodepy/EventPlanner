@@ -1,3 +1,4 @@
+import time
 from typing import Callable, Union, Optional
 
 import pygame
@@ -20,11 +21,11 @@ class DropDown(UIObject):
 
     def __init__(self, canvas: pygame.Surface, pos: (int, int), size: (int, int), options: list[str],
                  color: Color = Colors.WHITE, border_color: Color = Colors.BLACK, text_color: Color = Colors.WHITE,
-                 border_radius: int = 0,  border_width: int = 1,  hover_color: Color = None, click_color: Color = None,
+                 border_radius: int = 0, border_width: int = 1, hover_color: Color = None, click_color: Color = None,
                  selected_option: int = 0, font: pygame.font.Font = None, underline: bool = False,
                  horizontal_text_alignment: HorizontalAlignment = HorizontalAlignment.CENTER,
                  button_height: int = None, button_border_radius: int = None, scroll_value: int = 10,
-                 padding: Padding = None) -> None:
+                 max_height: int = None, padding: Padding = None) -> None:
         super().__init__(canvas, pos, padding)
         self.canvas = canvas
         self.x, self.y = pos
@@ -45,10 +46,11 @@ class DropDown(UIObject):
         self.button_height = button_height or (self.height - 6)
         self.button_border_radius = button_border_radius
         self.scroll_value = scroll_value
+        self.max_height = max_height
         self.padding = padding or Padding()
 
-        self.max_height = None
         self.scroll = 0
+        self.scroller = pygame.Rect(self.width - 6, 1, 5, self.max_height // 4)
 
         self.box_surface = pygame.Surface((self.width, self.get_box_height()), pygame.SRCALPHA)
 
@@ -56,6 +58,7 @@ class DropDown(UIObject):
         self.pressed = False
         self.opened = False
         self.is_scrolling = False
+        self.scroller_pressed = False
 
         self.on_select = None
         self.on_release_bind = None
@@ -76,14 +79,17 @@ class DropDown(UIObject):
         self.buttons: list[Button] = []
 
     def register_event(self, event: Event) -> bool:
+        self.is_scrolling = False
+
         registered_events = False
 
-        for btn in self.buttons:
-            if btn.register_event(self.get_button_event(event)):
-                registered_events = True
+        ev = event
+        if not self.event_in_box(event):
+            ev = MouseFocusChangedEvent(time.time(), False)
 
-        if registered_events:
-            return True
+        for btn in self.buttons:
+            if btn.register_event(self.get_button_event(ev)):
+                registered_events = True
 
         if isinstance(event, MouseMotionEvent):
             currently_hovering = self.is_hovering((event.x, event.y))
@@ -93,7 +99,8 @@ class DropDown(UIObject):
                 else:
                     self.on_enter()
                 self.hovering = currently_hovering
-                return True
+            self.on_mouse_motion(event)
+            return True
         elif isinstance(event, MouseFocusChangedEvent):
             if self.hovering and not event.focused:
                 self.hovering = event.focused
@@ -106,33 +113,37 @@ class DropDown(UIObject):
         elif isinstance(event, WindowUnminimizedEvent):
             return True
         elif (
-            isinstance(event, MouseClickEvent) and
-            self.is_hovering((event.x, event.y)) and
-            event.button is MouseButtons.LEFT_BUTTON
+                isinstance(event, MouseClickEvent) and
+                (self.is_hovering((event.x, event.y)) or self.is_hovering_box((event.x, event.y))) and
+                event.button is MouseButtons.LEFT_BUTTON
         ):
             self.pressed = True
-            self.on_click()
+            self.on_click(event)
             return True
+        elif isinstance(event, MouseReleaseEvent) and event.button is MouseButtons.LEFT_BUTTON and self.scroller_pressed:
+            self.scroller_pressed = False
         elif (
-            isinstance(event, MouseReleaseEvent) and
-            self.is_hovering((event.x, event.y)) and
-            event.button is MouseButtons.LEFT_BUTTON and
-            self.pressed
+                isinstance(event, MouseReleaseEvent) and
+                (self.is_hovering((event.x, event.y)) or self.is_hovering_box((event.x, event.y))) and
+                event.button is MouseButtons.LEFT_BUTTON and
+                self.pressed
         ):
             self.pressed = False
-            self.on_release()
+            self.on_release(event)
             return True
         elif isinstance(event, (MouseWheelUpEvent, MouseWheelDownEvent)) and self.is_hovering_box((event.x, event.y)):
             self.on_scroll(event)
             return True
         elif (
-            isinstance(event, MouseClickEvent) and
-            not self.is_hovering((event.x, event.y)) and
-            (event.button is MouseButtons.LEFT_BUTTON or event.button is MouseButtons.RIGHT_BUTTON)
+                isinstance(event, MouseClickEvent) and
+                not self.is_hovering((event.x, event.y)) and not self.is_hovering_box((event.x, event.y)) and
+                (event.button is MouseButtons.LEFT_BUTTON or event.button is MouseButtons.RIGHT_BUTTON)
         ):
             self.opened = False
             self.buttons = []
             return True
+
+        return registered_events
 
     def render(self) -> None:
         if self.underline:
@@ -179,6 +190,10 @@ class DropDown(UIObject):
         for btn in self.buttons:
             btn.render()
 
+        if self.max_height and self.opened:
+            pygame.draw.rect(self.box_surface, (10, 10, 10), [self.width - 6, 1, 5, self.get_box_height() - 2])
+            pygame.draw.rect(self.box_surface, (50, 50, 50), self.scroller, border_radius=2)
+
         if self.opened and self.border_width:
             if Settings().get_settings()["high_quality_graphics"]:
                 render_rounded_rect(
@@ -224,8 +239,9 @@ class DropDown(UIObject):
             self.buttons.append(
                 Button(
                     self.box_surface,
-                    (self.width // 2, self.height // 2 + 3 + i * self.button_height + (self.height - self.button_height) // 2),
-                    (self.width - 6, self.button_height),
+                    (self.width // 2 if not self.max_height else self.width // 2 - 2,
+                     self.height // 2 + 3 + i * self.button_height + (self.height - self.button_height) // 2),
+                    (self.button_width, self.button_height),
                     label=Label(text=self.options[j], text_color=self.text_color, font=self.font,
                                 horizontal_text_alignment=self.horizontal_text_alignment),
                     color=self.color,
@@ -250,13 +266,13 @@ class DropDown(UIObject):
         for btn in self.buttons:
             btn.update_canvas(self.box_surface)
 
-        # if self.buttons:
-        #     scroll = self.get_box_height() - 3 - self.buttons[-1].get_rect().bottom
-        #     for btn in self.buttons:
-        #         btn.update_position(y=btn.y + scroll)
-
-    def get_box_height(self) -> int:
-        return self.max_height or self.button_height * (len(self.options) - 1) + 6
+    def set_scroll(self) -> None:
+        self.scroll = -self.scroller.y * (self.get_box_height(False) - self.max_height) / (
+                    self.max_height - self.scroller.h)
+        for i, btn in enumerate(self.buttons):
+            btn.update_position(
+                y=self.height // 2 + 3 + i * self.button_height + (self.height - self.button_height) // 2 + self.scroll
+            )
 
     def on_button_click(self, idx: int) -> None:
         self.selected_option = idx
@@ -267,11 +283,30 @@ class DropDown(UIObject):
         if self.on_select:
             self.on_select()
 
-    def on_click(self) -> None:
+    def on_mouse_motion(self, event: MouseMotionEvent) -> None:
+        event = self.get_button_event(event)
+
+        if self.scroller_pressed and self.pressed:
+            self.scroller.y = max(0, min(self.max_height - self.scroller.h, event.y - self.scroller.h // 2))
+            self.set_scroll()
+
+    def on_click(self, event: MouseClickEvent) -> None:
+        event = self.get_button_event(event)
+
+        if not self.scroller.collidepoint((event.x, event.y)) and event.x > self.width - 7:
+            self.scroller_pressed = True
+            self.scroller.y = max(0, min(self.max_height - self.scroller.h, event.y - self.scroller.h // 2))
+            self.set_scroll()
+        elif self.scroller.collidepoint((event.x, event.y)):
+            self.scroller_pressed = True
+
         if self.on_click_bind:
             self.on_click_bind()
 
-    def on_release(self) -> None:
+    def on_release(self, event: MouseReleaseEvent) -> None:
+        if self.is_hovering_box((event.x, event.y)):
+            return
+
         if self.opened:
             self.opened = False
             self.buttons = []
@@ -305,6 +340,8 @@ class DropDown(UIObject):
             elif min_y + scroll_value >= 3:
                 scroll_value = 3 - min_y
 
+            self.scroll += scroll_value
+            self.scroller.y = -self.scroll * (self.max_height - self.scroller.h) / (self.get_box_height(False) - self.max_height)
             for btn in self.buttons:
                 btn.update_position(y=btn.y + scroll_value)
 
@@ -347,6 +384,15 @@ class DropDown(UIObject):
 
         return self.get_box_rect().collidepoint(mouse_pos)
 
+    def event_in_box(self, event: Event) -> bool:
+        if not isinstance(
+                event, (MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent, MouseMotionEvent)
+               ):
+            return True
+        elif self.get_box_rect().top < event.y < self.get_box_rect().bottom:
+            return True
+        return False
+
     def get_button_event(self, event: Event) -> Event:
         if isinstance(event, (MouseClickEvent, MouseReleaseEvent, MouseWheelUpEvent, MouseWheelDownEvent)):
             return event.__class__(event.exec_time, event.x - self.get_box_rect().x, event.y - self.get_box_rect().y,
@@ -354,9 +400,14 @@ class DropDown(UIObject):
         elif isinstance(event, MouseMotionEvent):
             return MouseMotionEvent(
                 event.exec_time, event.start_x - self.get_box_rect().x, event.start_y - self.get_box_rect().y,
-                event.x - self.get_box_rect().x, event.y - self.get_box_rect().y
+                                 event.x - self.get_box_rect().x, event.y - self.get_box_rect().y
             )
         return event
+
+    def get_box_height(self, max_height: bool = True) -> int:
+        if max_height:
+            return self.max_height or self.button_height * (len(self.options) - 1) + 6
+        return self.button_height * (len(self.options) - 1) + 6
 
     def get_box_rect(self) -> pygame.Rect:
         return pygame.Rect(self.x - self.width // 2, self.y + self.height // 2, self.width, self.get_box_height())
@@ -364,5 +415,8 @@ class DropDown(UIObject):
     def get_rect(self) -> pygame.Rect:
         return pygame.Rect(self.x - self.width // 2, self.y - self.height // 2, self.width, self.height)
 
-
-
+    @property
+    def button_width(self) -> None:
+        if self.max_height:
+            return self.width - 10
+        return self.width - 6

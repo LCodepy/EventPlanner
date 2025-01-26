@@ -93,7 +93,8 @@ class SettingsView(View):
             padding=Padding(left=10),
             selected_option=self.language_manager.languages.index(self.language_manager.get_language_name()),
             button_height=30,
-            scroll_value=Config.scroll_value
+            scroll_value=Config.scroll_value,
+            max_height=200
         )
 
         self.catholic_events_label = Label(
@@ -322,7 +323,6 @@ class SettingsView(View):
 
         self.title_label.x = self.width // 2
 
-        self.language_dropdown.set_max_height(None)
         if height and self.language_dropdown.get_box_rect().bottom >= self.height - 10:
             self.language_dropdown.set_max_height(self.height - 10 - self.language_dropdown.get_box_rect().top)
 
