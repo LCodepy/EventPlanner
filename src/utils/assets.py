@@ -115,8 +115,18 @@ class Assets(metaclass=Singleton):
         self.calendar_database_path = os.path.join(self.DATA_PATH, "calendars")
         self.settings_database_path = os.path.join(self.SETTINGS_PATH, "settings.json")
 
+        if not os.path.exists(self.todo_list_database_path):
+            os.mkdir(self.todo_list_database_path)
+        if not os.path.exists(self.calendar_database_path):
+            os.mkdir(self.calendar_database_path)
+
         self.google_credentials_file_path = os.path.join(self.GOOGLE_PATH, "credentials.json")
         self.google_tokens_path = os.path.join(self.GOOGLE_PATH, "tokens")
+
+        if not os.path.exists(self.GOOGLE_PATH):
+            os.mkdir(self.GOOGLE_PATH)
+        if not os.path.exists(self.google_tokens_path):
+            os.mkdir(self.google_tokens_path)
 
         self.user_profile_pictures = {None: self.profile_picture_icon_large}
 
