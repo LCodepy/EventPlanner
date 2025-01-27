@@ -12,7 +12,7 @@ class Assets(metaclass=Singleton):
     IMAGES_PATH = os.getcwd() + "\\assets\\images"
     DATA_PATH = os.getcwd() + "\\assets\\data"
     GOOGLE_PATH = os.getcwd() + "\\assets\\google"
-    GOOGLE_TOKENS_PATH = "\\assets\\tokens"
+    GOOGLE_TOKENS_PATH = os.getcwd() + "\\assets\\tokens"
     SETTINGS_PATH = os.getcwd() + "\\assets\\settings"
 
     def __init__(self) -> None:

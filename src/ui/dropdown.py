@@ -50,7 +50,7 @@ class DropDown(UIObject):
         self.padding = padding or Padding()
 
         self.scroll = 0
-        self.scroller = pygame.Rect(self.width - 6, 1, 5, self.max_height // 4)
+        self.scroller = pygame.Rect(self.width - 6, 1, 5, self.max_height // 4) if self.max_height else None
 
         self.box_surface = pygame.Surface((self.width, self.get_box_height()), pygame.SRCALPHA)
 
@@ -141,8 +141,9 @@ class DropDown(UIObject):
         ):
             self.opened = False
             self.buttons = []
-            self.scroll = 0
-            self.scroller.y = 0
+            if self.scroller:
+                self.scroll = 0
+                self.scroller.y = 0
             return True
 
         return registered_events
@@ -269,6 +270,9 @@ class DropDown(UIObject):
             btn.update_canvas(self.box_surface)
 
     def set_scroll(self) -> None:
+        if not self.scroller:
+            return
+
         self.scroll = -self.scroller.y * (self.get_box_height(False) - self.max_height) / (
                     self.max_height - self.scroller.h)
         for i, btn in enumerate(self.buttons):
@@ -288,18 +292,18 @@ class DropDown(UIObject):
     def on_mouse_motion(self, event: MouseMotionEvent) -> None:
         event = self.get_button_event(event)
 
-        if self.scroller_pressed and self.pressed:
+        if self.scroller and self.scroller_pressed and self.pressed:
             self.scroller.y = max(0, min(self.max_height - self.scroller.h, event.y - self.scroller.h // 2))
             self.set_scroll()
 
     def on_click(self, event: MouseClickEvent) -> None:
         event = self.get_button_event(event)
 
-        if not self.scroller.collidepoint((event.x, event.y)) and event.x > self.width - 7:
+        if self.scroller and not self.scroller.collidepoint((event.x, event.y)) and event.x > self.width - 7:
             self.scroller_pressed = True
             self.scroller.y = max(0, min(self.max_height - self.scroller.h, event.y - self.scroller.h // 2))
             self.set_scroll()
-        elif self.scroller.collidepoint((event.x, event.y)):
+        elif self.scroller and self.scroller.collidepoint((event.x, event.y)):
             self.scroller_pressed = True
 
         if self.on_click_bind:
@@ -312,8 +316,9 @@ class DropDown(UIObject):
         if self.opened:
             self.opened = False
             self.buttons = []
-            self.scroll = 0
-            self.scroller.y = 0
+            if self.scroller:
+                self.scroll = 0
+                self.scroller.y = 0
             return
 
         self.opened = True
@@ -329,6 +334,9 @@ class DropDown(UIObject):
         self.label.text_color = self.text_color
 
     def on_scroll(self, event: Union[MouseWheelUpEvent, MouseWheelDownEvent]) -> None:
+        if not self.scroller:
+            return
+
         self.is_scrolling = True
 
         scroll_value = self.scroll_value * event.scroll
