@@ -243,7 +243,7 @@ class DropDown(UIObject):
                 Button(
                     self.box_surface,
                     (self.width // 2 if not self.max_height else self.width // 2 - 2,
-                     self.height // 2 + 3 + i * self.button_height + (self.height - self.button_height) // 2),
+                     self.height // 2 + (3 if self.max_height else -1) + i * self.button_height + (self.height - self.button_height) // 2),
                     (self.button_width, self.button_height),
                     label=Label(text=self.options[j], text_color=self.text_color, font=self.font,
                                 horizontal_text_alignment=self.horizontal_text_alignment),
