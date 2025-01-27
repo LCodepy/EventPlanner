@@ -11,6 +11,7 @@ from src.utils.singleton import Singleton
 class Assets(metaclass=Singleton):
 
     IMAGES_PATH = os.getcwd() + "\\assets\\images"
+    FONTS_PATH = os.getcwd() + "\\assets\\fonts"
     DATA_PATH = os.getcwd() + "\\assets\\data"
     GOOGLE_PATH = os.getcwd() + "\\assets\\google"
     GOOGLE_TOKENS_PATH = os.getcwd() + "\\assets\\tokens"
@@ -19,6 +20,7 @@ class Assets(metaclass=Singleton):
     def __init__(self) -> None:
         if getattr(sys, "frozen", False):
             self.IMAGES_PATH = Path(sys._MEIPASS).__str__() + "\\assets\\images"
+            self.FONTS_PATH = Path(sys._MEIPASS).__str__() + "\\assets\\fonts"
             self.GOOGLE_PATH = Path(sys._MEIPASS).__str__() + "\\assets\\google"
 
             self.SETTINGS_PATH = os.path.join(os.getenv("LOCALAPPDATA"), "EventPlanner/settings")
@@ -149,19 +151,19 @@ class Assets(metaclass=Singleton):
         self.user_profile_pictures = {None: self.profile_picture_icon_large}
 
         # Fonts
-        self.font = "roboto"
-        self.font4 = pygame.font.SysFont(self.font, 4)
-        self.font6 = pygame.font.SysFont(self.font, 6)
-        self.font8 = pygame.font.SysFont(self.font, 8)
-        self.font10 = pygame.font.SysFont(self.font, 10)
-        self.font12 = pygame.font.SysFont(self.font, 12)
-        self.font14 = pygame.font.SysFont(self.font, 14)
-        self.font16 = pygame.font.SysFont(self.font, 16)
-        self.font18 = pygame.font.SysFont(self.font, 18)
-        self.font20 = pygame.font.SysFont(self.font, 20)
-        self.font24 = pygame.font.SysFont(self.font, 24)
-        self.font32 = pygame.font.SysFont(self.font, 32)
-        self.font36 = pygame.font.SysFont(self.font, 36)
+        self.font = os.path.join(self.FONTS_PATH, "roboto.ttf")
+        self.font4 = pygame.font.Font(self.font, 4)
+        self.font6 = pygame.font.Font(self.font, 6)
+        self.font8 = pygame.font.Font(self.font, 8)
+        self.font10 = pygame.font.Font(self.font, 10)
+        self.font12 = pygame.font.Font(self.font, 12)
+        self.font14 = pygame.font.Font(self.font, 14)
+        self.font16 = pygame.font.Font(self.font, 16)
+        self.font18 = pygame.font.Font(self.font, 18)
+        self.font20 = pygame.font.Font(self.font, 20)
+        self.font24 = pygame.font.Font(self.font, 24)
+        self.font32 = pygame.font.Font(self.font, 32)
+        self.font36 = pygame.font.Font(self.font, 36)
         self.fonts = [
             self.font4, self.font6, self.font8, self.font10, self.font12, self.font16, self.font18, self.font20,
             self.font24, self.font32, self.font36
