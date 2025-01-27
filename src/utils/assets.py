@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 from pathlib import Path
@@ -18,11 +19,11 @@ class Assets(metaclass=Singleton):
     def __init__(self) -> None:
         if getattr(sys, "frozen", False):
             self.IMAGES_PATH = Path(sys._MEIPASS).__str__() + "\\assets\\images"
-            self.SETTINGS_PATH = Path(sys._MEIPASS).__str__() + "\\assets\\settings"
             self.GOOGLE_PATH = Path(sys._MEIPASS).__str__() + "\\assets\\google"
 
-            self.DATA_PATH = (Path.home() / ".test/data").__str__()
-            self.GOOGLE_TOKENS_PATH = (Path.home() / ".test/tokens").__str__()
+            self.SETTINGS_PATH = (Path.home() / ".EventPlanner/settings").__str__()
+            self.DATA_PATH = (Path.home() / ".EventPlanner/data").__str__()
+            self.GOOGLE_TOKENS_PATH = (Path.home() / ".EventPlanner/tokens").__str__()
 
         # App Bar icons
         self.app_icon = pygame.image.load(
@@ -125,6 +126,23 @@ class Assets(metaclass=Singleton):
         self.todo_list_database_path = os.path.join(self.DATA_PATH, "todo_lists")
         self.calendar_database_path = os.path.join(self.DATA_PATH, "calendars")
         self.settings_database_path = os.path.join(self.SETTINGS_PATH, "settings.json")
+
+        if not os.path.exists(self.settings_database_path):
+            settings = {
+                "language": "eng",
+                "current_id": {
+                    "calendar": 0
+                },
+                "default_event_color": "#FF5400",
+                "show_catholic_events": False,
+                "catholic_event_color": "#544ACC",
+                "current_user_email": None,
+                "render_filled_events": False,
+                "high_quality_graphics": True,
+                "autosync": True
+            }
+            with open(self.settings_database_path, "w") as file:
+                json.dump(settings, file)
 
         self.google_credentials_file_path = os.path.join(self.GOOGLE_PATH, "credentials.json")
 
