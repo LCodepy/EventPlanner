@@ -141,7 +141,7 @@ class Assets(metaclass=Singleton):
                 "high_quality_graphics": True,
                 "autosync": True
             }
-            with open(self.settings_database_path, "w") as file:
+            with open(self.settings_database_path, "w", encoding="utf-16") as file:
                 json.dump(settings, file)
 
         self.google_credentials_file_path = os.path.join(self.GOOGLE_PATH, "credentials.json")
