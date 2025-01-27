@@ -21,9 +21,9 @@ class Assets(metaclass=Singleton):
             self.IMAGES_PATH = Path(sys._MEIPASS).__str__() + "\\assets\\images"
             self.GOOGLE_PATH = Path(sys._MEIPASS).__str__() + "\\assets\\google"
 
-            self.SETTINGS_PATH = (Path.home() / ".EventPlanner/settings").__str__()
-            self.DATA_PATH = (Path.home() / ".EventPlanner/data").__str__()
-            self.GOOGLE_TOKENS_PATH = (Path.home() / ".EventPlanner/tokens").__str__()
+            self.SETTINGS_PATH = os.path.join(os.getenv("LOCALAPPDATA"), "EventPlanner/settings")
+            self.DATA_PATH = os.path.join(os.getenv("LOCALAPPDATA"), "EventPlanner/data")
+            self.GOOGLE_TOKENS_PATH = os.path.join(os.getenv("LOCALAPPDATA"), "EventPlanner/tokens")
 
         # App Bar icons
         self.app_icon = pygame.image.load(
