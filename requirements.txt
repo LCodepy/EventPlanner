@@ -1,0 +1,11 @@
+pygame~=2.6.1
+PyAutoGui~=0.9.54
+colorama~=0.4.6
+google-api-python-client~=2.159.0
+google-auth~=2.38.0
+google-auth-oauthlib~=1.2.1
+pillow~=11.1.0
+protobuf~=5.29.3
+requests~=2.32.3
+requests-oauthlib~=2.0.0
+pytz~=2024.2
