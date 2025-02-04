@@ -1,19 +1,22 @@
 # Event Planner 📅✨
 
+<br><br>
 
 ## Overview
 This is a simple yet powerful **Event Planner** with a built-in **To-Do List ✅**, developed using **Python 🐍** and the **Pygame** module. The entire interface, including buttons and text fields, has been built from scratch. The app follows the **Model-View-Controller (MVC)** architecture to maintain a clean and organized codebase.
 
+<br><br>
 
 ## Features 🚀
 - **Calendar View 📆**: Navigate through months and select dates.
 - **To-Do List 📝**: Add, remove, and check off tasks.
 - **MVC Architecture**: Separates concerns into Model, View, and Controller for better maintainability.
 
+<br><br>
 
 ## Installation ⚙️
 ### Prerequisites
-Ensure you have Python installed (preferably Python 3.8 or higher) along with the Pygame library.
+Ensure you have Python installed (preferably Python 3.8 or higher).
 
 1. Clone the repository:
    ```bash
@@ -28,7 +31,8 @@ Ensure you have Python installed (preferably Python 3.8 or higher) along with th
    ```bash
    python launcher.py
    ```
-
+   
+<br><br>
 
 ## Usage 🎯
 - Navigate through the calendar.
@@ -36,6 +40,7 @@ Ensure you have Python installed (preferably Python 3.8 or higher) along with th
 - Add tasks and manage in the to-do list.
 - The interface is interactive and intuitive, all built using Pygame.
 
+<br><br>
 
 ## Project Structure (MVC Architecture) 📂
 The project follows the **MVC (Model-View-Controller)** pattern:
@@ -44,6 +49,7 @@ The project follows the **MVC (Model-View-Controller)** pattern:
 - **View (`view.py`)**: Handles rendering UI elements like buttons and text fields.
 - **Controller (`controller.py`)**: Manages user input and updates the model and view accordingly.
 
+<br><br>
 
 ## Contributing 🤝
 If you'd like to contribute:
@@ -58,10 +64,12 @@ If you'd like to contribute:
    ```
 4. Push to your branch and create a Pull Request.
 
+<br><br>
 
 ## License 📜
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+<br><br>
 
 ## Contact 📧
 For any questions or suggestions, feel free to reach out or open an issue on GitHub.
