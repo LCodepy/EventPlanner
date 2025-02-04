@@ -1,12 +1,8 @@
 # Event Planner 📅✨
-
 <br><br>
-
 ## Overview
 This is a simple yet powerful **Event Planner** with a built-in **To-Do List ✅**, developed using **Python 🐍** and the **Pygame** module. The entire interface, including buttons and text fields, has been built from scratch. The app follows the **Model-View-Controller (MVC)** architecture to maintain a clean and organized codebase.
-
 <br><br>
-
 ## Features 🚀
 - **Calendar View 📆**: Navigate through months and select dates.
 - **To-Do List 📝**: Add, remove, and check off tasks.
